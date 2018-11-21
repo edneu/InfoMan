@@ -1,0 +1,6 @@
+
+
+###change into remote directory
+###Syncs github (cloud) repository with remote.
+
+ git pull origin master
