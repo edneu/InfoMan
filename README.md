@@ -1,4 +1,3 @@
-##
 ## Univeristy of Florida 
 ## Clinical and Translational Science Institute
 ##
