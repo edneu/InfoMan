@@ -10,8 +10,10 @@
 
 git add .  
 
+git commit -a   ## Instead of git add .
+
 git commit -m "create"
 
 git push origin master
 
-##########THIS FILE IS ALTERED LOCALLY
+### NEWEST VERSION
