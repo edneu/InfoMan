@@ -1,0 +1,271 @@
+
+
+select * from loaddata.roster2017q1q2;
+
+
+drop table if exists brian.rosterlookup;
+create table brian.rosterlookup as
+select UF_UFID,
+       UF_LAST_NM,
+       UF_MIDDLE_NM,
+       UF_FIRST_NM,
+       UF_EMAIL,
+       UF_DEPT_NM,
+       UF_DEPT,
+       UF_USER_NM,
+       UF_TELEPHONE,
+	   UF_WORK_TITLE,
+       UF_BIRTH_DT
+from lookup.ufids
+where UF_EMAIL IN (SELECT DISTINCT email from loaddata.roster2017q1q2 where UFID="" AND email<>"");
+
+
+CREATE INDEX uflast ON lookup.ufids (UF_LAST_NM);
+CREATE INDEX uffirst ON lookup.ufids (UF_FIRST_NM);
+
+drop table if exists brian.rosterlookup;
+create table brian.rosterlookup as
+select UF_UFID,
+       UF_LAST_NM,
+       UF_FIRST_NM,
+       UF_EMAIL,
+       UF_USER_NM,
+       "" as EraCommons,
+       UF_DEPT,
+       UF_DEPT_NM,
+	   UF_WORK_TITLE,
+       "UF" AS Affiliation
+from lookup.ufids
+WHERE 
+(UF_LAST_NM='Aldridge' AND UF_FIRST_NM LIKE 'Pet%') OR 
+(UF_LAST_NM='Alford' AND UF_FIRST_NM LIKE 'Sha%') OR 
+(UF_LAST_NM='Allen' AND UF_FIRST_NM LIKE 'Ann%') OR 
+(UF_LAST_NM='Allison' AND UF_FIRST_NM LIKE 'Dav%') OR 
+(UF_LAST_NM='Anuntapong' AND UF_FIRST_NM LIKE 'Sun%') OR 
+(UF_LAST_NM='Ardente' AND UF_FIRST_NM LIKE 'Ama%') OR 
+(UF_LAST_NM='Arwood' AND UF_FIRST_NM LIKE 'Meg%') OR 
+(UF_LAST_NM='Ashby' AND UF_FIRST_NM LIKE 'Fre%') OR 
+(UF_LAST_NM='Avery' AND UF_FIRST_NM LIKE 'Bon%') OR 
+(UF_LAST_NM='Ayoub' AND UF_FIRST_NM LIKE 'Far%') OR 
+(UF_LAST_NM='Barb' AND UF_FIRST_NM LIKE 'Dia%') OR 
+(UF_LAST_NM='Beal' AND UF_FIRST_NM LIKE 'Sta%') OR 
+(UF_LAST_NM='Biswas' AND UF_FIRST_NM LIKE 'Abh%') OR 
+(UF_LAST_NM='Black' AND UF_FIRST_NM LIKE 'Eri%') OR 
+(UF_LAST_NM='Brantley' AND UF_FIRST_NM LIKE 'Mar%') OR 
+(UF_LAST_NM='Bril' AND UF_FIRST_NM LIKE 'Fer%') OR 
+(UF_LAST_NM='Brown' AND UF_FIRST_NM LIKE 'Emi%') OR 
+(UF_LAST_NM='Brown-Bishop' AND UF_FIRST_NM LIKE 'Can%') OR 
+(UF_LAST_NM='Carmelle Elie' AND UF_FIRST_NM LIKE 'Mar%') OR 
+(UF_LAST_NM='Carney' AND UF_FIRST_NM LIKE 'Oli%') OR 
+(UF_LAST_NM='Chardon' AND UF_FIRST_NM LIKE 'Mar%') OR 
+(UF_LAST_NM='Chen' AND UF_FIRST_NM LIKE 'Xin%') OR 
+(UF_LAST_NM='Cheng' AND UF_FIRST_NM LIKE 'Dav%') OR 
+(UF_LAST_NM='Cottler' AND UF_FIRST_NM LIKE 'Lin%') OR 
+(UF_LAST_NM='Co-Vu' AND UF_FIRST_NM LIKE 'Jen%') OR 
+(UF_LAST_NM='Cusi' AND UF_FIRST_NM LIKE 'Ken%') OR 
+(UF_LAST_NM='Daouk' AND UF_FIRST_NM LIKE 'Sal%') OR 
+(UF_LAST_NM='Deason' AND UF_FIRST_NM LIKE 'Dic%') OR 
+(UF_LAST_NM='Dehoff' AND UF_FIRST_NM LIKE 'Rho%') OR 
+(UF_LAST_NM='Dell' AND UF_FIRST_NM LIKE 'Pau%') OR 
+(UF_LAST_NM='DeMarco' AND UF_FIRST_NM LIKE 'Rom%') OR 
+(UF_LAST_NM='Dietrich' AND UF_FIRST_NM LIKE 'Eri%') OR 
+(UF_LAST_NM='Dikea ' AND UF_FIRST_NM LIKE 'Rou%') OR 
+(UF_LAST_NM='Diller' AND UF_FIRST_NM LIKE 'Mat%') OR 
+(UF_LAST_NM='Donahoo' AND UF_FIRST_NM LIKE 'Wil%') OR 
+(UF_LAST_NM='Doonan' AND UF_FIRST_NM LIKE 'Ben%') OR 
+(UF_LAST_NM='Duckworth' AND UF_FIRST_NM LIKE 'Lau%') OR 
+(UF_LAST_NM='Dumeny' AND UF_FIRST_NM LIKE 'Lea%') OR 
+(UF_LAST_NM='Duong' AND UF_FIRST_NM LIKE 'Mic%') OR 
+(UF_LAST_NM='Edlira ' AND UF_FIRST_NM LIKE 'Mas%') OR 
+(UF_LAST_NM='Efron' AND UF_FIRST_NM LIKE 'Phi%') OR 
+(UF_LAST_NM='Elsey' AND UF_FIRST_NM LIKE 'Ama%') OR 
+(UF_LAST_NM='Erdman' AND UF_FIRST_NM LIKE 'Mic%') OR 
+(UF_LAST_NM='Esquivel-Upshaw' AND UF_FIRST_NM LIKE 'Jos%') OR 
+(UF_LAST_NM='Eubanks' AND UF_FIRST_NM LIKE 'Gin%') OR 
+(UF_LAST_NM='Fairfield' AND UF_FIRST_NM LIKE 'Jen%') OR 
+(UF_LAST_NM='Farhadfar' AND UF_FIRST_NM LIKE 'Nos%') OR 
+(UF_LAST_NM='Farmer' AND UF_FIRST_NM LIKE 'Kev%') OR 
+(UF_LAST_NM='Faruqi' AND UF_FIRST_NM LIKE 'Ibr%') OR 
+(UF_LAST_NM='Fasanya' AND UF_FIRST_NM LIKE 'Hen%') OR 
+(UF_LAST_NM='Fedele' AND UF_FIRST_NM LIKE 'Dav%') OR 
+(UF_LAST_NM='Feely' AND UF_FIRST_NM LIKE 'Mic%') OR 
+(UF_LAST_NM='Forbes' AND UF_FIRST_NM LIKE 'Meg%') OR 
+(UF_LAST_NM='Forsmark' AND UF_FIRST_NM LIKE 'Chr%') OR 
+(UF_LAST_NM='Garcia' AND UF_FIRST_NM LIKE 'Van%') OR 
+(UF_LAST_NM='Garrett' AND UF_FIRST_NM LIKE 'Tim%') OR 
+(UF_LAST_NM='Genie' AND UF_FIRST_NM LIKE 'Bea%') OR 
+(UF_LAST_NM='Getz' AND UF_FIRST_NM LIKE 'Kay%') OR 
+(UF_LAST_NM='Ghosh' AND UF_FIRST_NM LIKE 'Sum%') OR 
+(UF_LAST_NM='Gibson' AND UF_FIRST_NM LIKE 'Dan%') OR 
+(UF_LAST_NM='Giles' AND UF_FIRST_NM LIKE 'Kri%') OR 
+(UF_LAST_NM='Gillies' AND UF_FIRST_NM LIKE 'Rob%') OR 
+(UF_LAST_NM='Good' AND UF_FIRST_NM LIKE 'Mik%') OR 
+(UF_LAST_NM='Grajo' AND UF_FIRST_NM LIKE 'Jos%') OR 
+(UF_LAST_NM='Gravenstein' AND UF_FIRST_NM LIKE 'Nik%') OR 
+(UF_LAST_NM='Green' AND UF_FIRST_NM LIKE 'Jea%') OR 
+(UF_LAST_NM='Guay' AND UF_FIRST_NM LIKE 'Mar%') OR 
+(UF_LAST_NM='Gul' AND UF_FIRST_NM LIKE 'Sar%') OR 
+(UF_LAST_NM='Guo' AND UF_FIRST_NM LIKE 'Yi%') OR 
+(UF_LAST_NM='Gupta' AND UF_FIRST_NM LIKE 'Nir%') OR 
+(UF_LAST_NM='Hagen' AND UF_FIRST_NM LIKE 'Jen%') OR 
+(UF_LAST_NM='Hall' AND UF_FIRST_NM LIKE 'Jac%') OR 
+(UF_LAST_NM='Harden' AND UF_FIRST_NM LIKE 'Chr%') OR 
+(UF_LAST_NM='Harrell' AND UF_FIRST_NM LIKE 'Dan%') OR 
+(UF_LAST_NM='Hartman' AND UF_FIRST_NM LIKE 'Joh%') OR 
+(UF_LAST_NM='Hassan' AND UF_FIRST_NM LIKE 'Aln%') OR 
+(UF_LAST_NM='Hernan' AND UF_FIRST_NM LIKE 'Pri%') OR 
+(UF_LAST_NM='Hincapie Castillo' AND UF_FIRST_NM LIKE 'Jua%') OR 
+(UF_LAST_NM='Hinrichs' AND UF_FIRST_NM LIKE 'Kat%') OR 
+(UF_LAST_NM='Hogan' AND UF_FIRST_NM LIKE 'Wil%') OR 
+(UF_LAST_NM='Hoh' AND UF_FIRST_NM LIKE 'Dan%') OR 
+(UF_LAST_NM='Hood' AND UF_FIRST_NM LIKE 'Lau%') OR 
+(UF_LAST_NM='Horgas' AND UF_FIRST_NM LIKE 'Ann%') OR 
+(UF_LAST_NM='Hromas' AND UF_FIRST_NM LIKE 'Rob%') OR 
+(UF_LAST_NM='Hsiao' AND UF_FIRST_NM LIKE 'Chu%') OR 
+(UF_LAST_NM='Hwang' AND UF_FIRST_NM LIKE 'And%') OR 
+(UF_LAST_NM='Iqbal' AND UF_FIRST_NM LIKE 'Ati%') OR 
+(UF_LAST_NM='Islam' AND UF_FIRST_NM LIKE 'Sal%') OR 
+(UF_LAST_NM='Iyer' AND UF_FIRST_NM LIKE 'Siv%') OR 
+(UF_LAST_NM='Jackman' AND UF_FIRST_NM LIKE 'Kel%') OR 
+(UF_LAST_NM='Jester' AND UF_FIRST_NM LIKE 'Gra%') OR 
+(UF_LAST_NM='Johnson' AND UF_FIRST_NM LIKE 'Jul%') OR 
+(UF_LAST_NM='Joyce' AND UF_FIRST_NM LIKE 'Jef%') OR 
+(UF_LAST_NM='Kamel' AND UF_FIRST_NM LIKE 'Ami%') OR 
+(UF_LAST_NM='Kanetsky' AND UF_FIRST_NM LIKE 'Pet%') OR 
+(UF_LAST_NM='Kattan' AND UF_FIRST_NM LIKE 'Jua%') OR 
+(UF_LAST_NM='Katz' AND UF_FIRST_NM LIKE 'Ada%') OR 
+(UF_LAST_NM='Kaufmann' AND UF_FIRST_NM LIKE 'Mic%') OR 
+(UF_LAST_NM='Kavasseri Balasubramanian' AND UF_FIRST_NM LIKE 'Dha%') OR 
+(UF_LAST_NM='Kaye' AND UF_FIRST_NM LIKE 'Les%') OR 
+(UF_LAST_NM='Keler-Wood' AND UF_FIRST_NM LIKE 'Mau%') OR 
+(UF_LAST_NM='Khan' AND UF_FIRST_NM LIKE 'Jam%') OR 
+(UF_LAST_NM='Khullar' AND UF_FIRST_NM LIKE 'Vik%') OR 
+(UF_LAST_NM='King' AND UF_FIRST_NM LIKE 'Jen%') OR 
+(UF_LAST_NM='Kirk' AND UF_FIRST_NM LIKE 'Con%') OR 
+(UF_LAST_NM='Klinker' AND UF_FIRST_NM LIKE 'Ken%') OR 
+(UF_LAST_NM='Knupp' AND UF_FIRST_NM LIKE 'Rub%') OR 
+(UF_LAST_NM='Koeniger' AND UF_FIRST_NM LIKE 'Sto%') OR 
+(UF_LAST_NM='Koomen' AND UF_FIRST_NM LIKE 'Joh%') OR 
+(UF_LAST_NM='Korytov' AND UF_FIRST_NM LIKE 'Iri%') OR 
+(UF_LAST_NM='Lampotang' AND UF_FIRST_NM LIKE 'Sam%') OR 
+(UF_LAST_NM='Leonardo ' AND UF_FIRST_NM LIKE 'Alm%') OR 
+(UF_LAST_NM='Lessler' AND UF_FIRST_NM LIKE 'Jus%') OR 
+(UF_LAST_NM='Leyngold' AND UF_FIRST_NM LIKE 'Mar%') OR 
+(UF_LAST_NM='Light' AND UF_FIRST_NM LIKE 'Lau%') OR 
+(UF_LAST_NM='Lima' AND UF_FIRST_NM LIKE 'Joh%') OR 
+(UF_LAST_NM='Lipori' AND UF_FIRST_NM LIKE 'Gig%') OR 
+(UF_LAST_NM='Lowther' AND UF_FIRST_NM LIKE 'Gra%') OR 
+(UF_LAST_NM='Lucien' AND UF_FIRST_NM LIKE 'Bla%') OR 
+(UF_LAST_NM='Luesch' AND UF_FIRST_NM LIKE 'Hen%') OR 
+(UF_LAST_NM='Lukens Bull' AND UF_FIRST_NM LIKE 'Kat%') OR 
+(UF_LAST_NM='Lyon' AND UF_FIRST_NM LIKE 'Deb%') OR 
+(UF_LAST_NM='Lyons' AND UF_FIRST_NM LIKE 'Tom%') OR 
+(UF_LAST_NM='Magoc' AND UF_FIRST_NM LIKE 'Tan%') OR 
+(UF_LAST_NM='Magvanjav' AND UF_FIRST_NM LIKE 'Oyu%') OR 
+(UF_LAST_NM='Mahoney' AND UF_FIRST_NM LIKE 'Mik%') OR 
+(UF_LAST_NM='Mahtta' AND UF_FIRST_NM LIKE 'Dhr%') OR 
+(UF_LAST_NM='Manini' AND UF_FIRST_NM LIKE 'Tod%') OR 
+(UF_LAST_NM='Mansoor' AND UF_FIRST_NM LIKE 'Hen%') OR 
+(UF_LAST_NM='Marsik' AND UF_FIRST_NM LIKE 'Mat%') OR 
+(UF_LAST_NM='Martin' AND UF_FIRST_NM LIKE 'Emm%') OR 
+(UF_LAST_NM='Mast' AND UF_FIRST_NM LIKE 'Bru%') OR 
+(UF_LAST_NM='Mccarty' AND UF_FIRST_NM LIKE 'Chr%') OR 
+(UF_LAST_NM='McConville' AND UF_FIRST_NM LIKE 'And%') OR 
+(UF_LAST_NM='McCurdy' AND UF_FIRST_NM LIKE 'Chr%') OR 
+(UF_LAST_NM='McFarland' AND UF_FIRST_NM LIKE 'Nik%') OR 
+(UF_LAST_NM='Michener' AND UF_FIRST_NM LIKE 'Llo%') OR 
+(UF_LAST_NM='Miller' AND UF_FIRST_NM LIKE 'Dar%') OR 
+(UF_LAST_NM='Min' AND UF_FIRST_NM LIKE 'Jae%') OR 
+(UF_LAST_NM='Modave' AND UF_FIRST_NM LIKE 'Fra%') OR 
+(UF_LAST_NM='Mohandas' AND UF_FIRST_NM LIKE 'Raj%') OR 
+(UF_LAST_NM='Mowitz' AND UF_FIRST_NM LIKE 'Mer%') OR 
+(UF_LAST_NM='Muszynski' AND UF_FIRST_NM LIKE 'Mic%') OR 
+(UF_LAST_NM='Muthyala' AND UF_FIRST_NM LIKE 'Kri%') OR 
+(UF_LAST_NM='Myles' AND UF_FIRST_NM LIKE 'Jen%') OR 
+(UF_LAST_NM='Nagaraja' AND UF_FIRST_NM LIKE 'Nan%') OR 
+(UF_LAST_NM='Nelson' AND UF_FIRST_NM LIKE 'Dav%') OR 
+(UF_LAST_NM='Neu' AND UF_FIRST_NM LIKE 'Edw%') OR 
+(UF_LAST_NM='Nickerson' AND UF_FIRST_NM LIKE 'Pau%') OR 
+(UF_LAST_NM='Norat' AND UF_FIRST_NM LIKE 'Ela%') OR 
+(UF_LAST_NM='Norton' AND UF_FIRST_NM LIKE 'Han%') OR 
+(UF_LAST_NM='Okun' AND UF_FIRST_NM LIKE 'Mik%') OR 
+(UF_LAST_NM="O'Mahony" AND UF_FIRST_NM LIKE 'Sea%') OR 
+(UF_LAST_NM="O'Mara" AND UF_FIRST_NM LIKE 'Kel%') OR 
+(UF_LAST_NM="O'Neal" AND UF_FIRST_NM LIKE 'Don%') OR 
+(UF_LAST_NM='Pahor' AND UF_FIRST_NM LIKE 'Mar%') OR 
+(UF_LAST_NM='Patel' AND UF_FIRST_NM LIKE 'Arp%') OR 
+(UF_LAST_NM='Patrick' AND UF_FIRST_NM LIKE 'Ant%') OR 
+(UF_LAST_NM='Pepine' AND UF_FIRST_NM LIKE 'Car%') OR 
+(UF_LAST_NM='Pereira' AND UF_FIRST_NM LIKE 'Dei%') OR 
+(UF_LAST_NM='Perez Ramirez' AND UF_FIRST_NM LIKE 'Lei%') OR 
+(UF_LAST_NM='Pertzborn' AND UF_FIRST_NM LIKE 'Mat%') OR 
+(UF_LAST_NM='Phillips' AND UF_FIRST_NM LIKE 'Sar%') OR 
+(UF_LAST_NM='Price' AND UF_FIRST_NM LIKE 'Cat%') OR 
+(UF_LAST_NM='Puthucode Balakishan' AND UF_FIRST_NM LIKE 'Mee%') OR 
+(UF_LAST_NM='Rajasekhar' AND UF_FIRST_NM LIKE 'Ani%') OR 
+(UF_LAST_NM='Rashidi' AND UF_FIRST_NM LIKE 'Par%') OR 
+(UF_LAST_NM='Ray' AND UF_FIRST_NM LIKE 'Mos%') OR 
+(UF_LAST_NM='Resmini' AND UF_FIRST_NM LIKE 'Ala%') OR 
+(UF_LAST_NM='Reynolds' AND UF_FIRST_NM LIKE 'Jen%') OR 
+(UF_LAST_NM='Robinson' AND UF_FIRST_NM LIKE 'Sha%') OR 
+(UF_LAST_NM='Roddy' AND UF_FIRST_NM LIKE 'Tho%') OR 
+(UF_LAST_NM='Roth' AND UF_FIRST_NM LIKE 'Bri%') OR 
+(UF_LAST_NM='Salloum' AND UF_FIRST_NM LIKE 'Ram%') OR 
+(UF_LAST_NM='Sanders' AND UF_FIRST_NM LIKE 'Eri%') OR 
+(UF_LAST_NM='Sawhney' AND UF_FIRST_NM LIKE 'Raj%') OR 
+(UF_LAST_NM='Scarton' AND UF_FIRST_NM LIKE 'Lis%') OR 
+(UF_LAST_NM='Schmidt' AND UF_FIRST_NM LIKE 'Eri%') OR 
+(UF_LAST_NM='Scott' AND UF_FIRST_NM LIKE 'Bra%') OR 
+(UF_LAST_NM='Segal' AND UF_FIRST_NM LIKE 'Mar%') OR 
+(UF_LAST_NM='Sequeira' AND UF_FIRST_NM LIKE 'Jak%') OR 
+(UF_LAST_NM='Seubert' AND UF_FIRST_NM LIKE 'Chr%') OR 
+(UF_LAST_NM='Shahin' AND UF_FIRST_NM LIKE 'Moh%') OR 
+(UF_LAST_NM='Shenkman' AND UF_FIRST_NM LIKE 'Eli%') OR 
+(UF_LAST_NM='Shoulders' AND UF_FIRST_NM LIKE 'Bet%') OR 
+(UF_LAST_NM='Silver' AND UF_FIRST_NM LIKE 'Nat%') OR 
+(UF_LAST_NM='Silver ' AND UF_FIRST_NM LIKE 'Nat%') OR 
+(UF_LAST_NM='Singh Ospina' AND UF_FIRST_NM LIKE 'Nay%') OR 
+(UF_LAST_NM='Slayton' AND UF_FIRST_NM LIKE 'Wil%') OR 
+(UF_LAST_NM='Smith' AND UF_FIRST_NM LIKE 'Max%') OR 
+(UF_LAST_NM='Snehal' AND UF_FIRST_NM LIKE 'Pat%') OR 
+(UF_LAST_NM='Sobel' AND UF_FIRST_NM LIKE 'Eri%') OR 
+(UF_LAST_NM='Solberg' AND UF_FIRST_NM LIKE 'Lau%') OR 
+(UF_LAST_NM='Song' AND UF_FIRST_NM LIKE 'Eum%') OR 
+(UF_LAST_NM='Soria-Saucedo' AND UF_FIRST_NM LIKE 'Ren%') OR 
+(UF_LAST_NM='Sortino' AND UF_FIRST_NM LIKE 'Sco%') OR 
+(UF_LAST_NM='Spiryda' AND UF_FIRST_NM LIKE 'Lis%') OR 
+(UF_LAST_NM='Stacy' AND UF_FIRST_NM LIKE 'Bea%') OR 
+(UF_LAST_NM='Staggs' AND UF_FIRST_NM LIKE 'Est%') OR 
+(UF_LAST_NM='Staley' AND UF_FIRST_NM LIKE 'Ben%') OR 
+(UF_LAST_NM='Staras' AND UF_FIRST_NM LIKE 'Ste%') OR 
+(UF_LAST_NM='Stoner' AND UF_FIRST_NM LIKE 'Pat%') OR 
+(UF_LAST_NM='Strekalova' AND UF_FIRST_NM LIKE 'Yul%') OR 
+(UF_LAST_NM='Stribling' AND UF_FIRST_NM LIKE 'Dan%') OR 
+(UF_LAST_NM='Sugrue' AND UF_FIRST_NM LIKE 'Ste%') OR 
+(UF_LAST_NM='Sura' AND UF_FIRST_NM LIKE 'Liv%') OR 
+(UF_LAST_NM='Swindle' AND UF_FIRST_NM LIKE 'Eli%') OR 
+(UF_LAST_NM='Thompson' AND UF_FIRST_NM LIKE 'Lin%') OR 
+(UF_LAST_NM='Tomlin' AND UF_FIRST_NM LIKE 'Dav%') OR 
+(UF_LAST_NM='Tzeng' AND UF_FIRST_NM LIKE 'Meg%') OR 
+(UF_LAST_NM='Varadarajan' AND UF_FIRST_NM LIKE 'Var%') OR 
+(UF_LAST_NM='Venugopalan' AND UF_FIRST_NM LIKE 'Vee%') OR 
+(UF_LAST_NM='Vinson' AND UF_FIRST_NM LIKE 'Mic%') OR 
+(UF_LAST_NM='Wainwright' AND UF_FIRST_NM LIKE 'Fal%') OR 
+(UF_LAST_NM='Wallace' AND UF_FIRST_NM LIKE 'Jod%') OR 
+(UF_LAST_NM='Wang' AND UF_FIRST_NM LIKE 'Zhe%') OR 
+(UF_LAST_NM='Warring' AND UF_FIRST_NM LIKE 'Car%') OR 
+(UF_LAST_NM='Weber' AND UF_FIRST_NM LIKE 'Eri%') OR 
+(UF_LAST_NM='Welniak' AND UF_FIRST_NM LIKE 'Sam%') OR 
+(UF_LAST_NM='Wilkie' AND UF_FIRST_NM LIKE 'Dia%') OR 
+(UF_LAST_NM='Willcocks' AND UF_FIRST_NM LIKE 'Reb%') OR 
+(UF_LAST_NM='Williams' AND UF_FIRST_NM LIKE 'Bre%') OR 
+(UF_LAST_NM='Winchester' AND UF_FIRST_NM LIKE 'Dav%') OR 
+(UF_LAST_NM='Woods' AND UF_FIRST_NM LIKE 'Ken%') OR 
+(UF_LAST_NM='Wright Jr.' AND UF_FIRST_NM LIKE 'Tho%') OR 
+(UF_LAST_NM='Wynn' AND UF_FIRST_NM LIKE 'Jim%') OR 
+(UF_LAST_NM='Xia' AND UF_FIRST_NM LIKE 'Yux%') OR 
+(UF_LAST_NM='Yaghjyan' AND UF_FIRST_NM LIKE 'Lus%') OR 
+(UF_LAST_NM='Youn' AND UF_FIRST_NM LIKE 'Ted%') OR 
+(UF_LAST_NM='Young' AND UF_FIRST_NM LIKE 'Hen%') OR 
+(UF_LAST_NM='Zhao' AND UF_FIRST_NM LIKE 'Qi%') OR 
+(UF_LAST_NM='Zori' AND UF_FIRST_NM LIKE 'Rob%') ;
