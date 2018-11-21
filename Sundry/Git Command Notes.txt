@@ -16,4 +16,9 @@ git commit -m "create"
 
 git push origin master
 
-### NEWEST VERSION
+
+##############
+git commit -a -m "Message Here"
+git push 
+ 
+
