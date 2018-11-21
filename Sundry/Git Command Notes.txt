@@ -4,3 +4,14 @@
 ###Syncs github (cloud) repository with remote.
 
  git pull origin master
+
+### Adds all files to the git management software
+## (added file to local repo)
+
+git add .  
+
+git commit -m "create"
+
+git push origin master
+
+##########THIS FILE IS ALTERED LOCALLY
