@@ -1,4 +1,4 @@
-#### Univerity of Florida
-#### Clinical and Translational Science Insitute
+#### University of Florida
+#### Clinical and Translational Science Institute
 #### Information Management
 ##### LoadData mySQL Scripts
