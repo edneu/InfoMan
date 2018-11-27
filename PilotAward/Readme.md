@@ -16,10 +16,9 @@ _ _ _ _ _ _ _
 _ _ _ _ _   
 ##### MySQL Scripts
 
-
 >     ADMIN New Pilot Tables.sql - Administrative Updates to clean and verify data 
 >     Make New Pilot Tables.sql  - Convert the old Data tables to new structure
->     Make Pilot CM and ROI Tables.sql  -  Create the Common Metrics and Return on Investment report Tables
+>     Make Pilot CM and ROI Tables.sql  -  Create the Common Metrics and Return on Investment report tables
 >     PIlot Award ROI Update.sql - Administraive Script to Update the PILOTS_ROI_DETAIL table from the AWARDS_HISTORY_TABLE
 >     Pilot Analytics.sql  -  Scripts used for Pilot Award Analysis for CTSI Manangement
 >     Pilot Reconcile.sql - Administrative code to verify and updates to reconcile data with all sources  	
