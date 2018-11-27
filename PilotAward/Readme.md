@@ -1,6 +1,6 @@
 		
 ### University of Florida
-### Clinical and Tranlsational Science Institiute
+### Clinical and Tranlsational Science Institute
 ### Office of Information Management
 _ _ _ _ _ _ _ 
 #### Pilot Award Related Code
