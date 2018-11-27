@@ -10,7 +10,7 @@ _ _ _ _ _ _ _
 >     *PILOTS_PUB_MASTER* - Information about Publications related to the Pilot Award  
 >     *PILOTS_ROI_MASTER* - Information about Awards Related to the Pilot Award  
 >    
-> The Key derived tables are  
+> The Key derived tables are:  
 >     *PILOTS_ROI_DETAIL* - Detailed Project level records for awards identified in PILOTS_ROI_MASTER (Updated with DSP Awards History)  
    
 _ _ _ _ _   
