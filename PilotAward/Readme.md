@@ -1,6 +1,6 @@
 		
 ### University of Florida
-### Clinical and Tranlsational Science Institute
+### Clinical and Translational Science Institute
 ### Office of Information Management
 _ _ _ _ _ _ _ 
 #### Pilot Award Related Code
@@ -20,6 +20,6 @@ _ _ _ _ _
 >     Make New Pilot Tables.sql  - Convert the old Data tables to new structure
 >     Make Pilot CM and ROI Tables.sql  -  Create the Common Metrics and Return on Investment report tables
 >     PIlot Award ROI Update.sql - Administraive Script to Update the PILOTS_ROI_DETAIL table from the AWARDS_HISTORY_TABLE
->     Pilot Analytics.sql  -  Scripts used for Pilot Award Analysis for CTSI Manangement
+>     Pilot Analytics.sql  -  Scripts used for Pilot Award Analysis for CTSI Management
 >     Pilot Reconcile.sql - Administrative code to verify and updates to reconcile data with all sources  	
 
