@@ -1,7 +1,7 @@
 		
 ### University of Florida
 ### Clinical and Tranlsational Science Insitiute
-### Office of Information Managment
+### Office of Information Management
 _ _ _ _ _ _ _ 
 #### Pilot Award Related Code
 > _These SQL scripts were developed to convert the Existing Pilot Award Tracking File into_
