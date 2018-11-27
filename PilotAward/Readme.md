@@ -5,7 +5,7 @@
 _ _ _ _ _ _ _ 
 #### Pilot Award Related Code
 > _These SQL scripts were developed to convert the Existing Pilot Award Tracking File into_
-> _a relational database consisting of three major tables_  
+> _a relational database consisting of three major tables:_  
 >     *PILOTS_MASTER* - Information about each Pilot Award  
 >     *PILOTS_PUB_MASTER* - Information about Publications related to the Pilot Award  
 >     *PILOTS_ROI_MASTER* - Information about Awards Related to the Pilot Award  
