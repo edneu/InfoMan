@@ -5,13 +5,13 @@
 _ _ _ _ _ _ _ 
 #### Pilot Award Related Code
 > These SQL scripts were developed to convert the Existing Piklot Award Tracking File into
-> a relational database consisting of three major tables
->     *PILOTS_MASTER* - Information about each Pilot Award
->     *PILOTS_PUB_MASTER* - Information about Publications related to the Pilot Award
->     *PILOTS_ROI_MASTER* - Information about Awards Related to the Pilot Award
->  
+> a relational database consisting of three major tables  
+>     *PILOTS_MASTER* - Information about each Pilot Award  
+>     *PILOTS_PUB_MASTER* - Information about Publications related to the Pilot Award  
+>     *PILOTS_ROI_MASTER* - Information about Awards Related to the Pilot Award  
+>    
 > The Key derived tables are  
->     *PILOTS_ROI_DETAIL* - Detailed Project level records for awards identified in PILOTS_ROI_MASTER (Updated with DSP Awards History)
+>     *PILOTS_ROI_DETAIL* - Detailed Project level records for awards identified in PILOTS_ROI_MASTER (Updated with DSP Awards History)  
    
    
 ##### MySQL Scripts
