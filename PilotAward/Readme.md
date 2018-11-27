@@ -1,7 +1,6 @@
-<<<<<<< HEAD
-This is the directory for CTSI Pilot Award Related Code
-=======
-# Pilot Award Managment and Reporting Code
-## MySQL
+### Univerity of Florida
+### Clinical and Tranlsational Science Insitiute
+### Office of Information Managment
+_ _ _ _ _ _ _ 
+Pilot Award Related Code
 
->>>>>>> 7e02d30899c6187b9b3c0e71ea00e871f5244ec8
