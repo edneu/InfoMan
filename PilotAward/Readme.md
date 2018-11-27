@@ -13,9 +13,9 @@ _ _ _ _ _ _ _
 > The Key derived tables are  
 >     *PILOTS_ROI_DETAIL* - Detailed Project level records for awards identified in PILOTS_ROI_MASTER (Updated with DSP Awards History)  
    
-   
+_ _ _ _ _   
 ##### MySQL Scripts
-_ _ _ _ _ 
+
 
 >     ADMIN New Pilot Tables.sql - Administrative Updates to clean and verify data 
 >     Make New Pilot Tables.sql  - Convert the old Data tables to new structure
