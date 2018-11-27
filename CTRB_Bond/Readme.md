@@ -9,7 +9,7 @@
 >Identify sponsored projects from space survey.  Survey PI of Sponsored award to estimate the percentage of total activity in building ?>using a Qualtrics survey of investigators.   
 
 >*Blue Zone 1: High Occupancy Departments*
->Departments that occupy >14% of the north wing review and report department operating budget.
+>Departments that occupy >14% of the north wing review and report data from department operating budget.
 
 >*Blue Zone 2: Low Occupancy Departments*
 >Departments that occupy <9% of the north wing will use “department research” and “OSA” categories in the space survey to estimate % >activity in the building, use payroll data estimate qualified research revenue 
