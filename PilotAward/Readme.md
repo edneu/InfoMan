@@ -4,7 +4,7 @@
 ### Office of Information Managment
 _ _ _ _ _ _ _ 
 #### Pilot Award Related Code
-> These SQL scripts were developed to convert the Existing Piklot Award Tracking File into
+> These SQL scripts were developed to convert the Existing Pilot Award Tracking File into
 > a relational database consisting of three major tables  
 >     *PILOTS_MASTER* - Information about each Pilot Award  
 >     *PILOTS_PUB_MASTER* - Information about Publications related to the Pilot Award  
