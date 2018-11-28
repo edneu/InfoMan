@@ -1,0 +1,39 @@
+drop table if exists ctsi_webcamp_adhoc.enrollment_tmp1;
+CREATE TABLE ctsi_webcamp_adhoc.enrollment_tmp1 AS
+     SELECT PATIENT,PROTOCOL FROM ctsi_webcamp.OPVISIT WHERE PROTOCOL IS NOT NULL  AND YEAR(VISITDATE)=2016
+         UNION ALL
+     SELECT PATIENT,PROTOCOL FROM ctsi_webcamp.ADMISSIO WHERE PROTOCOL IS NOT NULL  AND YEAR(ADMITDATE)=2016
+         UNION ALL
+     SELECT PATIENT,PROTOCOL FROM ctsi_webcamp.SBADMISSIO WHERE PROTOCOL IS NOT NULL  AND YEAR(ADMITDATE)=2016
+ ;
+
+select count(distinct PATIENT) from ctsi_webcamp_adhoc.enrollment_tmp1;
+
+1976
+
+
+################################################################
+
+drop table if exists ctsi_webcamp_adhoc.enrollment_tmp1;
+CREATE TABLE ctsi_webcamp_adhoc.enrollment_tmp1 AS
+     SELECT PATIENT,PROTOCOL FROM ctsi_webcamp.OPVISIT WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3) AND YEAR(VISITDATE)=2016
+         UNION ALL
+     SELECT PATIENT,PROTOCOL FROM ctsi_webcamp.ADMISSIO WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3)  AND YEAR(ADMITDATE)=2016
+         UNION ALL
+     SELECT PATIENT,PROTOCOL FROM ctsi_webcamp.SBADMISSIO WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3) AND YEAR(ADMITDATE)=2016
+ ;
+
+1602
+
+################################################################
+ADMISSON
+STATUS
+null=not entered,0 or null=not entered; 1=Scheduled; 2=Completed; 3=Begun; 4=No-show; 5=Request cancelled; 6=Requested; 7=Request denied; 8=Stopped prematurely; 9=Re-scheduling requested
+###
+OPVISIT
+STATUS
+null=not entered,0 or null=not entered; 1=Scheduled; 2=Completed; 3=Begun; 4=No-show; 5=Request cancelled; 6=Requested; 7=Request denied; 8=Stopped prematurely; 9=Re-scheduling requested
+###
+SBADMISSIO
+STATUS
+null=not entered,0 or null=not entered; 1=Scheduled; 2=Completed; 3=Begun; 4=No-show; 5=Request cancelled; 6=Requested; 7=Request denied; 8=Stopped prematurely; 9=Re-scheduling requested
