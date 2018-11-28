@@ -11,5 +11,5 @@ The following databases are used:
      
  **ctsi_webcamp_pr**  - the current production database for WebCamp   
  **ctsi_webcamp_adhoc**  - Information management reporting schema on WebCamp server   
- **ctsi_oldwebcamp**  - Obsolete prodcution schema   
- **ctsi_webcamp** - Obsolete prodcution schema   
+ **ctsi_oldwebcamp**  - Obsolete production schema   
+ **ctsi_webcamp** - Obsolete production schema   
