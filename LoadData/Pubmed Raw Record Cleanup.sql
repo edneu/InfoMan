@@ -1,4 +1,4 @@
-workwork#### PARSE PUBMED SUMMARY OUTPUT
+#### PARSE PUBMED SUMMARY OUTPUT
 ##DROP table work.pubmed_raw;
 ############################################
 ##########  ADD COLUMNS TO RAW PUBMED OUTPUT
