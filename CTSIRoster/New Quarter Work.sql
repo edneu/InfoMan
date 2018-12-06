@@ -129,3 +129,23 @@ select distinct Title from work.roster2018q1q2 where FacType is Null;
 desc lookup.roster_faculty_type;
 
 select max(roster_faculty_type_id2)+1 from lookup.roster_faculty_type;
+
+
+
+####################
+UPDATE work.roster2018q1q2 r, lookup.Employees lu
+SET r.Title=lu.Job_Code
+WHERE r.UFID=lu.Employee_ID
+and r.Title=""
+;
+
+select distinct Job_code from lookup.Employees;
+
+
+
+
+UPDATE work.roster2018q1q2 r, lookup.Employees lu
+SET r.Roster=1
+WHERE r.Title=lu.Job_Code
+AND Roster=0
+AND lu.Salary_Plan LIKE "%Faculty%";
