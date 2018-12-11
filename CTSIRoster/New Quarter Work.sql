@@ -44,10 +44,10 @@
 
 
 ############ VERIFY COMPLETENESS OF UFID - AFFILIATIONS
-select  count(*)
-from work.roster_additions
-WHERE UFID IN (""," ","0")
-  AND Affiliation="" ;
+     select  count(*)
+       from work.roster_additions
+       WHERE UFID IN (""," ","0")
+         AND Affiliation="" ;
 
 ####################################################################
 ##### ALL RECORDS ADDED 
