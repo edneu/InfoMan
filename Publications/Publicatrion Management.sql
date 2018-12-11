@@ -1946,6 +1946,10 @@ SELECT * from plan.PUB_CORE where NIHMS_STATUS IN ("Conference Presentation","Bo
 );
 
 
+select count(*) from plan.PUB_CORE;
+
+select count(*) from plan.pubmaster;
+
 desc  plan.PUB_PROGRAM_ASSIGN ;
 
 select * from plan.PUB_PROGRAM_ASSIGN ;

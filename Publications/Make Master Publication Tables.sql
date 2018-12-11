@@ -270,6 +270,7 @@ CREATE TABLE plan.PUB_CORE As SELECT * FROM plan.BACKUP_PLAN_PUB_CORE;
 
 select max(pubmaster_id2) from plan.PUB_CORE;
 
+
 desc plan.PUB_CORE;
 
 
