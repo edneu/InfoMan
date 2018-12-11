@@ -22,3 +22,12 @@ git commit -a -m "Message Here"
 git push 
  
 
+SET EDITOR
+-global core.editor "'C:/Program Files/Just Great Software/EditPad Pro git config -7/EditPadPro7.exe'  -n -w"
+
+
+##MERGE WOES
+
+git merge --abort
+git reset --merge
+rm -rf .git/MERGE*
