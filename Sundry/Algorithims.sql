@@ -140,3 +140,16 @@ DROP Service_Date,
 DROP Hire_Date;
 
 select * from loaddata.employees;
+
+
+
+########################################
+SELECT TABLE_NAME,CREATE_TIME,UPDATE_TIME, TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES
+  WHERE table_schema = 'results';
+
+
+
+
+DESC INFORMATION_SCHEMA.TABLES;
+
+select * from bluezone.Blue2Master;
