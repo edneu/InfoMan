@@ -18,7 +18,8 @@
 ## Check Validity of UFID / Name Pairings
      DROP TABLE IF EXISTS work.VerifyRosterNames;
      CREATE TABLE work.VerifyRosterNames AS
-     SELECT ra.UFID,
+     SELECT ra.roster2018q1q2_id,
+            ra.UFID,
             ra.LastName,
             ra.FirstName,
             lu.UF_LAST_NM,
@@ -62,7 +63,7 @@
 ## ASSIGN ROSTER IDs WHEN ALL RECORDS ADDED
 
      SET SQL_SAFE_UPDATES = 0;
-      UPDATE work.roster_additions SET rosterid = 0 
+      UPDATE work.roster_additions SET rosterid = 0 ;
       SELECT @i:=(select max(rosterid) from lookup.roster);
       UPDATE work.roster_additions SET rosterid = @i:=@i+1;
      SET SQL_SAFE_UPDATES = 1;

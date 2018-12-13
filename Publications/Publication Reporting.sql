@@ -72,3 +72,23 @@ from pubs.noncomptemp nc
 	on nc.pubmaster_id2=lu.pubmaster_id2
 ;
 
+
+
+################################
+################################
+### COMPLIANCE STATUS
+SELECT NIHMS_Status,
+SUM(May18Grant) AS May2018Grant,
+SUM(PilotPub) AS PilotPub,
+SUM(ProgOct2018) As ProgRept2018,
+COUNT(*) as Undup
+from pubs.PUB_CORE
+group by NIHMS_Status;
+
+
+#####################################
+#####################################
+### NON Compliant PMIDs for PUBMED Lookup
+SELECT DISTINCT PMID from pubs.PUB_CORE
+WHERE NIHMS_Status in ('Available Online','In Process','Not in NIHMS','Not in Pubmed');
+

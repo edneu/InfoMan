@@ -4,6 +4,8 @@
 ##########  ADD COLUMNS TO RAW PUBMED OUTPUT
 #############################################
 
+
+
 Alter table work.pubmed_raw
 ADD Citation varchar(4000),
 ADD PMID varchar(12),
@@ -42,20 +44,22 @@ select PMID,PMCID,Citation from
 work.pubmed_raw
 order by PMID;
 
+##############################
+### UPDATE Pub_CORE
+
+SET SQL_SAFE_UPDATES = 0;
+UPDATE pubs.PUB_CORE pc, work.PubmedOUT lu
+SET pc.PMC=lu.PMCID,
+    pc.NIHMS_Status='PMC Compliant'
+WHERE pc.PMID=lu.PMID
+AND lu.PMCID IS NOT NULL;
+SET SQL_SAFE_UPDATES = 0;
+
+
 ###########################################
 ############# END OF FILE #################
 ###########################################
 ###########################################
 
-SELECT 
-substr(raw,LOCATE("PMID:",RAW)+6,1),
-count(*)
-from work.pubmed_raw
-GROUP BY substr(raw,LOCATE("PMID:",RAW)+6,1);
 
-
-select * from work.pubmed_raw;
-
-
-desc pilots.PILOTS_PUB_MASTER;
 
