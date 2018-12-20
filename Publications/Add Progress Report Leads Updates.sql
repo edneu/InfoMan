@@ -82,3 +82,29 @@ AND EXCLUDED=0
 AND YEAR(PubDate)<=2017;
 
 SELECT distinct NIHMS_Status from  pubs.PUB_CORE;
+
+
+
+
+drop table if exists work.pubcompout;
+Create table work.pubcompout as 
+select 	pubmaster_id2,
+		PMID,
+		NIHMS_Status,
+		May18Grant,
+		PilotPub,
+		ProgReptSrce,
+		ProgRLead_LAST,
+		ProgRLead_FIRST,
+		ProfRLead_EMAIL,
+		PI_LAST,
+		PI_FIRST,
+		email AS PI_EMAIL,
+		PubDate,
+		Grant_Numbers
+		CTSI_GRANT,
+		Citation
+from pubs.PUB_CORE 
+WHERE NIHMS_Status NOT IN  ('PMC Compliant','Conference Presentation','Book Chapter','In Process','Removed NIHMS')
+AND EXCLUDED=0;
+##AND YEAR(PubDate)<=2017;
