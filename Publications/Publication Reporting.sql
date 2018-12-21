@@ -92,3 +92,35 @@ group by NIHMS_Status;
 SELECT DISTINCT PMID from pubs.PUB_CORE
 WHERE NIHMS_Status in ('Available Online','In Process','Not in NIHMS','Not in Pubmed');
 
+
+
+######################################
+######################################
+### CREATE TABLE FOR DEFINING PROGRAM LEADS
+#######################################
+
+drop table if exists work.pubcompout;
+Create table work.pubcompout as 
+select 	pubmaster_id2,
+		PMID,
+		NIHMS_Status,
+		May18Grant,
+		PilotPub,
+		ProgReptSrce,
+		ProgRLead_LAST,
+		ProgRLead_FIRST,
+		ProgRLead_EMAIL,
+		PI_LAST,
+		PI_FIRST,
+		email AS PI_EMAIL,
+		PubDate,
+		CTSI_GRANT,
+		Grant_Numbers,
+		Citation,
+		OnlineLink
+from pubs.PUB_CORE 
+WHERE NIHMS_Status NOT IN  ('PMC Compliant','Conference Presentation','Book Chapter','In Process','Removed NIHMS')
+AND EXCLUDED=0
+AND (YEAR(PubDate)<=2017 OR May18Grant=1);
+
+
