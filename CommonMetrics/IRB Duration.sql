@@ -4,7 +4,7 @@ desc loaddata.irb_raw_August_2018;
 
 drop table if exists work.irb;
 create table work.irb as
-select * from loaddata.irb_raw_august_2018;
+select * from loaddata.irb_jan_2019;
 
 
 ### FIX UFIDS
