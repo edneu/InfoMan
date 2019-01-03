@@ -6,8 +6,15 @@ drop table if exists work.irb;
 create table work.irb as
 select * from loaddata.irb_jan_2019;
 
+#### Fix Date ERROR
+SET SQL_SAFE_UPDATES = 0;
+UPDATE work.irb SET Approval_Date=str_to_date('05,30,2018','%m,%d,%Y') ,
+                    Date_Originally_Approved=str_to_date('05,30,2018','%m,%d,%Y')   
+    WHERE irb_jan_2019_id=7421;
 
+SET SQL_SAFE_UPDATES = 1;
 ### FIX UFIDS
+
 
 SET SQL_SAFE_UPDATES = 0;
 UPDATE work.irb SET PI_UFID=LPAD(PI_UFID,8,'0');
@@ -334,6 +341,11 @@ UPDATE results.IRB_monthly_MEDIAN ms, work.mExempt lu
 SET ms.Exempt=lu.median
 WHERE ms.IRB_Approval_Month=lu.median_group;
 
+
+##############################################################################
+######## REPORT TABLES 
+##############################################################################
+
 DROP TABLE IF EXISTS results.IRB_Approval_Monthly;
 create table results.IRB_Approval_Monthly AS
 select IRB_Approval_Month,
@@ -353,9 +365,38 @@ select IRB_Approval_Year,
 
 ##########################################################
 ##########################################################
+### IRB VOLUME
+SELECT 	IRB_Approval_Year,
+		COUNT(*) 
+from work.irb
+WHERE Committee="IRB-01"
+	AND Review_Type='Full IRB Review'
+group by IRB_Approval_Year;
+
+SELECT 	IRB_Approval_Month,
+		COUNT(*) 
+from work.irb
+WHERE Committee="IRB-01"
+	AND Review_Type='Full IRB Review'
+group by IRB_Approval_Month;
+
+
+
+
+
+
+select * from work.irb where IRB_Approval_Year=201;
+
+UPDATE work.irb SET Approval_Date=str_to_date('05,30,2018','%m,%d,%Y')     WHERE irb_jan_2019_id=7421;
+
 ##########################################################
 ##########################################################
 ##########################################################
+/*
+	DROP TABLE IF EXISTS lookup.myirb;
+	CREATE TABLE lookup.myirb AS
+	SELECT * from work.irb;
+*/
 ##########################################################
 ################## EOF ###################################
 ##########################################################
