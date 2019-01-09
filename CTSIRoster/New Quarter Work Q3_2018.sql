@@ -10,7 +10,7 @@
 
 ##create table brian.bu_q12_2108 as select * from work.roster_additions;
 
-
+roster1_2018_id
 
 ## Create work File
      #DROP TABLE IF EXISTS work.roster_additions;
@@ -53,6 +53,7 @@
        WHERE UFID IN (""," ","0")
          AND Affiliation="" ;
 
+
 ####################################################################
 ##### ALL RECORDS ADDED 
 ####################################################################
@@ -61,7 +62,7 @@
      SET Year=2018;
 
 
-
+/*
 ####################################################################
 ## ASSIGN ROSTER IDs WHEN ALL RECORDS ADDED
 
@@ -79,7 +80,7 @@
       UNION ALL 
      select "Max Roster ID work.roster_additions" AS Metric,max(rosterid) as val from work.roster_additions;
 ###################################################################
-
+*/
 
 ### ASSIGN Roster_key
      UPDATE work.roster_additions
@@ -92,6 +93,8 @@
 
 
 ### Assign Person Key
+alter table work.roster_additions modify Person_Key varchar(65);
+
      UPDATE work.roster_additions
      SET Person_Key=UFID
      WHERE UFID<>"";
@@ -100,6 +103,9 @@
      SET Person_Key=(LastName)
      WHERE UFID="";
 
+
+
+select * from work.roster_additions where roster1_2018_id>220 and roster1_2018_id<227;
 
 ### ASSIGN ERA COMMONS
      UPDATE work.roster_additions r, lookup.ERACommons era
@@ -111,12 +117,14 @@
 ### UPDATE FACULTY VARIABLES 
 
 ###### Verify that there are no missing titles in the lookup.roster_faculty_classify table
-
+### TO HERE
      DROP TABLE IF EXISTS work.Roster_Need_Faculty_Data;
      CREATE TABLE work.Roster_Need_Faculty_Data As
-     SELECT * 
+     SELECT DISTINCT Title 
      from work.roster_additions
      WHERE Title not in (select distinct Title from lookup.roster_faculty_classify);
+
+
 
 ####### < create and append required records >
 
