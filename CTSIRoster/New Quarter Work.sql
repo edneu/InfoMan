@@ -125,12 +125,14 @@ WHERE rs.ORIG_PROGRAM=lu.Program;
 ### UPDATE COLLEGE
 ##### UPDATE COLLEGE
 UPDATE work.roster_additions ra, lookup.dept_coll lu
-SET ra.College=lu.College
+SET ra.College=lu.College,
+    ra.Diaplay_College=lu.Display_College
 WHERE ra.DepartmentID=lu.DepartmentID;
 ;
 
 UPDATE work.roster_additions ra, lookup.dept_coll lu
-SET ra.College=lu.College
+SET ra.College=lu.College,
+    ra.Diaplay_College=lu.Display_College
 WHERE ra.Department=lu.Department
 AND ra.College="";
 

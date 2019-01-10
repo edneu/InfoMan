@@ -405,7 +405,7 @@ select * from lookup.roster
 UNION ALL 
 select * from work.roster_additions;
 
-select Year,count(DISTINCT Person_key)
+select Year,count(DISTINCT Person_key),COunt(*)
 FROM work.Q123roster
 WHERE Roster=1
 GROUP BY YEAR
@@ -422,6 +422,125 @@ UPDATE work.Q123roster SET College="" WHere College IS NULL;
 
 
 select * from work.Q123roster WHere College ='';
+
+select count(*) from work.Q123roster;
+select year,count(*) from work.Q123roster group by Year;
+
+select distinct College from lookup.dept_coll;
+
+select distinct Display_College from lookup.roster;
+
+### Add Display College
+
+ALTER TABLE lookup.dept_coll ADD Display_College varchar(45);
+
+UPDATE lookup.dept_coll SET Display_College='Agriculture and Life Sciences' WHERE College='AG-DEAN FOR ACADEMIC PROGRAMS';
+UPDATE lookup.dept_coll SET Display_College='Agriculture and Life Sciences' WHERE College='AG-DEAN FOR EXTENSION';
+UPDATE lookup.dept_coll SET Display_College='Agriculture and Life Sciences' WHERE College='AG-DEAN FOR RESEARCH';
+UPDATE lookup.dept_coll SET Display_College='Agriculture and Life Sciences' WHERE College='AG-OFFICE-SENIOR VICE PRES';
+UPDATE lookup.dept_coll SET Display_College='Agriculture and Life Sciences' WHERE College='AG/NAT RES DEPARTMENTS';
+UPDATE lookup.dept_coll SET Display_College='Agriculture and Life Sciences' WHERE College='AG/NAT RES OFF CAMPUS CENTERS';
+UPDATE lookup.dept_coll SET Display_College='Agriculture and Life Sciences' WHERE College='AG/NAT RES ON CAMPUS CENTERS';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='ASSOCCIATE VP-BR/IS';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='ASSOCIATE VP-BS/FA/OD/SBVDR';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='ASSOCIATE VP-HR/EHS/OA/UPD';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='BC-BAUGHMAN CENTER';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='BOARD OF TRUSTEES';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='BUS & ECO DEVELOPMENT';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='CATTLE ENHANCEMENT BOARD INC';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='CHIEF FINANCIAL OFFICER';
+UPDATE lookup.dept_coll SET Display_College='Arts' WHERE College='COLLEGE OF THE ARTS';
+UPDATE lookup.dept_coll SET Display_College='Business Administration' WHERE College='COLLEGE-BUSINESS ADMINISTRATION';
+UPDATE lookup.dept_coll SET Display_College='Design, Construction and Planning' WHERE College='COLLEGE-DCP';
+UPDATE lookup.dept_coll SET Display_College='Dentistry' WHERE College='COLLEGE-DENTISTRY';
+UPDATE lookup.dept_coll SET Display_College='Education' WHERE College='COLLEGE-EDUCATION';
+UPDATE lookup.dept_coll SET Display_College='Engineering' WHERE College='COLLEGE-ENGINEERING';
+UPDATE lookup.dept_coll SET Display_College='Health and Human Performance' WHERE College='COLLEGE-HLTH/HUMAN PERFORMANCE';
+UPDATE lookup.dept_coll SET Display_College='Journalism and Communications' WHERE College='COLLEGE-JOURNALISM / COMMUNICA';
+UPDATE lookup.dept_coll SET Display_College='Law' WHERE College='COLLEGE-LAW';
+UPDATE lookup.dept_coll SET Display_College='Liberal Arts and Sciences' WHERE College='COLLEGE-LIBERAL ARTS/SCIENCES';
+UPDATE lookup.dept_coll SET Display_College='Medicine' WHERE College='COLLEGE-MEDICINE';
+UPDATE lookup.dept_coll SET Display_College='Medicine - Jacksonville' WHERE College='COLLEGE-MEDICINE JACKSONVILLE';
+UPDATE lookup.dept_coll SET Display_College='Nursing' WHERE College='COLLEGE-NURSING';
+UPDATE lookup.dept_coll SET Display_College='Pharmacy' WHERE College='COLLEGE-PHARMACY';
+UPDATE lookup.dept_coll SET Display_College='Public Health and Health Professions' WHERE College='COLLEGE-PUBL HLTH / HLTH PROFS';
+UPDATE lookup.dept_coll SET Display_College='Veterinary Medicine' WHERE College='COLLEGE-VETERINARY MED';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='CONSTRUCTION / RENOVA / REPAIR';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='DIVISION-CONTINUING EDUCATION';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='DIVISION-HOUSING';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='DSO-DIRECT SUPPORT ORG';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='DV-VP DEVELOPMENT';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='DW-DIGITAL WORLD';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='EM-STUDENT FINANCIAL AFFAIRS';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='EMERGENCY MGMT';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='FACILITIES SERVICES DEPARTMENT';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='FACILITIES/PLANNING/CONSTRUC';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='FL FOUNDATION SEED PRODUCERS';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='FLORIDA 4-H FOUNDATION INC';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='FLORIDA MUSEUM NATURAL HISTORY';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='FLVC-FLORIDA VIRTUAL CAMPUS';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='GATOR BOOSTERS';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='GRADUATE SCHOOL';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='HUMAN RESOURCES';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='INFORMATION TECHNOLOGY';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='INSTITUTIONAL ACTIVITIES';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='INTERNATIONAL CENTER';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='J WAYNE REITZ UNION';
+UPDATE lookup.dept_coll SET Display_College='Liberal Arts and Sciences' WHERE College='Liberal Arts and Sciences';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='MILITARY UNITS';
+UPDATE lookup.dept_coll SET Display_College='Medicine' WHERE College='Medicine';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='Non-Academic';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='OFFICE ENROLLMENT MANAGEMENT';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='OFFICE OF HEALTH AFFAIRS';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='OFFICE OF PROVOST';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='OFFICE OF REGISTRAR';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='OFFICE OF RESEARCH';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='OFFICE OF STUDENT AFFAIRS';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='PC-PHILLIPS CENTER';
+UPDATE lookup.dept_coll SET Display_College='' WHERE College='';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College LIKE 'PRESIDENT%S OFFICE';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='REGISTRAR STUDENTS';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='SH-STUDENT HEALTH CARE CENTER';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='SHANDS TEACHING HOSPITAL';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='SMALL BUS/VENDOR DIVER RELA';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='STUDENT GOVERNMENT';
+UPDATE lookup.dept_coll SET Display_College='Type One Centers' WHERE College='TYPE ONE CENTERS';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='UA-UNIVERSITY AUDITORIUM';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='UF LEADERSHIP AND EDUCATION';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='UF PRIVACY OFFICE';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='UF RESEARCH FOUNDATION INC';
+UPDATE lookup.dept_coll SET Display_College='Library' WHERE College='UNIVERSITY LIBRARIES';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='UNIVERSITY PRESS OF FLORIDA';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='VP ADMINISTRATION';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='VP-DEVELOPMENT';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='VP-GENERAL COUNSEL';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='VP-GOVERNMENTAL RELATIONS';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='VP-PUBLIC RELATIONS';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College='VPFA-VP FINANCE / ADMIN';
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE College LIKE 'WOMEN%S ATHLETICS';
+UPDATE lookup.dept_coll SET Display_College='PHHP-COM Intergrated Programs' WHERE College='PHHP-COM INTEGRATED PROGRAMS';
+
+UPDATE lookup.dept_coll SET Display_College='Non-Academic' WHERE Display_College is null;
+
+select * from lookup.dept_coll WHERE Display_College is null;
+
+
+UPDATE work.Q123roster rs, lookup.dept_coll lu
+SET rs.Display_College=lu.Display_College
+WHERE rs.College=lu.College
+  AND rs.Display_College="";
+
+select display_college,count(*) from work.Q123roster group by Display_College;
+
+/*
+create table loaddata.BackupRoster2009_2017 as select * from lookup.roster;
+
+drop table if exists lookup.roster;
+create table lookup.roster as select * from work.Q123roster;
+
+*/
+
+
 ###############################################################################
 ###############################################################################
 #########################   EOF   #############################################
