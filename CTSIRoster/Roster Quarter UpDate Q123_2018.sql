@@ -289,6 +289,68 @@ alter table work.roster_additions modify Person_Key varchar(65);
      AND r.email<>""
      AND era.email<>"";
 
+### UPDATE STD_PROGRAM
+
+SELECT distinct ORIG_PROGRAM
+from work.Q123roster
+WHERE Year=2018
+AND ORIG_PROGRAM NOT IN (SELECT Distinct Program from lookup.standard_programs);
+
+
+UPDATE work.Q123roster rs, lookup.standard_programs lu
+SET rs.STD_PROGRAM=lu.STD_PROGRAM
+WHERE rs.ORIG_PROGRAM=lu.Program;
+
+/*
+UPDATE lookup.standard_programs SET STD_PROGRAM="Clinical Research Center" WHERE STD_PROGRAM="CCTR";
+UPDATE lookup.standard_programs SET STD_PROGRAM="Research Administration" WHERE STD_PROGRAM="RAC";
+UPDATE lookup.standard_programs SET STD_PROGRAM="Translational Workforce Development" WHERE STD_PROGRAM="TPDP";
+
+UPDATE lookup.roster SET ORIG_PROGRAM=STD_PROGRAM WHERE ORIG_PROGRAM="" AND STD_PROGRAM<>"";
+
+
+SELECT ORIG_PROGRAM,STD_PROGRAM from lookup.roster where ORIG_PROGRAM not in (select distinct Program from lookup.standard_programs) GROUP BY ORIG_PROGRAM,STD_PROGRAM;  
+select max(standard_programs_id2)+1 from lookup.standard_programs;
+select * from work.Q123roster where ORIG_PROGRAM in ("collaborate w/ biotility worksho","collaborate w/ education");
+*/
+
+
+
+
+
+
+##### UPDATE COLLEGE
+UPDATE work.Q123roster ra, lookup.dept_coll lu
+SET ra.College=lu.College
+WHERE ra.DepartmentID=lu.DepartmentID;
+;
+
+UPDATE lookup.roster ra, lookup.dept_coll lu
+SET ra.College=lu.College
+WHERE ra.DepartmentID=lu.DepartmentID;
+;
+
+
+CREATE INDEX dept ON lookup.dept_coll (Department);
+
+UPDATE work.Q123roster ra, lookup.dept_coll lu
+SET ra.College=lu.College
+WHERE ra.Department=lu.Department
+AND ra.Department<>"";
+
+
+select * from work.Q123roster where College="" and DepartmentID <>"";
+
+
+UPDATE lookup.roster
+set DepartmentID=LPAD(DepartmentID,8,'0')
+WHERE DepartmentID<>"";
+
+
+
+select DepartmentID,LPAD(DepartmentID,8,'0') from work.Q123roster WHERE DepartmentID<>"" AND DepartmentID<>LPAD(DepartmentID,8,'0');
+
+select College,VPCODE,VicePres from lookup.dept_coll group by College,VPCODE,VicePres;
 ### UPDATE FACULTY VARIABLES 
 
 ###### Verify that there are no missing titles in the lookup.roster_faculty_classify table
@@ -342,6 +404,24 @@ Create table work.Q123roster AS
 select * from lookup.roster
 UNION ALL 
 select * from work.roster_additions;
+
+select Year,count(DISTINCT Person_key)
+FROM work.Q123roster
+WHERE Roster=1
+GROUP BY YEAR
+ORDER BY YEAR;
+
+select College,count(DISTINCT Person_key)
+FROM work.Q123roster
+GROUP BY College
+;
+
+select * from lookup.dept_coll where DepartmentID='16120100';
+
+UPDATE work.Q123roster SET College="" WHere College IS NULL;
+
+
+select * from work.Q123roster WHere College ='';
 ###############################################################################
 ###############################################################################
 #########################   EOF   #############################################

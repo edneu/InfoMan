@@ -108,6 +108,34 @@
      AND r.email<>""
      AND era.email<>"";
 
+
+### UPDATE STANDARD PROGRAM
+
+SELECT distinct ORIG_PROGRAM
+from work.roster_additions
+WHERE Year=2018
+AND ORIG_PROGRAM NOT IN (SELECT Distinct Program from lookup.standard_programs);
+
+
+UPDATE work.roster_additions rs, lookup.standard_programs lu
+SET rs.STD_PROGRAM=lu.STD_PROGRAM
+WHERE rs.ORIG_PROGRAM=lu.Program;
+
+
+### UPDATE COLLEGE
+##### UPDATE COLLEGE
+UPDATE work.roster_additions ra, lookup.dept_coll lu
+SET ra.College=lu.College
+WHERE ra.DepartmentID=lu.DepartmentID;
+;
+
+UPDATE work.roster_additions ra, lookup.dept_coll lu
+SET ra.College=lu.College
+WHERE ra.Department=lu.Department
+AND ra.College="";
+
+
+
 ### UPDATE FACULTY VARIABLES 
 
 ###### Verify that there are no missing titles in the lookup.roster_faculty_classify table
