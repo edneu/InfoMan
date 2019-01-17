@@ -4,16 +4,29 @@ SELECT count(*) from pubs.PUB_CORE where May18Grant=1 and NIHMS_Status<>'PMC Com
 
 select NIHMS_Status,count(*) from pubs.PUB_CORE where May18Grant=1 Group by NIHMS_Status;
 
+## FOR ICITE
+SELECT distinct PMID from pubs.PUB_CORE 
+WHERE ProgOct2018=1 or May18Grant=1 or PilotPub=1
+AND PMID<>'';
+
+##
+SELECT distinct PMID from pubs.PUB_CORE 
+WHERE May18Grant=1
+AND PMID<>'';
+
+
+#################################################################################
+
 ###############################################################################
 ###ROSTER
-DROP TABLE IF exists work.roster_analysis;
-CREATE TABLE work.roster_analysis AS
-select * from lookup.roster;
+##DROP TABLE IF exists work.roster_analysis;
+##CREATE TABLE work.roster_analysis AS
+##select * from lookup.roster;
 
 Alter table work.roster_analysis 	ADD ctsi_year varchar(24),
 									ADD CTSA_Award varchar(24);
 
- Alter table work.roster_analysis    ADD UserClass varchar(45);
+Alter table work.roster_analysis    ADD UserClass varchar(45);
 ##  SET SQL_SAFE_UPDATES = 0;
 
 UPDATE work.roster_analysis SET ctsi_year="2009-2011" WHERE Year in (2009,2010,2011);
@@ -27,26 +40,125 @@ UPDATE work.roster_analysis SET CTSA_Award="Second CTSA" WHERE Year in (2016,201
 UPDATE work.roster_analysis SET UserClass="UF Faculty" WHERE Affiliation="UF" and Faculty="Faculty";
 UPDATE work.roster_analysis SET UserClass="UF Grad Student / Trainee" WHERE Affiliation="UF" and FacType='Trainee';
 UPDATE work.roster_analysis SET UserClass="UF Research Professionals" WHERE Affiliation="UF" and FacType='Non-Faculty';
-UPDATE work.roster_analysis SET UserClass="FSU Faculty" WHERE Affiliation="FSU" ;
+UPDATE work.roster_analysis SET UserClass="FSU Faculty" WHERE Affiliation="FSU" AND Faculty="Faculty";
 UPDATE work.roster_analysis SET UserClass="External Collaborators" WHERE Affiliation not in ("FSU","UF") ;
+##
 
 
+##############################################
 Select CTSA_Award,
        UserClass,
        count(distinct Person_key) as Undup
 from  work.roster_analysis
 group by CTSA_Award, UserClass;
 
-select 
+drop table if exists work.yearclass;
+CREATE TABLE work.yearclass as
+SELECT Year,
+	   UserClass,
+       MAX(CTSA_Award) AS CTSA_Award,
+       count(distinct Person_key) as Undup
+from  work.roster_analysis
+group by Year,
+	   UserClass
+UNION ALL
+Select  Year,
+		max("All Users") as UserClass,
+        MAX(CTSA_Award) AS CTSA_Award,
+		count(distinct Person_key) as Undup
+from work.roster_analysis
+GROUP BY  Year; 	
+
+ 
+
+drop table if exists  work.ctsi2_svc;
+create table work.ctsi2_svc as
+Select 
+		CTSA_Award,
+		UserClass,
+		AVG(Undup) as Undup
+from work.yearclass
+GROUP BY 	CTSA_Award,
+			UserClass;
 
 
 
+
+
+
+
+drop table if exists  work.ctsi_svc;
+create table work.ctsi_svc as
+Select Distinct UserClass
+from work.yearclass;
+
+       
+Alter table work.ctsi_svc
+ADD CTSI1 decimal(10,5),
+ADD CTSI2 decimal(10,5)   ;     
+
+
+UPDATE work.ctsi_svc cs, work.ctsi2_svc lu
+SET cs.CTSI1=lu.undup
+WHERE CTSA_Award="First CTSA"
+AND cs.UserClass=lu.UserClass;
+
+
+UPDATE work.ctsi_svc cs, work.ctsi2_svc lu
+SET cs.CTSI2=lu.undup
+WHERE CTSA_Award="Second CTSA"
+AND cs.UserClass=lu.UserClass;
+
+
+select * from work.ctsi_svc;
+
+
+
+
+################################################
+
+select * from work.roster_analysis where LastName like "Cooper%";
+select max(rosterid)+1 from work.roster_analysis;
+
+ALter table work.roster_analysis modify gatorlink varchar(45);
+
+create table loaddata.bu_roster_analys_01152019 as select * from work.roster_analysis;
+
+SELECT YEAR,count(*) from work.roster_analysis where Affiliation="FSU" group by Year;
+
+select * from work.roster_analysis where Affiliation="FSU"
+ and Year<>2018
+ and Person_key not in (select distinct Person_key from  work.roster_analysis where Affiliation="FSU" and Year<>2018);
+
+drop table work.footer;
+create table work.footer as 
+SELECT * FROM work.roster_analysis ORDER BY rosterid DESC LIMIT 100;
+
+
+drop table work.fsu;
+create table work.fsu as 
+select * from work.roster_analysis where STD_PROGRAM="FSU";
+ and Year<>2018
+ and Person_key not in (select distinct Person_key from  work.roster_analysis where Affiliation="FSU" and Year<>2018);
+
+
+
+select distinct facultyType from work.roster_analysis;
+select distinct facType from work.roster_analysis;
+
+SELECT DISTINCT STD_PROGRAM from work.roster_analysis;
 #######################################################
+DROP TABLE IF EXISTS work.rank_table;
+CREATE TABLE  work.rank_table AS
+SELECT DISTINCT ctsi_year from work.roster_analysis;
+
+
+
 
 ALTER TABLE  work.rank_table
-ADD AssProf decimal(20.5),
-ADD AsoProf decimal(20.5),
-ADD Prof decimal(20.5);
+ADD AssProf decimal(20,5),
+ADD AsoProf decimal(20,5),
+ADD Prof decimal(20,5);
 
 drop table if exists work.undup ; 
 create table work.undup as
@@ -78,23 +190,20 @@ WHERE rt.ctsi_year=lu.ctsi_year
 AND FacType='Professor';
 
 
-select distinct facType from work.roster_analysis;
 
 SELECT * from work.rank_table;
+
 ################################################
 
- 
 
 
 
 
 
-###
-
-
-
-###
-s
+##################################################################################################
+##################################################################################################
+##################################################################################################
+##################################################################################################
 /*
 ##################################################################################################
 ################ BEGIN UPDATE BLOCK
