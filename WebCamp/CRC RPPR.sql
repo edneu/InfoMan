@@ -2,7 +2,7 @@
 
 
 SELECT YEAR(VISITDATE),COUNT(*) AS N_OP_VISITS
-FROM ctsi_webcamp.OPVISIT
+FROM ctsi_webcamp_pr.OPVISIT
 WHERE PROTOCOL IS NOT NULL 
 AND STATUS IN (2,3)
 AND LAB IN (SELECT UNIQUEFIELD FROM ctsi_webcamp.lab WHERE LAB="CRC")
@@ -17,21 +17,21 @@ CREATE TABLE ctsi_webcamp_adhoc.protocolTMP AS
     SELECT Year(VISITDATE) AS ActYear,
            PROTOCOL,
             "OPVisit" AS VisitType 
-      FROM ctsi_webcamp.OPVISIT 
+      FROM ctsi_webcamp_pr.OPVISIT 
       WHERE PROTOCOL IS NOT NULL 
        AND STATUS IN (2,3)
      UNION ALL
     SELECT Year(ADMITDATE) as ActYear,
            PROTOCOL,
            "IPVisit" AS VisitType  
-      FROM ctsi_webcamp.ADMISSIO 
+      FROM ctsi_webcamp_pr.ADMISSIO 
       WHERE PROTOCOL IS NOT NULL 
        AND STATUS IN (2,3) 
     UNION ALL
     SELECT Year(ADMITDATE) as ActYear,
            PROTOCOL,
           "SBVisit" AS VisitType 
-      FROM ctsi_webcamp.SBADMISSIO 
+      FROM ctsi_webcamp_pr.SBADMISSIO 
      WHERE PROTOCOL IS NOT NULL 
        AND STATUS IN (2,3) 
 ;
@@ -125,21 +125,18 @@ select * from ctsi_webcamp_adhoc.pi_tmp1;
 drop table if exists ctsi_webcamp_adhoc.ptcount1;
 CREATE TABLE ctsi_webcamp_adhoc.ptcount1 AS
      SELECT Year(VISITDATE) AS ActYear,
-            PATIENT,
-            PROTOCOL
-     FROM ctsi_webcamp.OPVISIT
+            PATIENT
+            FROM ctsi_webcamp_pr.OPVISIT
      WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3) AND VISITTYPE <> 1
          UNION ALL
      SELECT Year(ADMITDATE) as ActYear,
-            PATIENT,
-            PROTOCOL
-     FROM ctsi_webcamp.ADMISSIO
+            PATIENT
+            FROM ctsi_webcamp_pr.ADMISSIO
      WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3) AND VISITTYPE <> 1
          UNION ALL
      SELECT Year(ADMITDATE) as ActYear,
-            PATIENT,
-            PROTOCOL
-     FROM ctsi_webcamp.SBADMISSIO
+            PATIENT
+            FROM ctsi_webcamp_pr.SBADMISSIO
      WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3) AND VISITTYPE <> 1
 ;
 
