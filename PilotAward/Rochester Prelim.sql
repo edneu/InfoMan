@@ -16,3 +16,5 @@ SELECT Award_Amt,count(*) from work.pilotaward group by Award_Amt  ORDER by Awar
 
 select count(*) from work.pilotaward WHERE Award_Amt>=50000;
 select count(*) from work.pilotaward WHERE Category not in ("SECIM") AND Award_Amt>=50000;
+
+SELECT Award_Amt,count(*) from work.pilotaward where Category="Translational" group by Award_Amt ;

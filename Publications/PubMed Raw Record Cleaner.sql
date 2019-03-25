@@ -1,5 +1,6 @@
 #### PARSE PUBMED SUMMARY OUTPUT
 ##DROP table work.pubmed_raw;
+##select * from work.pubmed_raw;
 ############################################
 ##########  ADD COLUMNS TO RAW PUBMED OUTPUT
 #############################################
