@@ -1,7 +1,37 @@
 
-############################
-############################
-############################
+##################################################
+##################################################
+######## MK pubs.pmc_comp_mail  ####################
+####################################################
+drop table if exists work.pmc_comp_mail;
+create table work.pmc_comp_mail AS
+select * from pubs.pmc_comp_mail
+WHERE pubmaster_id2 IN (SELECT distinct pubmaster_id2 from pubs.PUB_CORE
+							Where May18Grant=1
+							AND PMC="" );
+
+drop table if exists work.temp;
+create table work.temp as
+SELECT *
+from pubs.PUB_CORE
+Where May18Grant=1
+	AND PMC=""
+    AND pubmaster_id2 NOT IN (SELECT DISTINCT pubmaster_id2 from work.pmc_comp_mail );
+
+
+
+DROP TABLE IF EXISTS  pubs.pmc_comp_mail;
+Create table pubs.pmc_comp_mail AS
+SELECT * from work.pmc_comp_mail;
+
+SELECT EMAIL,count(*) from pubs.pmc_comp_mail group by EMAIL;
+
+##################################################
+##################################################
+##################################################
+##################################################
+################################################################
+################################################################
 
 UPDATE pubs.pmc_comp_mail pm, pubs.PUB_CORE lu
 SET pm.Citation=lu.Citation
@@ -13,7 +43,7 @@ SELECT * from pubs.pmc_comp_mail
 ORDER BY Email;
 
 
-select distinct citation,PubFMT from  pubs.pubmail;
+
 
 ALTER TABLE pubs.pubmail ADD PubFMT varchar(4000);
 
@@ -37,7 +67,7 @@ select PubFMT from pubs.pubmail;
 
 
 #### SPANS FOR QUALTRICS 
-############ ## 10 Spans
+############ ## 11 Spans
 
 DROP TABLE IF EXISTS pubs.PMCMail ;
 CREATE TABLE pubs.PMCMail AS 
@@ -79,7 +109,10 @@ ALTER TABLE pubs.PMCMail
 	ADD pubmasterid9 int(11),
 
 	ADD Pub10 varchar(4000),
-	ADD pubmasterid10 int(11);
+	ADD pubmasterid10 int(11),
+    
+	ADD Pub11 varchar(4000),
+	ADD pubmasterid11 int(11);
 
 select * from  pubs.PMCMail;
 
@@ -186,6 +219,12 @@ Where pm.Email=lu.Email
 and lu.Span=10; 
 
 
+UPDATE pubs.PMCMail pm, pubs.pubmail lu
+SET pm.pub11=lu.PubFMT,
+    pm.pubmasterid11=lu.pubmaster_id2
+Where pm.Email=lu.Email
+and lu.Span=11; 
+
 select * from pubs.PMCMail;
 
 
@@ -195,16 +234,3 @@ select * from pubs.PMCMail;
 
 
 ###
-/*
-Drop table work.SpaceRank ;
-Create table work.SpaceRank as
-Select t1.AWARD_INV_UFID,
-       t1.AWARD_ID,	
-	   count(*) as Span
-from work.bondmaster AS t1
-join work.bondmaster AS t2 
-     on (t2.AWARD_ID, t2.AWARD_INV_UFID) >= (t1.AWARD_ID, t1.AWARD_INV_UFID)
-    and t1.AWARD_INV_UFID = t2.AWARD_INV_UFID
-Group by t1.AWARD_INV_UFID, t1.AWARD_ID
-Order by t1.AWARD_INV_UFID, Span;
-*/
