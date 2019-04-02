@@ -2,6 +2,13 @@ SET sql_mode = '';
 SET sql_mode = "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION";
 set global sql_mode= 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';
 
+ SELECT VERSION();
+
+SET GLOBAL local_infile = 1;
+
+SHOW VARIABLES LIKE 'local_infile';
+SHOW VARIABLES LIKE "secure_file_priv";
+
 SET SQL_SAFE_UPDATES = 0;
 
 set @@global.net_write_timeout = 9999999;
@@ -145,7 +152,7 @@ select * from loaddata.employees;
 
 ########################################
 SELECT TABLE_NAME,CREATE_TIME,UPDATE_TIME, TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES
-  WHERE table_schema = 'results';
+  WHERE table_schema = 'pubs';
 
 
 
@@ -164,7 +171,7 @@ SELECT DISTINCT
     COLUMN_NAME,
     index_type
 FROM INFORMATION_SCHEMA.STATISTICS
-WHERE TABLE_SCHEMA = 'lookup';
+WHERE TABLE_SCHEMA = 'pubs';
 
 desc INFORMATION_SCHEMA.STATISTICS;
 

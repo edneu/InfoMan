@@ -1,0 +1,277 @@
+
+vpn.ufl.edu
+
+10.241.112.154
+edneu
+42p
+
+
+P@ssw0rd
+
+What Verion Server OS? 
+lsb_release -a
+
+
+##### Last Update 9/8/2016 @ 8:30am
+
+
+2019-03-13
+
+
+Distributor ID: Ubuntu
+Description:    Ubuntu 16.04.6 LTS
+Release:        16.04
+Codename:       xenial
+
+
+Ubuntu 16.04.6 LTS LOAD DATA LOCAL INFILE
+
+
+
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20170407.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20170421.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20170511.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20170512.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20170517.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20170519.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20170524.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20170609.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20170804.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20170811.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20170901.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20170902.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20170908.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20170914.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20171012.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20171109.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20171207.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20180215.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20180223.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL2018026.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20180301.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20180309.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20180327.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20180420.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20180518.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20180702.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20180831.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20181005.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20181109.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20181212.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20190313.sql
+
+locate -i All_mySQL20171012.sql
+sudo find / -type f -name "mySQL20171012.sql"
+
+
+
+sudo apt-get update
+sudo apt-get upgrade
+
+
+sudo apt-get dist-upgrade
+sudo service mysql stop
+sudo service mysql start
+
+########## RELEASE UPGRADE
+do-release-upgrade
+
+
+
+
+sudo reboot
+
+## DISK SPACE
+df -h
+## DISK SPACE BY DIRECTORY
+du
+## System time and Date
+timedatectl set-local-rtc 0
+
+
+
+Size of APT cache
+du -sh /var/cache/apt/archives
+Clear APT Cache
+sudo apt-get clean
+
+
+Update: 
+sudo apt-get update
+Upgrade:
+ sudo apt-get upgrade
+
+mySQL Console: mysql -u root -pP@ssw0rd
+mysql status:  service mysql status
+
+sudo service mysql start
+sudo service mysql stop
+
+
+
+show processes running:    ps-aux  (OR) top
+
+text editor:  nano
+
+
+
+sudo shutdown -h now
+sudo reboot
+sudo reboot
+
+Config:
+permit both addrgroup all-campus:addr-og 10.241.112.154 eq 3306   (mySQL)
+permit both addrgroup all-campus:addr-og 10.241.112.154 eq 3307   (mySQL)
+permit both addrgroup all-campus:addr-og 10.241.112.154 eq 22     (SSH)
+permit both addrgroup all-campus:addr-og 10.241.112.154 eq 443    (Apache)
+
+
+
+
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'P@ssw0rd' WITH GRANT OPTION;
+
+GRANT ALL PRIVILEGES ON *.* TO 'edneu'@'%' IDENTIFIED BY '42panic' WITH GRANT OPTION;
+
+
+Remove Priledges using worklbench...
+GRANT ALL PRIVILEGES ON *.* TO 'Avani'@'%' IDENTIFIED BY 'Avani123!' ;   
+
+afrudakis
+
+GRANT ALL PRIVILEGES ON *.* TO 'Alicia'@'%' IDENTIFIED BY 'Afrud123!' ;  
+
+
+mysqldbcopy \
+  --source=root:pass@localhost:3306:/test123/mysql.sock \
+  --destination=root:pass@10.241.112.154:3306:/test123/mysql.sock \
+  util_test:util_test_copy
+
+
+
+Is Apache running:
+pgrep apache
+
+
+
+PHPADMIN
+
+sudo apt-get update
+sudo apt-get install phpmyadmin
+sudo php5enmod mcrypt
+sudo service apache2 restart
+http://10.241.112.154/phpmyadmin
+
+Edit file
+sudo nano /etc/apache2/conf-available/phpmyadmin.conf
+
+Add this :
+AllowOverride All
+sudo service apache2 restart
+
+
+create this file:
+sudo nano /usr/share/phpmyadmin/.htaccess
+
+Add this:
+AuthType Basic
+AuthName "Restricted Files"
+AuthUserFile /etc/phpmyadmin/.htpasswd
+Require valid-user
+
+
+Make a user:
+sudo apt-get install apache2-utils
+sudo htpasswd -c /etc/phpmyadmin/.htpasswd username
+http://10.241.112.154/phpmyadmin
+
+
+
+sudo su   - make user a superuser
+
+sudo chown -R edneu:edneu /var/www/html
+
+
+
+PHP Install
+sudo apt-get install php5
+sudo apt-get install libapache2-mod-auth-mysql
+sudo a2enmod auth_mysql
+sudo service apache2 restart
+
+
+mysqlbu
+
+mysqldump -p -u root –opt lookup > /backup/mysql/lookup-2015-5-6
+
+
+
+sudo nano /etc/mysql/my.cnf
+
+and change the line:
+bind-address           = localhost
+to your own internal ip address e.g. 192.168.1.20
+bind-address           = 10.241.112.154
+
+
+
+Example:
+Backup:
+mysqldump -p -u root –opt virtual > /backup/virtual-2010-10-24
+
+Restore:
+mysql -p -u root virtual < /backup/virtual-2010-10-24
+
+
+
+UBUNTU DIRECTORIES
+
+WebPAge:   /var/www/html
+
+
+find  /.. -name " All_mySQL*.*"
+
+#####################################################################################
+SET TIME (December 6, 2007, 22:43:55)
+
+sudo date 120622432007.55
+sudo date 040717112017.04
+
+
+#####################################################################################
+VPN
+edneu@ufl.edu/esodbc   ## ENTERPRISE SYSTEMS
+
+
+UFAD for GatorLink accounts
+Shands for Shands users
+UMC for Jacksonville users
+
+#####################################################################################
+WEBCAMP
+
+Server: ahcmydqldf1.ahc.ufl.edu
+ID: edneu@ufl.edu
+Password: dX1#HJfQTAKetSBjfd
+Port: 3306
+
+
+
+
+#####################################################
+? An error occurred while upgrading the database:
+ ?
+ ? mysql: [Warning] mysql: Empty value for 'port' specified. Will throw an
+ ? error in future versions ERROR 2002 (HY000): Can't connect to local
+ ? MySQL server through socket '/var/run/mysqld/mysqld.sock' (2)
+ ?
+ ? Fortunately,
+ ? /var/cache/dbconfig-common/backups/phpmyadmin_4:4.4.13.1-1.2017-09-14-17
+ ? .12.13 should hold a backup of the database, made just before the
+ ? upgrade (unless the error occurred during backup creation, in which case
+ ? no changes will have been applied yet). Your options are:
+ ?  * abort - Causes the operation to fail; you will need to downgrade,
+ ?    reinstall, reconfigure this package, or otherwise manually intervene
+ ?    to continue using it. This will usually also impact your ability to
+ ?
+
+

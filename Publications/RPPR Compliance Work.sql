@@ -160,7 +160,7 @@ select max(pubmaster_id2)+1 from pubs.PUB_CORE;
 
 select * from pubs.PUB_CORE where pubmaster_id2=1031;
 
-SELECT * from pubs.PUB_CORE WHERE PMID IN (
+
 
 UPDATE pubs.PUB_CORE SET NIHMS_Status='PMC Compliant' WHERE PMC<>'';
 
@@ -200,8 +200,6 @@ FROM pubs.PUBCOREBACKUP pa LEFT JOIN
 WHERE ;  
 
 
-select pubmaster_id2 from pubs.pmc_comp_mail
-WHERE pubmaster_id2 NOT IN (SELECT 
 
 
 
@@ -219,3 +217,22 @@ FROM pubs.pmc_comp_mail pa LEFT JOIN
      pubs.PUB_CORE pc ON pa.pubmaster_id2=pc.pubmaster_id2
     
 WHERE pa.PMID<>pc.PMID;  
+
+######################################################
+######################################################
+
+
+ALTER TABLE pubs.PUB_CORE ADD ON_DND integer(1);
+
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE pubs.PUB_CORE SET ON_DND =0;
+
+UPDATE pubs.PUB_CORE pc
+SET pc.ON_DND=1
+WHERE pc.PMID IN (SELECT DISTINCT PMID FROM pubs.dnd);
+
+drop table work.temp;
+create table work.temp as
+SELECT distinct PMID from pubs.PUB_CORE;
+

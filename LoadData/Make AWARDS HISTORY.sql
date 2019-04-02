@@ -89,11 +89,13 @@ CREATE TABLE loaddata.awards_history
 
 );
 
+SET GLOBAL local_infile = 1;
 
 
-load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory20180604.csv" 
+
+load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory20190328.csv" 
 into table loaddata.awards_history 
-fields terminated by '|'
+fields terminated by ','
 lines terminated by '\n'
 (
 CLK_AWD_ID,
@@ -182,7 +184,10 @@ CLK_MOD_SPON_AWD_ID
 ##ORGNL_FUNDS_ACTIVATED
 );
 
+show variables like '%INFILE%'
+SHOW VARIABLES LIKE "secure_file_priv";
 
+SHOW VARIABLES LIKE 'local_infile';
 ALTER TABLE loaddata.awards_history ADD AcademicUnit Varchar(5);
 
 SET SQL_SAFE_UPDATES = 0;
