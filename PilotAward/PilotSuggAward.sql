@@ -16,3 +16,7 @@ create table work.pilotpigrants AS
 select * from lookup.awards_history
 WHERE CLK_PI_UFID IN (SELECT DISTINCT UFID from work.pimingrant) OR
       CLK_AWD_PROJ_MGR_UFID IN (SELECT DISTINCT UFID from work.pimingrant) ; 
+      
+      
+      
+      SELECT * from lookup.Employees where Name like "Cardel%Michelle%";

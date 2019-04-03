@@ -1,5 +1,7 @@
 ### Source : [IS_BaseData].[Base].[vwPeople]
 ### USE ODBC with SPSS
+### UFID Load and Write ODBC.sps
+
 
 
 
@@ -79,7 +81,7 @@ select "New Table (loaddata.ufids):",count(*), count(distinct uf_ufid) from load
 UNION ALL 
 select "Current Table: (lookup.ufids)",count(*), count(distinct uf_ufid) from lookup.ufids;
 
-select * from loaddata.ufids;ufids
+select * from loaddata.ufids;
 
 select min(UF_UFID), MAX(UF_UFID) from loaddata.ufids ;
 
@@ -140,7 +142,7 @@ desc loaddata.ufids;
 
 /*
 
-create table loaddata.backupufid20170823 as select * from lookup.ufids;
+create table loaddata.backupufid20190203 as select * from lookup.ufids;
 
 drop table lookup.ufids;
 create table lookup.ufids AS
@@ -149,6 +151,7 @@ select * from loaddata.ufids;
 CREATE INDEX ufid ON lookup.ufids (UF_UFID);
 CREATE INDEX email ON lookup.ufids (UF_EMAIL);
 CREATE INDEX UF_USER_NM ON lookup.ufids (UF_USER_NM);
+CREATE INDEX UF_LAST_NM ON lookup.ufids (UF_LAST_NM);
 
 select UF_BIRTH_DT from loaddata.ufids;
 select min(UF_BIRTH_DT),max(UF_BIRTH_DT) from lookup.ufids;
@@ -162,6 +165,8 @@ select distinct UF_LAST_NM from loaddata.ufids;
 
 select UF_GENDER_CD,count(*) from lookup.ufids group by UF_GENDER_CD;
 select UF_GENDER_CD,count(*) from loaddata.ufids group by UF_GENDER_CD;
+
+select * from lookup.ufids where UF_LAST_NM="Hall";
 
 select * from lookup.ufids;
 

@@ -1,49 +1,65 @@
+## EMPLOYEES TABLE UPDATED WITH MOST RECENT INFO FROM ACTIVE_EMP + Keeps inactive employees
 
-### Verify New Active Employee Table (from Employee Daily Listing)
-      SELECT * from loaddata.active_emp_2018_12_14;
-### Change key field name
-Alter table loaddata.active_emp_2018_12_14 CHANGE COLUMN `active_emp_2018_12_14_id` `active_emp_id` int(11);
+## CREATE WORKING COPY OF Employees Table
 
-
-
-####Replace old Active Employee Table
-      DROP TABLE IF Exists lookup.active_emp;
-      CREATE TABLE lookup.active_emp AS
-      SELECT * from loaddata.active_emp_2018_12_14;
+DROP TABLE IF EXISTS work.Employees;
+CREATE TABLE work.Employees AS
+SELECT * from lookup.Employees;
 
 
-### EXTRACT RECORDS NOT IN Current lookup.Employees table
-      DROP TABLE IF EXISTS work.addtoemp;
-      CREATE TABLE work.addtoemp AS
-      SELECT  *
-        from lookup.active_emp
-      WHERE Employee_ID NOT IN (SELECT DISTINCT Employee_ID from lookup.Employees); 
 
-select * from work.addtoemp;;
+## CREATE WORKING COPY OF ActiveEmployee table
 
-### ASSIGN KEY FIELD VALUES
-     SET SQL_SAFE_UPDATES = 0;
-      UPDATE work.addtoemp SET active_emp_id = 0 ;
-      SELECT @i:=(select max(active_emp_id) from lookup.Employees);
-      UPDATE work.addtoemp SET active_emp_id = @i:=@i+1;
-     SET SQL_SAFE_UPDATES = 1;
+DROP TABLE IF EXISTS work.activeemp;
+CREATE TABLE work.activeemp AS
+select * from loaddata.active_emp_20190403;
 
 
-#### VERIFY active_emp_id Assignment
-      select "Max active_emp_id Lookup.Employees" AS Metric,max(active_emp_id) as val from lookup.Employees
-    UNION ALL
-      select "Min active_emp_id work.addtoemp" AS Metric, min(active_emp_id) as val from work.addtoemp
-    UNION ALL
-      select "Max active_emp_id work.addtoemp" AS Metric,max(active_emp_id) as val from work.addtoemp;
+## Replace Active Employee File in Lookup
+## DROP TABLE IF EXISTS lookup.active_emp;
+CREATE TABLE ookup.active_emp AS
+select * from work.activeemp;
+
+
+
+
+DROP TABLE IF EXISTS work.EmployeeUpdate;
+Create table work.EmployeeUpdate AS
+SELECT Department,
+		Department_Code,
+		Employee_ID,
+		FTE,
+		Job_Code,
+		Job_Code_Code,
+		Name,
+		Salary_Plan,
+		Salary_Plan_Code
+FROM work.activeemp
+UNION ALL
+SELECT Department,
+		Department_Code,
+		Employee_ID,
+		FTE,
+		Job_Code,
+		Job_Code_Code,
+		Name,
+		Salary_Plan,
+		Salary_Plan_Code
+FROM work.Employees
+WHERE Employee_ID NOT IN (SELECT DISTINCT Employee_ID from work.activeemp);
+        
+
+
+#####################################################################################
+#####################################################################################
+#####################################################################################
+
+
 ###################################################################
 
-### APPEND TABLES to temporary table
-    DROP TABLE IF EXISTS work.EmployeeUpdate;
-    create table work.EmployeeUpdate AS
-    select * from lookup.Employees
-   UNION ALL
-    SELECT * from work.addtoemp;
 
+
+SET SQL_SAFE_UPDATES = 0;
 
 #### ADD EMAIL FROM EMPLOYEE EMAIL LIAD
       ALTER TABLE work.EmployeeUpdate ADD EMAIL varchar(255);
@@ -72,8 +88,6 @@ select * from work.addtoemp;;
 ##### ADD ERACOMMONS
      ALTER TABLE work.EmployeeUpdate ADD ERACommons varchar(25);
 
-     CREATE INDEX emailtemp2 ON work.EmployeeUpdate (email);
-     CREATE INDEX ERACommEmail ON lookup.ERACommons (Email);
 
      UPDATE work.EmployeeUpdate SET EraCommons=NULL;
 
@@ -93,7 +107,7 @@ select * from work.addtoemp;;
 
     SET SQL_SAFE_UPDATES = 0;
 
-	 CREATE INDEX factitle ON lookup.roster_faculty_classify (Title);
+	# CREATE INDEX factitle ON lookup.roster_faculty_classify (Title);
 
 
      UPDATE work.EmployeeUpdate eu ,
@@ -117,9 +131,9 @@ select * from work.addtoemp;;
           SET Roster=1
        WHERE Faculty="Faculty";
 
-desc work.EmployeeUpdate;
 
 
+select * from work.EmployeeUpdate;
 
 
 ######################################################
@@ -174,8 +188,7 @@ AND lu.UF_USER_NM<>' ';
 /*
 DROP TABLE IF EXISTS lookup.Employees;
 CREATE TABLE lookup.Employees AS
-SELECT * FROM work.EmployeeUpdate
-ORDER BY active_emp_id;
+SELECT * FROM work.EmployeeUpdate;
 */
 select * from lookup.Employees;
 ###########################
@@ -207,4 +220,4 @@ desc lookup.roster;
 
 
 
-select * from lookup.ufids where UF_LAST_NM="Chiles";
+
