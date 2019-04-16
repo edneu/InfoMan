@@ -31,8 +31,8 @@ drop table if exists work.pilotfitered;
 create table work.pilotfitered as
 SELECT * from pilots.PILOTS_MASTER
 WHERE Awarded='Awarded'
-AND Award_Year<=2016
-AND Award_Amt>=20000;
+AND Award_Year<=2012
+AND Award_Amt>=50000;
 
 
 
