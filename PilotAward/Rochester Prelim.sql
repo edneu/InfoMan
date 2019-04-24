@@ -82,11 +82,39 @@ GROUP BY Category;
 
 
 
+################  PULL PRe 2012 Pilots
 
+DROP TABLE IF EXISTS pilots.EarlyCompPilots;
+create table pilots.EarlyCompPilots AS
+Select  *
+FROM pilots.PILOTS_MASTER
+WHERE Award_Year<2012 
+AND ProjectStatus="Completed"
+AND Awarded="Awarded"
+;
 
+  select Award_Year,count(*),min(Award_Amt),AVG(Award_Amt),max(Award_Amt) from pilots.EarlyCompPilots group by Award_Year;
+  select count(*),min(Award_Amt),AVG(Award_Amt),max(Award_Amt) from pilots.EarlyCompPilots ;
 
+  select Category,count(*),min(Award_Amt),AVG(Award_Amt),max(Award_Amt) from pilots.EarlyCompPilots group by Category;
 
-
-
+  select AwardType,count(*),min(Award_Amt),AVG(Award_Amt),max(Award_Amt) from pilots.EarlyCompPilots group by AwardType;
  ;
 
+DROP TABLE IF Exists pilots.EarlyExtract ;
+CREATE TABLE pilots.EarlyExtract AS
+SELECT 	Pilot_ID,
+		Award_Year,
+        Category,
+        AwardType,
+        Awarded,
+        AwardLetterDate,
+        Award_Amt,
+        PI_Last,
+        PI_First,
+        Email AS PI_EMAIL,
+        UFID AS PI_UFID,
+        PI_DEPT,
+        College
+FROM pilots.EarlyCompPilots
+ORDER BY Pilot_ID;
