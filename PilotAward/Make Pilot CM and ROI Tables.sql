@@ -2,39 +2,35 @@
 SET SQL_SAFE_UPDATES = 0;
 
 ########################################################################################VERIFY TABLES
-UPDATE lookup.pilots
-SET RelatedPub=0,
-    RelatedGrant=0;
 
-UPDATE lookup.pilots SET RelatedPub=1 WHERE PubYear>0 AND PubYear<2018;
-UPDATE lookup.pilots SET RelatedGrant=1 WHERE GrantYear>0 AND GrantYear<2018;   
-
-
-select distinct PubYear from lookup.pilots;
-select distinct GrantYear from lookup.pilots;
 
 ######################################################################
-ALTER TABLE pilots.pilots_summary
-ADD TotalAMT decimal(11.2),
-ADD RelatedPub int(1),
-ADD RelatedGrant int(1);
+ALTER TABLE pilots.PILOTS_SUMMARY
+	ADD TotalAMT decimal(11,2),
+	ADD RelatedPub int(1),
+	ADD RelatedGrant int(1);
+   	ADD ROIRelatedPub int(1),
+    ADD ROIRelatedGrant int(1);
 
-UPDATE pilots.pilots_summary
+UPDATE pilots.PILOTS_SUMMARY
 SET TotalAMT=Total,
 RelatedPub=0,
-RelatedGrant=0;
+RelatedGrant=0,
+ROIRelatedPub=0,
+ROIRelatedGrant=0;
 	
 
-UPDATE pilots.pilots_summary SET RelatedPub=1 WHERE PubYear>0 AND PubYear<2018;
-UPDATE pilots.pilots_summary SET RelatedGrant=1 WHERE GrantYear>0 AND GrantYear<2018;  
+UPDATE pilots.PILOTS_SUMMARY SET RelatedPub=1 WHERE PubYear>0 AND PubYear<=2018;
+UPDATE pilots.PILOTS_SUMMARY SET RelatedGrant=1 WHERE GrantYear>0 AND GrantYear<=2018;  
 
-
+UPDATE pilots.PILOTS_SUMMARY SET ROIRelatedPub=1 WHERE PubYear>0 ;
+UPDATE pilots.PILOTS_SUMMARY SET ROIRelatedGrant=1 WHERE GrantYear>0 ;  
 
 ##################### START TABLES
 
 DROP TABLE IF EXISTS work.cmpilotcalc;
 CREATE TABLE work.cmpilotcalc AS
-Select * from pilots.pilots_summary
+Select * from pilots.PILOTS_SUMMARY
 WHERE Award_Year>=2012
 AND Awarded="Awarded"
 AND Category NOT IN ("SECIM")
@@ -64,12 +60,14 @@ ADD Pub2014 Int(5),
 ADD Pub2015 Int(5),
 ADD Pub2016 Int(5),
 ADD Pub2017 Int(5),
+ADD Pub2018 Int(5),
 ADD Grant2012 Int(5),
 ADD Grant2013 int(5),
 ADD Grant2014 Int(5),
 ADD Grant2015 Int(5),
 ADD Grant2016 Int(5),
-ADD Grant2017 Int(5);
+ADD Grant2017 Int(5),
+ADD Grant2018 Int(5);
 
 SET SQL_SAFE_UPDATES = 0;
 
@@ -80,12 +78,23 @@ SET Pub2012=0,
     Pub2015=0,
     Pub2016=0,
     Pub2017=0,
+    Pub2018=0,
     Grant2012=0,
     Grant2013=0,
     Grant2014=0,
     Grant2015=0,
     Grant2016=0,
-    Grant2017=0;
+    Grant2017=0,
+    Grant2018=0;
+    
+SELECT "Number of Pilots with Pubs" as Measure, count(*) as nPilots from work.cmpilotcalc WHERE PubYear>=2012 AND PubYear<=2018    
+UNION ALL
+SELECT "Number of Pilots with Pubs" as Measure, count(*) as nPilots from work.cmpilotcalc WHERE GrantYear>=2012 AND GrantYear<=2018;    
+
+
+### select distinct PubYear,count(*) from work.cmpilotcalc group by PubYear ;
+#### select distinct GrantYear, count(*) from work.cmpilotcalc group by GrantYear ;
+
 
 
 UPDATE work.cmpilotcalc SET Pub2012=1 WHERE PubYear=2012;
@@ -94,6 +103,7 @@ UPDATE work.cmpilotcalc SET Pub2014=1 WHERE PubYear=2014;
 UPDATE work.cmpilotcalc SET Pub2015=1 WHERE PubYear=2015;
 UPDATE work.cmpilotcalc SET Pub2016=1 WHERE PubYear=2016;
 UPDATE work.cmpilotcalc SET Pub2017=1 WHERE PubYear=2017;
+UPDATE work.cmpilotcalc SET Pub2018=1 WHERE PubYear=2018;
 
 UPDATE work.cmpilotcalc SET Grant2012=1 WHERE GrantYear=2012;
 UPDATE work.cmpilotcalc SET Grant2013=1 WHERE GrantYear=2013;
@@ -101,9 +111,7 @@ UPDATE work.cmpilotcalc SET Grant2014=1 WHERE GrantYear=2014;
 UPDATE work.cmpilotcalc SET Grant2015=1 WHERE GrantYear=2015;
 UPDATE work.cmpilotcalc SET Grant2016=1 WHERE GrantYear=2016;
 UPDATE work.cmpilotcalc SET Grant2017=1 WHERE GrantYear=2017;
-
-
-
+UPDATE work.cmpilotcalc SET Grant2018=1 WHERE GrantYear=2018;
 
 
 DROP TABLE IF EXISTS results.CM_PUBS;
@@ -115,7 +123,8 @@ SELECT Award_Year,
        SUM(Pub2014) as Pub2014,
        SUM(Pub2015) as Pub2015,
        SUM(Pub2016) as Pub2016,
-       SUM(Pub2017) as Pub2017
+       SUM(Pub2017) as Pub2017,
+       SUM(Pub2018) as Pub2018
 FROM  work.cmpilotcalc
 GROUP BY Award_Year
 ORDER BY Award_Year;
@@ -130,7 +139,8 @@ SELECT Award_Year,
        SUM(Grant2014) as Grant2014,
        SUM(Grant2015) as Grant2015,
        SUM(Grant2016) as Grant2016,
-       SUM(Grant2017) as Grant2017
+       SUM(Grant2017) as Grant2017,
+       SUM(Grant2018) as Grant2018
 FROM  work.cmpilotcalc
 GROUP BY Award_Year
 ORDER BY Award_Year;
@@ -145,19 +155,26 @@ ORDER BY Award_Year;
 ## ROI TABLES
 ####################################
 
+####### INCLUDE ALL GRANTS IN ROI CALCULATION
 
-Select Award_Year, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAmt) AS GrantAmt, Sum(RelatedPub) AS HasPub, Sum(RelatedGrant) AS HasGrant
-FROM pilots.pilots_summary
-WHERE Award_Year>=2012 AND Award_Year<2018
+
+
+
+select distinct Award_Year from pilots.PILOTS_SUMMARY;
+
+
+Select Award_Year, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAmt) AS GrantAmt, Sum(ROIRelatedPub) AS HasPub, Sum(ROIRelatedGrant) AS HasGrant
+FROM pilots.PILOTS_SUMMARY
+WHERE Award_Year>=2012 AND Award_Year<2019
 AND Awarded="Awarded"
 AND Category NOT IN ("SECIM")
 GROUP BY Award_Year;
 ;
 
 
-Select Category, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAmt) AS GrantAmt, Sum(RelatedPub) AS HasPub, Sum(RelatedGrant) AS HasGrant
-FROM pilots.pilots_summary
-WHERE Award_Year>=2012 AND Award_Year<2018
+Select Category, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAmt) AS GrantAmt, Sum(ROIRelatedPub) AS HasPub, Sum(ROIRelatedGrant) AS HasGrant
+FROM pilots.PILOTS_SUMMARY
+WHERE Award_Year>=2012 AND Award_Year<2019
 AND Awarded="Awarded"
 AND Category NOT IN ("SECIM")
 GROUP BY Category;
@@ -165,16 +182,16 @@ GROUP BY Category;
 
 
 #########
-## COMPLEATED PROJECTS
+## COMPLETED PROJECTS
 ##########
 
 
 ##
 
 
-Select Award_Year, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAmt) AS GrantAmt, Sum(RelatedPub) AS HasPub, Sum(RelatedGrant) AS HasGrant
-FROM pilots.pilots_summary
-WHERE Award_Year>=2012 AND Award_Year<2018
+Select Award_Year, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAmt) AS GrantAmt, Sum(ROIRelatedPub) AS HasPub, Sum(ROIRelatedGrant) AS HasGrant
+FROM pilots.PILOTS_SUMMARY
+WHERE Award_Year>=2012 AND Award_Year<2019
 AND ProjectStatus="Completed"
 AND Awarded="Awarded"
 AND Category NOT IN ("SECIM")
@@ -183,47 +200,23 @@ GROUP BY Award_Year;
 
 
 
-Select Category, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAmt) AS GrantAmt, Sum(RelatedPub) AS HasPub, Sum(RelatedGrant) AS HasGrant
-FROM pilots.pilots_summary
-WHERE Award_Year>=2012 AND Award_Year<2018
+Select Category, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAmt) AS GrantAmt, Sum(ROIRelatedPub) AS HasPub, Sum(ROIRelatedGrant) AS HasGrant
+FROM pilots.PILOTS_SUMMARY
+WHERE Award_Year>=2012 AND Award_Year<2019
 AND Awarded="Awarded"
 AND ProjectStatus="Completed"
 AND Category NOT IN ("SECIM")
 GROUP BY Category;
 ;
 
-########################
-## ALL BUT ONGOING
-########################
-
-
-Select Award_Year, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAmt) AS GrantAmt, Sum(RelatedPub) AS HasPub, Sum(RelatedGrant) AS HasGrant
-FROM pilots.pilots_summary
-WHERE Award_Year>=2012 AND Award_Year<2018
-AND ProjectStatus<>"Ongoing"
-AND Awarded="Awarded"
-AND Category NOT IN ("SECIM")
-GROUP BY Award_Year;
-;
 
 
 
-Select Category, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAmt) AS GrantAmt, Sum(RelatedPub) AS HasPub, Sum(RelatedGrant) AS HasGrant
-FROM pilots.pilots_summary
-WHERE Award_Year>=2012 AND Award_Year<2018
-AND Awarded="Awarded"
-AND ProjectStatus<>"Ongoing"
-AND Category NOT IN ("SECIM")
-GROUP BY Category;
-;
-
-
-###################
 ## TRAD BY TYPE
 ###################
-Select AwardType, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAmt) AS GrantAmt, Sum(RelatedPub) AS HasPub, Sum(RelatedGrant) AS HasGrant
-FROM pilots.pilots_summary
-WHERE Award_Year>=2012 AND Award_Year<2018
+Select AwardType, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAmt) AS GrantAmt, Sum(ROIRelatedPub) AS HasPub, Sum(ROIRelatedGrant) AS HasGrant
+FROM pilots.PILOTS_SUMMARY
+WHERE Award_Year>=2012 AND Award_Year<2019
 AND Awarded="Awarded"
 AND ProjectStatus<>"Ongoing"
 AND Category IN ("Traditional")
@@ -238,10 +231,10 @@ SELECT College,
        COUNT(*) as NumProjects,
        Sum(Award_Amt) AS PilotAmt,
        Sum(TotalAmt) AS GrantAmt,
-       Sum(RelatedPub) AS HasPub,
-       Sum(RelatedGrant) AS HasGrant
-FROM pilots.pilots_summary
-WHERE Award_Year>=2012 AND Award_Year<2018
+       Sum(ROIRelatedPub) AS HasPub,
+       Sum(ROIRelatedGrant) AS HasGrant
+FROM pilots.PILOTS_SUMMARY
+WHERE Award_Year>=2012 AND Award_Year<2019
 AND Awarded="Awarded"
 AND ProjectStatus<>"Ongoing"
 AND Category NOT IN ("SECIM")
@@ -252,9 +245,9 @@ GROUP BY College;
 ### AWRD BY CAREER STAGE
 ###################################
 
-Select AwardeeCareerStage, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAmt) AS GrantAmt, Sum(RelatedPub) AS HasPub, Sum(RelatedGrant) AS HasGrant
-FROM pilots.pilots_summary
-WHERE Award_Year>=2012 AND Award_Year<2018
+Select AwardeeCareerStage, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAmt) AS GrantAmt, Sum(ROIRelatedPub) AS HasPub, Sum(ROIRelatedGrant) AS HasGrant
+FROM pilots.PILOTS_SUMMARY
+WHERE Award_Year>=2012 AND Award_Year<2019
 AND Awarded="Awarded"
 AND ProjectStatus<>"Ongoing"
 AND Category NOT IN ("SECIM")
@@ -267,8 +260,8 @@ select Award_Year,Category,AwardeeCareerStage,Pilot_id,AwardType,Pi_last,PI_Firs
 ### AWD BY GENDER
 ###################################
 Select PI_GENDER, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAmt) AS GrantAmt, Sum(RelatedPub) AS HasPub, Sum(RelatedGrant) AS HasGrant
-FROM pilots.pilots_summary
-WHERE Award_Year>=2012 AND Award_Year<2018
+FROM pilots.PILOTS_SUMMARY
+WHERE Award_Year>=2012 AND Award_Year<2019
 AND Awarded="Awarded"
 AND ProjectStatus<>"Ongoing"
 AND Category NOT IN ("SECIM")
@@ -280,14 +273,24 @@ GROUP BY PI_GENDER ;
 ###################################
 ### AWD BY HUMAN SUBJECT
 #################################
-Select Award_HummanSubjectResearch, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAmt) AS GrantAmt, Sum(RelatedPub) AS HasPub, Sum(RelatedGrant) AS HasGrant
-FROM pilots.pilots_summary
-WHERE Award_Year>=2012 AND Award_Year<2018
+Select Award_HummanSubjectResearch, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAmt) AS GrantAmt, Sum(ROIRelatedPub) AS HasPub, Sum(ROIRelatedGrant) AS HasGrant
+FROM pilots.PILOTS_SUMMARY
+WHERE Award_Year>=2012 AND Award_Year<2019
 AND Awarded="Awarded"
 AND ProjectStatus<>"Ongoing"
 AND Category NOT IN ("SECIM")
 GROUP BY Award_HummanSubjectResearch ;
 ;
+
+## NUMBER OF  AWARDS (Cell Q45)
+select count(DISTINCT PILOT_ID) from pilots.PILOTS_ROI_MASTER WHERE Pilot_ID in 
+(select DISTINCT PILOT_ID FROM pilots.PILOTS_SUMMARY
+WHERE Award_Year>=2012 AND Award_Year<2019
+AND Awarded="Awarded"
+AND ProjectStatus<>"Ongoing"
+AND Category NOT IN ("SECIM"));
+ ;
+;;
 /*
 SELECT PIlot_ID, Category, TITLE, PI_LAST,PI_FIRST from lookup.pilots 
 where Award_HummanSubjectResearch IS NULL
@@ -300,17 +303,17 @@ select distinct Award_HummanSubjectResearch from lookup.pilots;
 
 ###  CHARTS 
 ######################################################################
-SELECT Award_Year,  COUNT(*) as NumProjects, Sum(RelatedPub) AS HasPub, Sum(RelatedGrant) AS HasGrant
-FROM pilots.pilots_summary
+SELECT Award_Year,  COUNT(*) as NumProjects, Sum(ROIRelatedPub) AS HasPub, Sum(ROIRelatedGrant) AS HasGrant
+FROM pilots.PILOTS_SUMMARY
 WHERE Award_Year>=2012
 AND Awarded="Awarded"
 AND Category NOT IN ("SECIM")
 GROUP BY Award_Year;
 
 
-SELECT Category,  COUNT(*) as NumProjects, Sum(RelatedPub) AS HasPub, Sum(RelatedGrant) AS HasGrant
-FROM pilots.pilots_summary
-WHERE Award_Year>=2012
+SELECT Category,  COUNT(*) as NumProjects, SSum(ROIRelatedPub) AS HasPub, Sum(ROIRelatedGrant) AS HasGrant
+FROM pilots.PILOTS_SUMMARY
+WHERE Award_Year>=2019
 AND Awarded="Awarded"
 AND Category NOT IN ("SECIM")
 GROUP BY Category;
@@ -318,8 +321,8 @@ GROUP BY Category;
 
 
 
-Select AwardType, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAmt) AS GrantAmt, Sum(RelatedPub) AS HasPub, Sum(RelatedGrant) AS HasGrant
-FROM pilots.pilots_summary
+Select AwardType, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAmt) AS GrantAmt, Sum(ROIRelatedPub) AS HasPub, Sum(ROIRelatedGrant) AS HasGrant
+FROM pilots.PILOTS_SUMMARY
 WHERE Award_Year>=2012
 AND Awarded="Awarded"
 AND ProjectStatus<>"Ongoing"

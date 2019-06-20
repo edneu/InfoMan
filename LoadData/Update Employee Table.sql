@@ -12,12 +12,12 @@ SELECT * from lookup.Employees;
 
 DROP TABLE IF EXISTS work.activeemp;
 CREATE TABLE work.activeemp AS
-select * from loaddata.active_emp_20190403;
+select * from loaddata.active_emp_20190528;
 
 
 ## Replace Active Employee File in Lookup
 ## DROP TABLE IF EXISTS lookup.active_emp;
-CREATE TABLE ookup.active_emp AS
+CREATE TABLE lookup.active_emp AS
 select * from work.activeemp;
 
 
@@ -61,17 +61,30 @@ WHERE Employee_ID NOT IN (SELECT DISTINCT Employee_ID from work.activeemp);
 
 SET SQL_SAFE_UPDATES = 0;
 
+##### ADD EMAIL FROM PERVIOUS Employere File
+
+
+
 #### ADD EMAIL FROM EMPLOYEE EMAIL LIAD
       ALTER TABLE work.EmployeeUpdate ADD EMAIL varchar(255);
 
       CREATE INDEX emailtemp ON work.EmployeeUpdate (Name);
 
       UPDATE work.EmployeeUpdate SET email=null;
+      
+      
+##### ADD EMAIL FROM PERVIOUS Employere File
+     UPDATE work.EmployeeUpdate eu, lookup.Employees lu
+        SET eu.email=lu.EMAIL
+        WHERE eu.Employee_ID=lu.Employee_ID;
+
+      
 
       SET SQL_SAFE_UPDATES = 0; 
         UPDATE work.EmployeeUpdate eu, lookup.employee_email lu
         SET eu.email=lu.email
-        WHERE eu.NAME=lu.NAME
+        WHERE (eu.email IS Null or eu.email="")
+        AND eu.NAME=lu.NAME
         AND eu.Department_Code=lu.Department_Code
         AND eu.Job_Code_Code=lu.Job_Code;
 
@@ -79,9 +92,10 @@ SET SQL_SAFE_UPDATES = 0;
       SET SQL_SAFE_UPDATES = 0; 
         UPDATE work.EmployeeUpdate eu, lookup.ufids lu
         SET eu.email=lu.UF_EMAIL
-        WHERE eu.Employee_ID=UF_UFID
-        AND eu.email is NULL
-        AND lu.UF_EMAIL<>' ';
+        WHERE (eu.email IS Null or eu.email="")
+          AND eu.Employee_ID=UF_UFID
+          AND eu.email is NULL
+          AND lu.UF_EMAIL<>' ';
 
 
 
@@ -139,13 +153,6 @@ select * from work.EmployeeUpdate;
 ######################################################
 ######################################################
 ######################################################
-/*
-DROP TABLE IF EXISTS lookup.Employees;
-CREATE TABLE lookup.Employees AS
-SELECT * FROM work.EmployeeUpdate
-ORDER BY active_emp_id;
-*/
-select * from lookup.Employees;
 
 
 ############################

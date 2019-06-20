@@ -50,6 +50,8 @@ select * from work.PubmedOUT;
 ##############################
 ### UPDATE Pub_CORE
 
+
+
 SET SQL_SAFE_UPDATES = 0;
 UPDATE pubs.PUB_CORE pc, work.PubmedOUT lu
 SET pc.PMC=lu.PMCID,

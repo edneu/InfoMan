@@ -93,7 +93,7 @@ SET GLOBAL local_infile = 1;
 
 
 
-load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory20190402.csv" 
+load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory20190528.csv" 
 into table loaddata.awards_history 
 fields terminated by '|'
 lines terminated by '\n'
@@ -293,8 +293,10 @@ select "AuthAmt" as Measure, min(SPONSOR_AUTHORIZED_AMOUNT) as Minimum, max(SPON
 
 SET sql_mode = '';
 SET SQL_SAFE_UPDATES = 0;
-create table loaddata.backupAwardsHistory20190402 AS SELECT * from lookup.awards_history;
+create table loaddata.backupAwardsHistory20190528 AS SELECT * from lookup.awards_history;
 
+
+select * from loaddata.awards_history  Where CLK_AWD_PRJ_END_DT='Research Developmental' ;
 
 select distinct CLK_AWD_OVERALL_END_DATE from loaddata.awards_history;
 

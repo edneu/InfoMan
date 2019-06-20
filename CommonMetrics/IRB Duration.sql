@@ -1,10 +1,10 @@
 
 
-desc loaddata.irb_raw_August_2018;
+
 
 drop table if exists work.irb;
 create table work.irb as
-select * from loaddata.irb_jan_2019;
+select * from loaddata.irb_jun_2019;
 
 #### Fix Date ERROR
 SET SQL_SAFE_UPDATES = 0;

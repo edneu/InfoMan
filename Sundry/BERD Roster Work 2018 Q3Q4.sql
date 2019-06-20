@@ -155,3 +155,12 @@ WHERE
 (UF_LAST_NM='Stoppel' AND UF_FIRST_NM LIKE 'Whit%')
 ORDER BY UF_LAST_NM, UF_FIRST_NM ;
 
+select count(distinct Person_Key), count(*) from lookup.roster
+WHERE Year=2018 and STD_PROGRAM="BERD"; 
+
+select min(rosterid), MAx(rosterid) from lookup.roster
+WHERE Year=2018 and STD_PROGRAM="BERD"; 
+
+select max(rosterid) from  lookup.roster;
+
+select * from lookup.roster where rosterid=33690;

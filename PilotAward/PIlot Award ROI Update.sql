@@ -2,6 +2,7 @@
 ### EXTRACT AWARDS FOR Appending to pilots.roi_awards_master
 ### This file contains a base record at with the Project or Award Level.
 ### These Data are used to query the Awards Data to update the pilot realted award amounts
+##### DATA CLEANING CODE
 
 drop table if exists pilots.temp;
 create table pilots.temp as
@@ -20,32 +21,57 @@ CLK_AWD_PROJ_NAME AS Grant_Title,
 DIRECT_AMOUNT,
 INDIRECT_AMOUNT,
 SPONSOR_AUTHORIZED_AMOUNT
- FROM lookup.awards_history where CLK_AWD_ID  like "AWD03282";
+ FROM lookup.awards_history where CLK_AWD_PROJ_NAME  like "%Iatrogenic%";
 ;
 
+
+################
+SELECT Award_Year,ProjectStatus,count(*) from pilots.PILOTS_MASTER WHERE AWARDED="Awarded" GROUP BY Award_Year,ProjectStatus;
+SELECT DISTINCT ProjectStatus from pilots.PILOTS_MASTER;
+
+drop table if exists work.projstatus;
+create table work.projstatus as
+SELECT Pilot_ID,Category,Award_Year,AwardLetterDate,ProjectStatus,PI_Last,PI_First,Title from pilots.PILOTS_MASTER WHERE ProjectStatus NOT IN ('Completed','Active','Closed-Low Enrollment')
+AND AWARDED="Awarded" AND Award_Year<=2018;
+
+UPDATE pilots.PILOTS_MASTER SET ProjectStatus="Completed" WHERE Category="SECIM";
+UPDATE pilots.PILOTS_MASTER SET ProjectStatus="Completed" WHERE ProjectStatus="" and Award_Year=2011 AND AWARDED="Awarded"; 
+UPDATE pilots.PILOTS_MASTER SET ProjectStatus="" WHERE Award_Year=2011 AND AWARDED<>"Awarded";
+UPDATE pilots.PILOTS_MASTER SET ProjectStatus="Completed" WHERE Pilot_ID IN (382,383,384);
+UPDATE pilots.PILOTS_MASTER SET ProjectStatus="Ongoing" 
+      WHERE Pilot_ID IN  (399,400,401,402,403,404,405,406,407,408,409,410,411,412,413);
+
+
+; 
+
+select Category,count(*) from pilots.PILOTS_MASTER
+WHERE Awarded="Awarded"
+AND Award_Year<=2016
+GROUP BY Category;
+
+
+
+
+Completed
+Closed-Low Enrollment 
+Ongoing
+Active
+
+
+
+
+
 ###Aggregate the Amounts
-select sum(DIRECT_AMOUNT), Sum(INDIRECT_AMOUNT),sum(SPONSOR_AUTHORIZED_AMOUNT)  FROM lookup.awards_history where CLK_AWD_ID  like "AWD03666";
-###############################################################################################################
-###############################################################################################################
-###############################################################################################################
-###############################################################################################################
-###############################################################################################################
-###############################################################################################################
-###############################################################################################################
-###############################################################################################################
-/*  File Administration Code
-DELETE FROM pilots.roi_awards
-WHERE roi_awards_id2 IN (40);
+select sum(DIRECT_AMOUNT), Sum(INDIRECT_AMOUNT),sum(SPONSOR_AUTHORIZED_AMOUNT)  FROM lookup.awards_history where CLK_AWD_ID  like "AWD05859";
 
-select max(roi_awards_id2)+1 from pilots.roi_awards;
-
-
-
-create table pilots.roi_awards_master as Select * from pilots.roi_awards;
-ALTER TABLE pilots.roi_awards_master CHANGE COLUMN `pilots.roi_awards_master` `roi_awards_master_id` int(11);
-*/
-
-
+###############################################################################################################
+###############################################################################################################
+###############################################################################################################
+###############################################################################################################
+###############################################################################################################
+###############################################################################################################
+###############################################################################################################
+###############################################################################################################
 ###############################################################################################################
 ###############################################################################################################
 ###############################################################################################################
@@ -53,79 +79,7 @@ ALTER TABLE pilots.roi_awards_master CHANGE COLUMN `pilots.roi_awards_master` `r
 ###############################################################################################################
 ###############################################################################################################
 ### ADMIN CODE TO CREATE pilot_award_master
-/*
-DROP TABLE IF EXISTS pilots.pilot_award_master;
-Create table pilots.pilot_award_master As
-SELECT     Pilot_ID,
-           Award_Year,
-           Category,
-           AwardType,
-           Cohort,
-           Awarded,
-           AwardLetterDate,
-           Award_Amt,
-           Status,
-           UFID,
-           Email,
-           PI_First,
-           PI_Last,
-           Title,
-           Remain_Amt,
-           Return_Amt,
-           Role,
-           Institution,
-           NumCollab,
-           Begin_Date,
-           End_Date,
-           NCE_Date,
-           PI_DEPT,
-           PI_DEPTID,
-           PI_DEPTNM,
-           Orig_Award_Year,
-           ProjectStatus,
-		   CiteGrant,
-           ORGINAL_AWARD,
-           College,
-           PI_GENDER,
-           PI_DOB,
-           AwardeePositionAtApp,
-           AwardeeCareerStage,
-           Award_HummanSubjectResearch,
-           CancerScore,
-           AprilPilotID
-from lookup.pilots;
-*/
-select CiteGrant,count(*) from lookup.pilots group by CiteGrant;
-select GrantProjectID,count(*) from lookup.pilots group by GrantProjectID;
-select GrantNote,count(*) from lookup.pilots group by GrantNote;
 
-select GrantStartNote,count(*) from lookup.pilots group by GrantStartNote;
-
-select VerifiedPub_CitesCTSI,count(*) from lookup.pilots group by VerifiedPub_CitesCTSI;
-select VerifiedPub_CitesCTSI_Notes,count(*) from lookup.pilots group by VerifiedPub_CitesCTSI_Notes;
-
-##############  Pilot Pub Admin
-
-;
-
-create table pilots.pilot_pub_master AS
-select * from pilots.pilot_pubs;
-USE pilots;
- 
-select count(*) from pilot_pub_master;
-select count(distinct Pilot_ID) from pilot_pub_master;
-
-select pilot_id, count(*) from pilots.pilot_pub_master group by Pilot_id;
-
-Alter Table pilots.pilot_pub_master;
-
-UPDATE pilots.pilot_pub_master SET Citation='Samant, S., Jiang, X., Horenstein, R. B., Shuldiner, A. R., Yerges-Armstrong, L. M., Zheng, S., ... & Schmidt, S. (2014). A Semi-physiological Population Pharmacokinetic/Pharmacodynamic Model For The Development Of A Bedside-ready Dosing Algorithm For Clopidogrel.: oiii-3. Clinical Pharmacology & Therapeutics, 95(1), S102.' WHERE pilot_pubs_id2=6;
-UPDATE pilots.pilot_pub_master SET  PMID='22689992', PMCID='PMC3387103' WHERE pilot_pubs_id2=13;
-UPDATE pilots.pilot_pub_master SET  PMID='26919068', PMCID='' WHERE pilot_pubs_id2=64;
-UPDATE pilots.pilot_pub_master SET  PMID='26820234', PMCID='PMC6052867' WHERE pilot_pubs_id2=63;
-
-
- 
 #####################################################
 #####################################################
 #####################################################
@@ -157,7 +111,7 @@ SELECT
 	INDIRECT_AMOUNT,
 	SPONSOR_AUTHORIZED_AMOUNT
 from lookup.awards_history
-WHERE CLK_AWD_ID IN (SELECT DISTINCT CLK_AWD_ID from pilots.roi_awards_master WHERE AggLevel="Award")
+WHERE CLK_AWD_ID IN (SELECT DISTINCT CLK_AWD_ID from pilots.PILOTS_ROI_MASTER WHERE AggLevel="Award")
 UNION ALL 
 SELECT
 	"Project" As AggLevel, 
@@ -175,37 +129,56 @@ SELECT
 	INDIRECT_AMOUNT,
 	SPONSOR_AUTHORIZED_AMOUNT
 from lookup.awards_history
-WHERE CLK_AWD_PROJ_ID IN (SELECT DISTINCT CLK_AWD_PROJ_ID from pilots.roi_awards_master WHERE AggLevel="Project");
+WHERE CLK_AWD_PROJ_ID IN (SELECT DISTINCT CLK_AWD_PROJ_ID from pilots.PILOTS_ROI_MASTER WHERE AggLevel="Project");
 ##
 ## ADD Pilot Award Information to Award Data
 ##
+
+
+
 ALTER TABLE pilots.ROIAward_detail_work
 	ADD Pilot_ID int(11),
 	ADD	PilotPI varchar(25),
 	ADD	PilotPI_UFID varchar(12),
+    ADD AwardLetterDate datetime,
 	ADD	Year_Activiated int(11),
     ADD Grant_Title varchar(255);
 
 SET SQL_SAFE_UPDATES = 0;
-UPDATE pilots.ROIAward_detail_work pd, pilots.roi_awards_master lu
+UPDATE pilots.ROIAward_detail_work pd, pilots.PILOTS_ROI_MASTER lu
 SET pd.Pilot_ID=lu.Pilot_ID,
 	pd.PilotPI=lu.PilotPI,
     pd.PilotPI_UFID=lu.PilotPI_UFID,
+    pd.AwardLetterDate=lu.AwardLetterDate,
 	pd.Year_Activiated=lu.Year_Activiated,
     pd.Grant_Title=lu.CLK_AWD_PROJ_NAME
 WHERE pd.CLK_AWD_ID=lu.CLK_AWD_ID
   AND pd.AggLevel="Award";	
 
-UPDATE pilots.ROIAward_detail_work pd, pilots.roi_awards_master lu
+UPDATE pilots.ROIAward_detail_work pd, pilots.PILOTS_ROI_MASTER  lu
 SET pd.Pilot_ID=lu.Pilot_ID,
 	pd.PilotPI=lu.PilotPI,
     pd.PilotPI_UFID=lu.PilotPI_UFID,
+        pd.AwardLetterDate=lu.AwardLetterDate,
 	pd.Year_Activiated=lu.Year_Activiated,
     pd.Grant_Title=lu.CLK_AWD_PROJ_NAME
 WHERE pd.CLK_AWD_PROJ_ID=lu.CLK_AWD_PROJ_ID
   AND pd.AggLevel="Project";	
 
 SET SQL_SAFE_UPDATES = 0;
+
+DELETE from pilots.ROIAward_detail_work
+       WHERE FUNDS_ACTIVATED<AwardLetterDate ;
+
+
+SET SQL_SAFE_UPDATES = 1;
+
+
+### DELETE PROJECT RECORDS PRIOR TO Pilot Award Letter
+select FUNDS_ACTIVATED,AwardLetterDate from pilots.ROIAward_detail_work
+WHERE FUNDS_ACTIVATED<AwardLetterDate ;
+
+
 
 
 DROP TABLE IF EXISTS pilots.ROI_Detail;
@@ -214,6 +187,7 @@ SELECT
 	@ROI_Detail_id := @ROI_Detail_id + 1 n,
 	Pilot_ID,
 	AggLevel,
+    AwardLetterDate AS Pilot_Award_Date,
 	CLK_AWD_ID,
 	CLK_AWD_PROJ_ID,
 	PilotPI,
@@ -238,10 +212,11 @@ ORDER BY Pilot_ID;
 DROP TABLE IF EXISTS pilots.ROI_AWARD_AGG;
 CREATE TABLE pilots.ROI_AWARD_AGG AS
 	SELECT 	Pilot_ID,
-			Concat("AwdID: ",CLK_AWD_ID) AS GrantID ,
+            Concat("AwdID: ",CLK_AWD_ID) AS GrantID ,
+            MAX(Pilot_Award_Date) AS Pilot_Award_Date,
 			MIN(Grant_Title) AS Grant_Title,
-			MIN(Year_Activiated) AS Year_Activiated,
-			MIN(FUNDS_ACTIVATED) AS FUNDS_ACTIVATED,
+			MIN(Year_Activiated) AS GrantYear,
+			MIN(FUNDS_ACTIVATED) AS Year_Activiated,
 			MIN(CLK_AWD_PI) AS Grant_PI,
 			MIN(CLK_PI_UFID) AS Grant_PI_UFID,
 			MIN(REPORTING_SPONSOR_NAME) AS Grant_Sponsor,
@@ -255,10 +230,11 @@ WHERE AggLevel="Award"
 Group by Pilot_ID, Concat("AwdID: ",CLK_AWD_ID)
 UNION ALL
 	SELECT 	Pilot_ID,
-			Concat("ProjID: ",CLK_AWD_PROJ_ID) AS GrantID ,
+           	Concat("ProjID: ",CLK_AWD_PROJ_ID) AS GrantID ,
+            MAX(Pilot_Award_Date) AS Pilot_Award_Date,
 			MIN(Grant_Title) AS Grant_Title,
-			MIN(Year_Activiated) AS Year_Activiated,
-			MIN(FUNDS_ACTIVATED) AS FUNDS_ACTIVATED,
+			MIN(Year_Activiated) AS GrantYear,
+			MIN(FUNDS_ACTIVATED) AS Year_Activiated,
 			MIN(CLK_AWD_PROJ_MGR) AS Grant_PI,
 			MIN(CLK_AWD_PROJ_MGR_UFID) AS Grant_PI_UFID,
 			MIN(REPORTING_SPONSOR_NAME) AS Grant_Sponsor,
@@ -275,13 +251,16 @@ Group by Pilot_ID, Concat("ProjID: ",CLK_AWD_PROJ_ID) ;
 DROP TABLE IF EXISTS pilots.ROI_PILOTID_AGG;
 CREATE TABLE pilots.ROI_PILOTID_AGG AS
 	SELECT 	Pilot_ID,
-            Min(Year_Activiated) AS GrantYear,
+            MIN(Pilot_Award_Date) AS Pilot_Award_Date,
+            Min(YEAR(Year_Activiated)) AS GrantYear,
             GROUP_CONCAT(CONCAT(Grant_Title," (",Year_Activiated,") ",Grant_Sponsor," (",Grant_Sponsor_ID,") $",Fmt_Total)," | ") AS Grant_Summary,
 			sum(Direct) AS Direct,
 			sum(Indirect) AS Indirect,
 			sum(Total) As Total
 FROM pilots.ROI_AWARD_AGG
 GROUP BY Pilot_ID;
+
+SELECT SUM(TOTAL) from pilots.ROI_PILOTID_AGG;
 
 
 #### This table is for the publication summary for the single Pilot View
@@ -290,7 +269,7 @@ CREATE TABLE pilots.PUB_PILOTID_AGG AS
 SELECT	Pilot_ID,
 		Min(PubYear) AS PubYear,
 		GROUP_CONCAT(Concat(Citation) ," | ") AS PubSummary
-FROM pilots.pilot_pub_master
+FROM pilots.PILOTS_PUB_MASTER
 GROUP BY Pilot_ID;
 
 
@@ -298,8 +277,8 @@ GROUP BY Pilot_ID;
 ####### pilots.ROI_PILOTID_AGG are the Grants
 ####### pilots.PUB_PILOTID_AGG are the publications
 
-drop table if exists pilots.pilots_summary;
-CREATE TABLE pilots.pilots_summary AS
+drop table if exists pilots.PILOTS_SUMMARY;
+CREATE TABLE pilots.PILOTS_SUMMARY AS
 SELECT    pi.Pilot_ID,
           pi.Award_Year,
           pi.Category,
@@ -343,10 +322,40 @@ SELECT    pi.Pilot_ID,
           pi.Award_HummanSubjectResearch,
           pi.CancerScore,
           pi.AprilPilotID
-FROM pilots.pilot_award_master pi 
+FROM pilots.PILOTS_MASTER pi
      LEFT JOIN pilots.ROI_PILOTID_AGG gr ON pi.Pilot_ID=gr.Pilot_ID
      LEFT JOIN pilots.PUB_PILOTID_AGG pb ON pi.Pilot_ID=pb.Pilot_ID;
+     
+     
+     
+ALTER TABLE pilots.PILOTS_SUMMARY
+	ADD TotalAMT decimal(11,2),
+	ADD RelatedPub int(1),
+	ADD RelatedGrant int(1);
 
+SET SQL_SAFE_UPDATES = 0;	
+
+UPDATE pilots.PILOTS_SUMMARY
+SET TotalAMT=Total,
+RelatedPub=0,
+RelatedGrant=0;
+
+
+
+UPDATE pilots.PILOTS_SUMMARY SET RelatedPub=1 WHERE PubYear>0 AND PubYear<=2018;
+UPDATE pilots.PILOTS_SUMMARY SET RelatedGrant=1 WHERE GrantYear>0 AND GrantYear<=2018;       
+
+SET SQL_SAFE_UPDATES = 1;	
+##################################################################################################################
+##################################################################################################################
+##################################################################################################################
+##################################################################################################################
+##################################################################################################################
+##################################################################################################################
+##################################################################################################################
+##################################################################################################################
+
+ 
 
 
 
@@ -427,20 +436,5 @@ select * from pilots.roi_awards where PilotID=379;
 
 ##################################################################
 ##################################################################
-drop table if exists pilots.lu_pilots;
-create table pilots.lu_pilots AS
-select * from lookup.pilots;
-
-desc pilots.lu_pilots;
-
-
-drop table if exists pilots.lu_pilots;
-create table pilots.lu_pilots AS
-select * from lookup.pilots;
-
-desc pilots.pilot_pubs;
-
-desc pilots.roi_awards;
-
 
 
