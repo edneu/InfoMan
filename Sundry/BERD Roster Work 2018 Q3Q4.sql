@@ -161,9 +161,9 @@ WHERE Year=2018 and STD_PROGRAM="BERD";
 select min(rosterid), MAx(rosterid) from lookup.roster
 WHERE Year=2018 and STD_PROGRAM="BERD"; 
 
-select max(rosterid) from  lookup.roster;
+select max(rosterid)+1 from  lookup.roster;
+select rosterid from lookup.roster; 
 
-select * from lookup.roster where rosterid=33690;
 
 DROP TABLE IF EXISTS loaddata.roster;
 CREATE TABLE loaddata.roster
@@ -175,7 +175,7 @@ SELECT rosterid AS rosterid,
        LastName AS LastName,
        FirstName AS FirstName,
        email AS email,
-       UserName AS UserName,
+       UserName AS UserName,roster
        EraCommons AS EraCommons,
        DepartmentID AS DepartmentID,
        Department AS Department,
@@ -199,7 +199,7 @@ SELECT rosterid AS rosterid,
        "BERD" AS Report_Program,
        "BERD" AS Rept_Program2,
        "" AS Rept_Program,
-       "" AS Display_College,
+       space(255) as Display_College,
        "" AS ctsi_year,
        "" AS CTSA_Award,
        "" AS UserClass
@@ -209,10 +209,6 @@ from loaddata.berdq342018;
 SELECT * FROm 
 
 
-
-
-*/
-## Unduplicated Roster Indicator
 
 
 drop table if exists work.undup_temp;
