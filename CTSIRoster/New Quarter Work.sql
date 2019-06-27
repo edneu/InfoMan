@@ -9,19 +9,63 @@
 ## Roster Key
 
 ##create table brian.bu_q12_2108 as select * from work.roster_additions;
+#######################################################################################################
+DROP TABLE IF EXISTS loaddata.roster;
+CREATE TABLE loaddata.roster
+SELECT rosterid AS rosterid,
+       Space(1) AS Roster_Key,
+       Year AS Year,
+       "" AS STD_PROGRAM,
+       UFID AS UFID,
+       LastName AS LastName,
+       FirstName AS FirstName,
+       email AS email,
+       UserName AS UserName,
+       Space(25) AS EraCommons,
+       DepartmentID AS DepartmentID,
+       Department AS Department,
+       Title AS Title,
+       Affiliation AS Affiliation,
+       0 AS Roster,
+       0 AS Undup_ROSTER,
+       "" AS Person_key,
+       0 AS UndupINV,
+       PROGRAM AS ORIG_PROGRAM,
+       0 AS AllYearsUndup,
+       "" AS College,
+       FacultyType AS FacultyType,
+       0 AS NIH_PI,
+       0 AS UNDUP_NIH_PI,
+       0 AS ALLYEARS_UNDUP_NIH_PI,
+       0 AS NewRoster,
+       "" AS gatorlink,
+       Faculty AS Faculty,
+       FacType AS FacType,
+       "" AS Report_Program,
+       "" AS Rept_Program2,
+       "" AS Rept_Program,
+       space(255) as Display_College,
+       "" AS ctsi_year,
+       "" AS CTSA_Award,
+       "" AS UserClass
+from loaddata.q12019roster;
 
 
+
+
+
+########################################################################################################
 
 ## Create work File
-     #DROP TABLE IF EXISTS work.roster_additions;
+     DROP TABLE IF EXISTS work.roster_additions;
      Create Table work.roster_additions AS
-     SELECT * from brian.roster1_2018;
+     SELECT * from loaddata.roster;
 
 
 ## Check Validity of UFID / Name Pairings
      DROP TABLE IF EXISTS work.VerifyRosterNames;
      CREATE TABLE work.VerifyRosterNames AS
-     SELECT ra.roster1_2018_id,
+     SELECT ra.rosterid,
             ra.UFID,
             ra.LastName,
             ra.FirstName,
@@ -45,20 +89,27 @@
      SET SQL_SAFE_UPDATES = 1;
 
      select * from  work.VerifyRosterNames ORDER BY UFID;
+     
+
 
 
 ############ VERIFY COMPLETENESS OF UFID - AFFILIATIONS
      select  count(*)
        from work.roster_additions
-       WHERE UFID IN (""," ","0")
-         AND Affiliation="" ;
+       WHERE (UFID IN (""," ","0") OR UFID IS NULL)
+         AND (Affiliation="" OR Affiliation IS NULL);
+         
+select * from  work.roster_additions where Affiliation is null;   
+
+Affiliation is null;  
+UPDATE work.roster_additions SET Affiliation="Non-UF" where Affiliation is NULL;
 
 ####################################################################
 ##### ALL RECORDS ADDED 
 ####################################################################
 ##### UPDATE YEAR
      UPDATE work.roster_additions
-     SET Year=2018;
+     SET Year=2019;
 
 
 
@@ -71,6 +122,7 @@
       UPDATE work.roster_additions SET rosterid = @i:=@i+1;
      SET SQL_SAFE_UPDATES = 1;
 
+select * from work.roster_additions;
 
 #### VERIFY rosterid Assignment
      select "Max Roster ID Lookup.roster" AS Metric,max(rosterid) as val from lookup.roster
@@ -80,7 +132,15 @@
      select "Max Roster ID work.roster_additions" AS Metric,max(rosterid) as val from work.roster_additions;
 ###################################################################
 
-
+    SET SQL_SAFE_UPDATES = 0;
+    
+    UPDATE work.roster_additions SET UFID="" WHERE UFID IS NULL;
+    ALTER TABLE work.roster_additions Modify column Roster_key varchar(255);
+    ALTER TABLE work.roster_additions Modify column Person_Key varchar(255);   
+    ALTER TABLE work.roster_additions Modify column EraCommons varchar(255); 
+    ALTER TABLE work.roster_additions Modify column STD_PROGRAM varchar(255); 
+        ALTER TABLE work.roster_additions Modify column College varchar(255); 
+    
 ### ASSIGN Roster_key
      UPDATE work.roster_additions
      SET Roster_Key=CONCAT(Year,"-",UFID)
@@ -88,7 +148,7 @@
 
      UPDATE work.roster_additions
      SET Roster_Key=CONCAT(Year,"-",LastName)
-     WHERE UFID="";
+     WHERE UFID="" ;
 
 
 ### Assign Person Key
@@ -113,8 +173,9 @@
 
 SELECT distinct ORIG_PROGRAM
 from work.roster_additions
-WHERE Year=2018
-AND ORIG_PROGRAM NOT IN (SELECT Distinct Program from lookup.standard_programs);
+WHERE ORIG_PROGRAM NOT IN (SELECT Distinct Program from lookup.standard_programs);
+
+
 
 
 UPDATE work.roster_additions rs, lookup.standard_programs lu
@@ -141,18 +202,31 @@ AND ra.College="";
 ### UPDATE FACULTY VARIABLES 
 
 ###### Verify that there are no missing titles in the lookup.roster_faculty_classify table
-
+###############################################################################################################################FIX FACULTY TABLE
      DROP TABLE IF EXISTS work.Roster_Need_Faculty_Data;
      CREATE TABLE work.Roster_Need_Faculty_Data As
      SELECT * 
      from work.roster_additions
      WHERE Title not in (select distinct Title from lookup.roster_faculty_classify);
 
+
+select distinct FacType from work.roster_additions;
+select distinct Faculty from work.roster_additions;
+select distinct FacultyType from work.roster_additions;
+
+select * from work.roster_additions where FacultyType is null;
+
+/*
+UPDATE work.roster_additions SET  FacultyType = "N/A" where FacType is Null;
+UPDATE work.roster_additions SET  FacultyType = "N/A" where FacultyType is Null;
+UPDATE work.roster_additions SET  Faculty = 'Non-Faculty' where FacType is Null;
+UPDATE work.roster_additions SET  FacType = 'N/A' where FacType is Null;
+*/
+
 ####### < create and append required records >
 
 
-####### Find starting key vlaue for appended records.
-     Select max(roster_faculty_classify_id2)+1 from lookup.roster_faculty_classify;
+
 
 ###########  UPDATE FACULTY CLASSIFICATION VARIABLES
 #     ALTER TABLE work.roster_additions
@@ -191,14 +265,23 @@ AND ra.College="";
 ###############################################################################
 ###############################################################################
 
+/*
+create table loaddata.rosterBU20190627 AS select * from lookup.roster;
 
 
+DROP TABLE IF EXISTS loaddata.newroster;
+CREATE table loaddata.newroster AS
+SELECT * FROM lookup.roster
+UNION ALL
+SELECT * FROM  work.roster_additions ;
 
 
+drop table lookup.roster; 
+create table lookup.roster as
+SELECT * from loaddata.newroster;
+*/
 
-
-
-
+SELECT Year,Count(distinct Person_key) as nPerson  from lookup.roster  group by year;
 
 
 
