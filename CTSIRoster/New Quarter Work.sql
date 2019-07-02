@@ -281,7 +281,15 @@ create table lookup.roster as
 SELECT * from loaddata.newroster;
 */
 
-SELECT Year,Count(distinct Person_key) as nPerson  from lookup.roster  group by year;
+SELECT Year,Count(distinct Person_key) as nPerson  from lookup.roster WHERE STD_PROGRAM="BERD" group by year;
+
+SELECT Year,Count(distinct Person_key) as nPerson  from lookup.roster WHERE STD_PROGRAM="BERD" and Faculty="Faculty" group by year;
+
+SELECT Year,Count(distinct Person_key) as nPerson  from lookup.roster  where STD_PROGRAM="BERD" and Roster=1 group by year;
+
+
+select * from lookup.roster where Year=2017 and STD_PROGRAM="BERD" group by Faculty;
+
 
 
 

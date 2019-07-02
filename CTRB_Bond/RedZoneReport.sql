@@ -1,8 +1,8 @@
 ## MAKE FILE FOR DSP DETERMINATION
 
 
-drop table space.SafeHarbor2017;
-create table space.SafeHarbor2017 AS
+drop table space.SafeHarbor2019;
+create table space.SafeHarbor20109 AS
 select Award_ID_Number AS PS_CONTRACT, 
        space(20) AS DSP_Determine,
        concat(LastName,", ",FirstName) AS PI_NAME,
@@ -39,7 +39,7 @@ from work.spacelist
 UNION ALL
 Select "Number of unique Projects from Space File" AS MetricDesc,
 count(distinct ProjectID) AS Metric
-from work.spacelist
+from work.spacelistmeasure
 UNION ALL
 Select "Number of Unique Project IDs with no match" AS MetricDesc,
  count(distinct ProjectID) as Metric

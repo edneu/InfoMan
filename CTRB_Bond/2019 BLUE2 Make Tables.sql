@@ -147,7 +147,7 @@ SET al.DEPT_NAME=dp.DeptName
 WHERE al.DEPTID=dp.DEPTID
 AND al.DEPT_NAME="";
 
-select distinct DEPT_NAME   from space.allocate;
+select distinct DEPT_NAME   from space.allocate;Blue2
 */
 # FUNDCODE TABLE
 DROP TABLE space.Blue2FundList ;

@@ -46,7 +46,7 @@ CREATE INDEX email ON lookup.ufids (UF_EMAIL);
 CREATE INDEX UF_USER_NM ON lookup.ufids (UF_USER_NM);
 CREATE INDEX UFID_EMP ON lookup.employees (Employee_ID);
 CREATE INDEX ufid_Active ON lookup.active_emp (Employee_ID);
-
+CREATE INDEX rosterid ON lookup.roster (rosterid);
 
 SET SQL_SAFE_UPDATES = 0;
 

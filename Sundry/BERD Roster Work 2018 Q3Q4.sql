@@ -319,3 +319,7 @@ select max(rosterid)+1 from lookup.roster;
 
 
 DESC lookup.roster;
+
+8?
+
+select year, 
