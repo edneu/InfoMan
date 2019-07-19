@@ -11,45 +11,71 @@ drop table if exists space.redsurveyresults2018;
 
 drop table if exists space.redsurveyresults;
 create table space.redsurveyresults AS
-SELECT * FROM space.redsurveyresults2018;
+SELECT * FROM space.redsurveyresults2019;
+
+###drop table space.redsurveyresults2019;
+
 
 ##ADJUST FOR BOUNCED EMAIL
 SET SQL_SAFE_UPDATES = 0;
-UPDATE space.redsurveyresults SET EMAIL="gonzre@ufl.edu" WHERE EMAIL='Lauren.Morelli@medicine.ufl.edu';
+
 
 
 ###############################################################      AFTER SURVEY IS COMPLETE
 drop table if exists work.redsurveydata;
-create table work.redsurveydata AS
-SELECT EMAIL, 1 as Span, span01 as CTRB_PCT FROM space.redsurveyresults WHERE span01 <>'' UNION ALL
-SELECT EMAIL, 2 as Span, span02 as CTRB_PCT FROM space.redsurveyresults WHERE span02 <>'' UNION ALL
-SELECT EMAIL, 3 as Span, span03 as CTRB_PCT FROM space.redsurveyresults WHERE span03 <>'' UNION ALL
-SELECT EMAIL, 4 as Span, span04 as CTRB_PCT FROM space.redsurveyresults WHERE span04 <>'' UNION ALL
-SELECT EMAIL, 5 as Span, span05 as CTRB_PCT FROM space.redsurveyresults WHERE span05 <>'' UNION ALL
-SELECT EMAIL, 6 as Span, span06 as CTRB_PCT FROM space.redsurveyresults WHERE span06 <>'' UNION ALL
-SELECT EMAIL, 7 as Span, span07 as CTRB_PCT FROM space.redsurveyresults WHERE span07 <>'' UNION ALL
-SELECT EMAIL, 8 as Span, span08 as CTRB_PCT FROM space.redsurveyresults WHERE span08 <>'' UNION ALL
-SELECT EMAIL, 9 as Span, span09 as CTRB_PCT FROM space.redsurveyresults WHERE span09 <>'' UNION ALL
-SELECT EMAIL, 10 as Span, span10 as CTRB_PCT FROM space.redsurveyresults WHERE span10 <>'' UNION ALL
-SELECT EMAIL, 11 as Span, span11 as CTRB_PCT FROM space.redsurveyresults WHERE span11 <>'' UNION ALL
-SELECT EMAIL, 12 as Span, span12 as CTRB_PCT FROM space.redsurveyresults WHERE span12 <>'' UNION ALL
-SELECT EMAIL, 13 as Span, span13 as CTRB_PCT FROM space.redsurveyresults WHERE span13 <>'' UNION ALL
-SELECT EMAIL, 14 as Span, span14 as CTRB_PCT FROM space.redsurveyresults WHERE span14 <>'' UNION ALL
-SELECT EMAIL, 15 as Span, span15 as CTRB_PCT FROM space.redsurveyresults WHERE span15 <>'' UNION ALL
-SELECT EMAIL, 16 as Span, span16 as CTRB_PCT FROM space.redsurveyresults WHERE span16 <>'' UNION ALL
-SELECT EMAIL, 17 as Span, span17 as CTRB_PCT FROM space.redsurveyresults WHERE span17 <>'' UNION ALL
-SELECT EMAIL, 18 as Span, span18 as CTRB_PCT FROM space.redsurveyresults WHERE span18 <>'' UNION ALL
-SELECT EMAIL, 19 as Span, span19 as CTRB_PCT FROM space.redsurveyresults WHERE span19 <>'' UNION ALL
-SELECT EMAIL, 20 as Span, span20 as CTRB_PCT FROM space.redsurveyresults WHERE span20 <>'' UNION ALL
-SELECT EMAIL, 21 as Span, span21 as CTRB_PCT FROM space.redsurveyresults WHERE span21 <>'' UNION ALL
-SELECT EMAIL, 22 as Span, span22 as CTRB_PCT FROM space.redsurveyresults WHERE span22 <>'' UNION ALL
-SELECT EMAIL, 23 as Span, span23 as CTRB_PCT FROM space.redsurveyresults WHERE span23 <>'' UNION ALL
-SELECT EMAIL, 24 as Span, span24 as CTRB_PCT FROM space.redsurveyresults WHERE span24 <>'' UNION ALL
-SELECT EMAIL, 25 as Span, span25 as CTRB_PCT FROM space.redsurveyresults WHERE span25 <>'' 
+create table work.redsurveydata AS 
+SELECT EMAIL, 1 as Span, span01 as CTRB_PCT FROM space.redsurveyresults WHERE span01 IS NOT NULL UNION ALL
+SELECT EMAIL, 2 as Span, span02 as CTRB_PCT FROM space.redsurveyresults WHERE span02 IS NOT NULL UNION ALL
+SELECT EMAIL, 3 as Span, span03 as CTRB_PCT FROM space.redsurveyresults WHERE span03 IS NOT NULL UNION ALL
+SELECT EMAIL, 4 as Span, span04 as CTRB_PCT FROM space.redsurveyresults WHERE span04 IS NOT NULL UNION ALL
+SELECT EMAIL, 5 as Span, span05 as CTRB_PCT FROM space.redsurveyresults WHERE span05 IS NOT NULL UNION ALL
+SELECT EMAIL, 6 as Span, span06 as CTRB_PCT FROM space.redsurveyresults WHERE span06 IS NOT NULL UNION ALL
+SELECT EMAIL, 7 as Span, span07 as CTRB_PCT FROM space.redsurveyresults WHERE span07 IS NOT NULL UNION ALL
+SELECT EMAIL, 8 as Span, span08 as CTRB_PCT FROM space.redsurveyresults WHERE span08 IS NOT NULL UNION ALL
+SELECT EMAIL, 9 as Span, span09 as CTRB_PCT FROM space.redsurveyresults WHERE span09 IS NOT NULL UNION ALL
+SELECT EMAIL, 10 as Span, span10 as CTRB_PCT FROM space.redsurveyresults WHERE span10 IS NOT NULL UNION ALL
+SELECT EMAIL, 11 as Span, span11 as CTRB_PCT FROM space.redsurveyresults WHERE span11 IS NOT NULL UNION ALL
+SELECT EMAIL, 12 as Span, span12 as CTRB_PCT FROM space.redsurveyresults WHERE span12 IS NOT NULL UNION ALL
+SELECT EMAIL, 13 as Span, span13 as CTRB_PCT FROM space.redsurveyresults WHERE span13 IS NOT NULL UNION ALL
+SELECT EMAIL, 14 as Span, span14 as CTRB_PCT FROM space.redsurveyresults WHERE span14 IS NOT NULL UNION ALL
+SELECT EMAIL, 15 as Span, span15 as CTRB_PCT FROM space.redsurveyresults WHERE span15 IS NOT NULL UNION ALL
+SELECT EMAIL, 16 as Span, span16 as CTRB_PCT FROM space.redsurveyresults WHERE span16 IS NOT NULL UNION ALL
+SELECT EMAIL, 17 as Span, span17 as CTRB_PCT FROM space.redsurveyresults WHERE span17 IS NOT NULL UNION ALL
+SELECT EMAIL, 18 as Span, span18 as CTRB_PCT FROM space.redsurveyresults WHERE span18 IS NOT NULL UNION ALL
+SELECT EMAIL, 19 as Span, span19 as CTRB_PCT FROM space.redsurveyresults WHERE span19 IS NOT NULL UNION ALL
+SELECT EMAIL, 20 as Span, span20 as CTRB_PCT FROM space.redsurveyresults WHERE span20 IS NOT NULL UNION ALL
+SELECT EMAIL, 21 as Span, span21 as CTRB_PCT FROM space.redsurveyresults WHERE span21 IS NOT NULL UNION ALL
+SELECT EMAIL, 22 as Span, span22 as CTRB_PCT FROM space.redsurveyresults WHERE span22 IS NOT NULL UNION ALL
+SELECT EMAIL, 23 as Span, span23 as CTRB_PCT FROM space.redsurveyresults WHERE span23 IS NOT NULL UNION ALL
+SELECT EMAIL, 24 as Span, span24 as CTRB_PCT FROM space.redsurveyresults WHERE span24 IS NOT NULL UNION ALL
+SELECT EMAIL, 25 as Span, span25 as CTRB_PCT FROM space.redsurveyresults WHERE span25 IS NOT NULL  UNION ALL
+SELECT EMAIL, 26 as Span, span26 as CTRB_PCT FROM space.redsurveyresults WHERE span26 IS NOT NULL UNION ALL
+SELECT EMAIL, 27 as Span, span27 as CTRB_PCT FROM space.redsurveyresults WHERE span27 IS NOT NULL UNION ALL
+SELECT EMAIL, 28 as Span, span28 as CTRB_PCT FROM space.redsurveyresults WHERE span28 IS NOT NULL UNION ALL
+SELECT EMAIL, 29 as Span, span29 as CTRB_PCT FROM space.redsurveyresults WHERE span29 IS NOT NULL UNION ALL
+SELECT EMAIL, 30 as Span, span30 as CTRB_PCT FROM space.redsurveyresults WHERE span30 IS NOT NULL UNION ALL
+SELECT EMAIL, 31 as Span, span31 as CTRB_PCT FROM space.redsurveyresults WHERE span31 IS NOT NULL UNION ALL
+SELECT EMAIL, 32 as Span, span32 as CTRB_PCT FROM space.redsurveyresults WHERE span32 IS NOT NULL UNION ALL
+SELECT EMAIL, 33 as Span, span33 as CTRB_PCT FROM space.redsurveyresults WHERE span33 IS NOT NULL UNION ALL
+SELECT EMAIL, 34 as Span, span34 as CTRB_PCT FROM space.redsurveyresults WHERE span34 IS NOT NULL UNION ALL
+SELECT EMAIL, 35 as Span, span35 as CTRB_PCT FROM space.redsurveyresults WHERE span35 IS NOT NULL UNION ALL
+SELECT EMAIL, 36 as Span, span36 as CTRB_PCT FROM space.redsurveyresults WHERE span36 IS NOT NULL UNION ALL
+SELECT EMAIL, 37 as Span, span37 as CTRB_PCT FROM space.redsurveyresults WHERE span37 IS NOT NULL UNION ALL
+SELECT EMAIL, 38 as Span, span38 as CTRB_PCT FROM space.redsurveyresults WHERE span38 IS NOT NULL UNION ALL
+SELECT EMAIL, 39 as Span, span39 as CTRB_PCT FROM space.redsurveyresults WHERE span39 IS NOT NULL UNION ALL
+SELECT EMAIL, 40 as Span, span40 as CTRB_PCT FROM space.redsurveyresults WHERE span40 IS NOT NULL UNION ALL
+SELECT EMAIL, 41 as Span, span41 as CTRB_PCT FROM space.redsurveyresults WHERE span41 IS NOT NULL UNION ALL
+SELECT EMAIL, 42 as Span, span42 as CTRB_PCT FROM space.redsurveyresults WHERE span42 IS NOT NULL UNION ALL
+SELECT EMAIL, 43 as Span, span43 as CTRB_PCT FROM space.redsurveyresults WHERE span43 IS NOT NULL UNION ALL
+SELECT EMAIL, 44 as Span, span44 as CTRB_PCT FROM space.redsurveyresults WHERE span44 IS NOT NULL UNION ALL
+SELECT EMAIL, 45 as Span, span45 as CTRB_PCT FROM space.redsurveyresults WHERE span45 IS NOT NULL UNION ALL
+SELECT EMAIL, 46 as Span, span46 as CTRB_PCT FROM space.redsurveyresults WHERE span46 IS NOT NULL UNION ALL
+SELECT EMAIL, 47 as Span, span47 as CTRB_PCT FROM space.redsurveyresults WHERE span47 IS NOT NULL ;
 ;
 
+select * from work.redsurveydata;
 
-select * from space.bondmaster where EMAIL="gonzre@ufl.edu";
+
 
 
 select CTRB_PCT, CTRB_PCT*.01 from  work.redsurveydata;
@@ -225,6 +251,7 @@ sum(Good_Research_Revenue)/sum(CTRB_Research_Revenue) as Metric
 from space.bondmaster
 ;
 ## select * from space.measures;
+
 
 
 

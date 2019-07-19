@@ -1,5 +1,5 @@
 ## MAKE FILE FOR DSP DETERMINATION
-
+/*
 
 drop table space.SafeHarbor2019;
 create table space.SafeHarbor20109 AS
@@ -13,13 +13,27 @@ select Award_ID_Number AS PS_CONTRACT,
        Total_Award
 from space.bondmaster
 Where IP_USAGE IS NULL;
-
+*/
 ################################################################
+/*
+## Spacelist for reference
+DROP TABLE if exists work.spacelist;
+CREATE TABLE work.spacelist AS
+Select BLDG AS Building,
+         FL AS Floor,
+         ROOM as Room,
+         PRJNUM AS ProjectID 
+FROM space.ctrb_projects_2019;
 
+select * from space.spacelist;
+*/
 
 select distinct IP_USAGE from space.bondmaster;
 
-
+UPDATE space.bondmaster SET Research_Revenue=0,
+							CTRB_Research_Revenue=0,
+                            Good_Research_Revenue=0,
+                            Bad_Research_Revenue=0;
 
 UPDATE space.bondmaster SET Research_Revenue=Include_Award*Total_Award;
 UPDATE space.bondmaster SET CTRB_Research_Revenue=Research_Revenue*(CTRB_PCT*.01);
@@ -31,7 +45,7 @@ UPDATE space.bondmaster SET Bad_Research_Revenue=CTRB_Research_Revenue WHERE IP_
 ## REPORT RED ZONE
 
 
-drop table space.measures;
+drop table  if exists space.measures;
 Create table space.measures as
 Select "Number of ProjectIDs from Space File" AS MetricDesc,
 count(ProjectID) AS MetricSpace
@@ -39,7 +53,7 @@ from work.spacelist
 UNION ALL
 Select "Number of unique Projects from Space File" AS MetricDesc,
 count(distinct ProjectID) AS Metric
-from work.spacelistmeasure
+from work.spacelist
 UNION ALL
 Select "Number of Unique Project IDs with no match" AS MetricDesc,
  count(distinct ProjectID) as Metric
@@ -97,10 +111,57 @@ AND CTRB_PCT IS NULL
 
 select * from space.bondmaster where (Good_Research_Revenue+Bad_Research_Revenue)<>CTRB_Research_Revenue;
 
+##################################
+
+
+SELECT "2015" as CertYear,
+       SUM(Research_Revenue) as ResearchRev,
+       SUM(CTRB_Research_Revenue) AS CTRBRev,
+       SUM(Good_Research_Revenue) as GoodRev,
+       SUM(Bad_Research_Revenue) AS BadRev
+FROM space.bondmaster2015
+UNION ALL
+SELECT "2016" as CertYear,
+       SUM(Research_Revenue) as ResearchRev,
+       SUM(CTRB_Research_Revenue) AS CTRBRev,
+       SUM(Good_Research_Revenue) as GoodRev,
+       SUM(Bad_Research_Revenue) AS BadRev
+FROM space.bondmaster2016
+UNION ALL
+SELECT "2017" as CertYear,
+       SUM(Research_Revenue) as ResearchRev,
+       SUM(CTRB_Research_Revenue) AS CTRBRev,
+       SUM(Good_Research_Revenue) as GoodRev,
+       SUM(Bad_Research_Revenue) AS BadRev
+FROM space.bondmaster2017
+UNION ALL
+SELECT "2018" as CertYear,
+       SUM(Research_Revenue) as ResearchRev,
+       SUM(CTRB_Research_Revenue) AS CTRBRev,
+       SUM(Good_Research_Revenue) as GoodRev,
+       SUM(Bad_Research_Revenue) AS BadRev
+FROM space.bondmaster2018
+UNION ALL
+SELECT "2019" as CertYear,
+       SUM(Research_Revenue) as ResearchRev,
+       SUM(CTRB_Research_Revenue) AS CTRBRev,
+       SUM(Good_Research_Revenue) as GoodRev,
+       SUM(Bad_Research_Revenue) AS BadRev
+FROM space.bondmaster       ;
+       
+
+
+
+
+
+###################################
+
+
+
 
 select * from space.measures;
 
-DROP TABLE work.contract_class;
+DROP TABLE if exists work.contract_class;
 Create table work.contract_class AS
 SELECT 	Prime_Sponsor_Type,
 		COUNT(DISTINCT AWARD_ID) AS Good,
