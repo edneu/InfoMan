@@ -252,3 +252,7 @@ order by concat(trim(LastName),", ",trim(FirstName)) ;
 select * from space.SurveySumm where PI like "%Muller%";
 
 select sum(CTRB_Amt),sum(Good), Sum(BAD_AMT) from space.SurveySumm;
+
+
+/*
+Create table space.bondmaster2019 AS Select * from space.bondmaster;
