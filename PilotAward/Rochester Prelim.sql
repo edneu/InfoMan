@@ -368,4 +368,4 @@ ORDER BY CATEGORY,Award_Year;
 
 
 
-
+select YEar,count(distinct Person_key) from lookup.roster group by Year;
