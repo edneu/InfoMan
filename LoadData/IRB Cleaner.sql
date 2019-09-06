@@ -1,12 +1,14 @@
 
 
-desc loaddata.irb_raw_August_2018;
+desc loaddata.irb_raw_sept_2019;
 
 drop table if exists work.irb;
 create table work.irb as
-select * from loaddata.irb_raw_august_2018;
+select * from loaddata.irb_raw_sept_2019;
 
 
+
+ select Min(Approval_Date), Max(Approval_Date) from work.irb;
 ### FIX UFIDS
 
 SET SQL_SAFE_UPDATES = 0;
@@ -33,7 +35,12 @@ UPDATE work.irb SET PreReview_Days=datediff(First_Review_Date, Date_IRB_Received
 UPDATE work.irb SET IRB_APPROVAL_TIME_NOPRESCREEN = datediff(Date_Originally_Approved, Date_IRB_Received);
 UPDATE work.irb SET IRB_APPROVAL_TIME = datediff(Date_Originally_Approved, Date_IRB_Received)-PreReview_Days;
 
-
+### CEDED REIVEWS  _ Correction for Orginal Approval Data <IRB Receive Date
+UPDATE work.myIRB
+SET IRB_APPROVAL_TIME_NOPRESCREEN = datediff(First_Review_Date, Date_IRB_Received),
+    IRB_APPROVAL_TIME = datediff(First_Review_Date, Date_IRB_Received)-PreReview_Days
+WHERE substr(ID,1,3)="CED"
+AND Date_Originally_Approved<Date_IRB_Received;
 
 
 
@@ -361,6 +368,7 @@ select IRB_Approval_Year,
 ##########################################################
 
 #create table loaddata.myIRBBackup201710 AS Select * from lookup.
+drop table if exists lookup.myIRB;
 Create table lookup.myIRB as Select * from work.irb;
 
 select Review_Type,Committee,min(IRB_Approval_Month) from lookup.myIRB group by Committee,Review_Type;

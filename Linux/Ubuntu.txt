@@ -15,7 +15,7 @@ lsb_release -a
 ##### Last Update 9/8/2016 @ 8:30am
 
 
-2019-03-13
+2019-08-21
 
 
 Distributor ID: Ubuntu
@@ -59,6 +59,11 @@ sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20181005.sql
 sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20181109.sql
 sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20181212.sql
 sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20190313.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20190821.sql
+sudo mysqldump -pP@ssw0rd --all-databases > All_mySQL20190906.sql
+
+
+
 
 locate -i All_mySQL20171012.sql
 sudo find / -type f -name "mySQL20171012.sql"

@@ -66,9 +66,9 @@ select * from INFORMATION_SCHEMA.TABLES;
 
 DROP TABLE IF EXISTS work.TableList;
 CREATE TABLE work.TableList AS
-SELECT TABLE_SCHEMA,table_name,create_time, TABLE_ROWS
+SELECT TABLE_SCHEMA,table_name,create_time,UPDATE_TIME, TABLE_ROWS
 FROM INFORMATION_SCHEMA.TABLES 
-WHERE table_schema  IN  ('lookup');
+WHERE table_schema  IN  ('Adhoc');
 
 
 
