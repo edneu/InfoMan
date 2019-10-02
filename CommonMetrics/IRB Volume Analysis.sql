@@ -1,4 +1,4 @@
-
+select distinct Review_Type from lookup.myIRB;
 
 select min(Approval_Date),max(Approval_Date) from lookup.myIRB;
 
@@ -74,7 +74,7 @@ FROM lookup.myIRB
 WHERE Committee="IRB-01"
 AND Review_Type='Full IRB Review'
 GROUP BY YEAR(Date_Originally_Approved)
-ORDER BY YEAR(Date_Originally_Approved);
+ORDER BY YEAR(Date_Originally_ApprovedmyIRB);
 
 
 SELECT COUNT(*) from lookup.myIRB;
@@ -134,3 +134,19 @@ SET IRB_APPROVAL_TIME_NOPRESCREEN = datediff(First_Review_Date, Date_IRB_Receive
     IRB_APPROVAL_TIME = datediff(First_Review_Date, Date_IRB_Received)-PreReview_Days
 WHERE substr(ID,1,3)="CED"
 AND Date_Originally_Approved<Date_IRB_Received;
+
+
+drop table work.temp;
+create table work.temp as
+SELECT 	ID,
+		Committee,
+		Review_Type,
+        Date_IRB_Received,
+        First_Review_Date,
+        Date_Originally_Approved,
+        Approval_Date,
+        Concat(PI_Last_Name,", ",PI_First_Name) as PI,
+        Project_Title
+FROM work.myIRB
+WHERE Committee="IRB-01"
+AND substr(ID,1,3)="CED";

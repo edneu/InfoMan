@@ -12,7 +12,7 @@ SELECT * from lookup.Employees;
 
 DROP TABLE IF EXISTS work.activeemp;
 CREATE TABLE work.activeemp AS
-select * from loaddata.active_emp_20190528;
+select * from loaddata.active_emp_20191001;
 
 
 ## Replace Active Employee File in Lookup
@@ -48,6 +48,51 @@ SELECT Department,
 FROM work.Employees
 WHERE Employee_ID NOT IN (SELECT DISTINCT Employee_ID from work.activeemp);
         
+#################################################################################
+#################################################################################
+#################################################################################
+#################################################################################
+#################################################################################
+## EMPLOYEE EMAIL FILE UPDATE
+
+DROP TABLE IF EXISTS work.EmpEmail;
+CREATE TABLE work.EmpEmail
+AS SELECT * from loaddata.empemail20191001;
+
+
+
+DROP TABLE IF EXISTS work.EmpEmailUpdate;
+Create table work.EmpEmailUpdate AS
+SELECT  Name,
+		Department_Code,
+		Department,
+		Job_Code,
+		Job_Title,
+		Email_Address as email
+FROM work.EmpEmail
+UNION ALL
+SELECT 	Name,
+		Department_Code,
+		Department,
+		Job_Code,
+		Job_Title,
+		email
+FROM lookup.employee_email
+WHERE email NOT IN (SELECT DISTINCT Email_Address from work.EmpEmail);
+
+
+## Check Rec Nums
+SELECT "Old File" as Measure, Count(distinct email) as nEMAIL, Count(*) as nRECs from lookup.employee_email
+UNION ALL
+SELECT "New File" as Measure, Count(distinct email) as nEMAIL, Count(*) as nRECs  from work.EmpEmailUpdate;
+
+
+DROP TABLE IF EXISTS loaddata.EMP_EMAIL_BU;
+CREATE TABLE loaddata.EMP_EMAIL_BU As select * from lookup.employee_email;
+
+DROP TABLE IF EXISTS lookup.employee_email;
+CREATE TABLE lookup.employee_email AS
+SELECT * from work.EmpEmailUpdate;
 
 
 #####################################################################################
@@ -111,7 +156,7 @@ SET SQL_SAFE_UPDATES = 0;
      AND r.email<>""
      AND era.email<>"";
 
-#####ADD FACULTY INDFICATORS
+#####ADD FACULTY INDICATORS
      ALTER TABLE work.EmployeeUpdate 
        ADD Faculty varchar(12),
        ADD FacType varchar(25),

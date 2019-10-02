@@ -8,7 +8,7 @@ SET SQL_SAFE_UPDATES = 0;
 ALTER TABLE pilots.PILOTS_SUMMARY
 	ADD TotalAMT decimal(11,2),
 	ADD RelatedPub int(1),
-	ADD RelatedGrant int(1);
+	ADD RelatedGrant int(1),
    	ADD ROIRelatedPub int(1),
     ADD ROIRelatedGrant int(1);
 
@@ -25,6 +25,9 @@ UPDATE pilots.PILOTS_SUMMARY SET RelatedGrant=1 WHERE GrantYear>0 AND GrantYear<
 
 UPDATE pilots.PILOTS_SUMMARY SET ROIRelatedPub=1 WHERE PubYear>0 ;
 UPDATE pilots.PILOTS_SUMMARY SET ROIRelatedGrant=1 WHERE GrantYear>0 ;  
+
+
+SELECT * FROM pilots.PILOTS_SUMMARY WHERE ROIRelatedGrant=1 AND RelatedGrant=0;
 
 ##################### START TABLES
 
@@ -114,6 +117,8 @@ UPDATE work.cmpilotcalc SET Grant2017=1 WHERE GrantYear=2017;
 UPDATE work.cmpilotcalc SET Grant2018=1 WHERE GrantYear=2018;
 
 
+
+
 DROP TABLE IF EXISTS results.CM_PUBS;
 CREATE TABLE results.CM_PUBS AS
 SELECT Award_Year,
@@ -160,16 +165,19 @@ ORDER BY Award_Year;
 
 
 
-select distinct Award_Year from pilots.PILOTS_SUMMARY;
+select distinct GrantYear from pilots.PILOTS_SUMMARY;
 
 
 Select Award_Year, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAmt) AS GrantAmt, Sum(ROIRelatedPub) AS HasPub, Sum(ROIRelatedGrant) AS HasGrant
 FROM pilots.PILOTS_SUMMARY
 WHERE Award_Year>=2012 AND Award_Year<2019
+AND GrantYear IS NOT NULL
 AND Awarded="Awarded"
 AND Category NOT IN ("SECIM")
 GROUP BY Award_Year;
 ;
+
+
 
 
 Select Category, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAmt) AS GrantAmt, Sum(ROIRelatedPub) AS HasPub, Sum(ROIRelatedGrant) AS HasGrant
