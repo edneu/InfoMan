@@ -24,7 +24,7 @@ UF_PRIMARY_AFFL varchar (3) NOT NULL,
 UF_WORK_TITLE varchar (50) NOT NULL,
 UF_TELEPHONE varchar (50) NOT NULL,
 UF_GENDER_CD varchar (3) NOT NULL,
-UF_BIRTH_DT date NOT NULL,
+UF_BIRTH_DT date NULL,
 UF_ADDR_LINE1 varchar (50) NOT NULL,
 UF_ADDR_LINE2 varchar (50) NOT NULL,
 UF_ADDR_LINE3 varchar (50) NOT NULL,
@@ -42,7 +42,7 @@ commit;
 
 
 
-load data local infile "P:\\My Documents\\My Documents\\Loaddata\\ufids.dat" 
+load data local infile "P:\\My Documents\\My Documents\\Loaddata\\UFIDs20191029.dat" 
 into table loaddata.ufids 
 fields terminated by '\t'
 lines terminated by '\n'
@@ -76,6 +76,13 @@ TenureDEPTID
 
 select min(UF_BIRTH_DT), MAX(UF_BIRTH_DT) from loaddata.ufids ;
 
+select UF_GENDER_CD,count(*) from loaddata.ufids group by UF_GENDER_CD;
+
+/*
+select * from loaddata.ufids where UF_GENDER_CD='UF_'; 
+SET SQL_SAFE_UPDATES = 0;
+delete from loaddata.ufids where UF_GENDER_CD='UF_';
+*/
 
 select "New Table (loaddata.ufids):",count(*), count(distinct uf_ufid) from loaddata.ufids
 UNION ALL 
@@ -85,13 +92,7 @@ select * from loaddata.ufids;
 
 select min(UF_UFID), MAX(UF_UFID) from loaddata.ufids ;
 
-select ae_Salary_Plan,count(*) from loaddata.ufids  group by ae_Salary_Plan;
 
-select count(*) from loaddata.ufids ;
-
-SET SQL_SAFE_UPDATES = 0;
-DELETE FROM loaddata.ufids where UF_UFID IN ('ï»¿UF_UFID') ;
-SET SQL_SAFE_UPDATES = 1;
 
 
 
@@ -118,7 +119,7 @@ CREATE INDEX EMPID ON lookup.Employees (Employee_ID);
 
 SET SQL_SAFE_UPDATES = 0;
 UPDATE loaddata.ufids uf, lookup.Employees lu
-SET	uf.ae_active_emp_id=lu.active_emp_id,
+SET	uf.ae_active_emp_id=lu.Employee_ID,
 	uf.ae_Department_Code=lu.Department_Code,
 	uf.ae_Department=lu.Department,
 	uf.ae_Employee_ID=lu.Employee_ID,
@@ -142,7 +143,7 @@ desc loaddata.ufids;
 
 /*
 
-create table loaddata.backupufid20190203 as select * from lookup.ufids;
+create table loaddata.backupufid20191029 as select * from lookup.ufids;
 
 drop table lookup.ufids;
 create table lookup.ufids AS
@@ -166,9 +167,9 @@ select distinct UF_LAST_NM from loaddata.ufids;
 select UF_GENDER_CD,count(*) from lookup.ufids group by UF_GENDER_CD;
 select UF_GENDER_CD,count(*) from loaddata.ufids group by UF_GENDER_CD;
 
-select * from lookup.ufids where UF_LAST_NM="Hall";
-
-select * from lookup.ufids;
+select * from lookup.ufids where UF_LAST_NM="Neu";
+select * from loaddata.ufids where UF_LAST_NM="Neu";
+select * from loaddata.backupufid20191029 where UF_LAST_NM="Neu";
 
 
 

@@ -1,6 +1,6 @@
 #### PARSE PUBMED SUMMARY OUTPUT
 ##DROP table work.pubmed_raw;
-##select * from work.pubmed_raw;
+## CREATE TABLE work.pubmed_raw AS select * from work.from_pubmed;
 
 ############################################
 ##########  ADD COLUMNS TO RAW PUBMED OUTPUT

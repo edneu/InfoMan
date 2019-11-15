@@ -47,7 +47,7 @@ CREATE TABLE loaddata.awards_history
 	`CLK_AWD_PURPOSE` Varchar(25) not null,
 	`CLK_AWD_PROJ_TYPE` Varchar(25) not null,
 	`CLK_AWD_PRJ_START_DT` Datetime not null,
-	`CLK_AWD_PRJ_END_DT` Varchar(45) not null,
+	`CLK_AWD_PRJ_END_DT` Datetime null,
 	`CLK_AWD_ALLOC_STRT_DT` Datetime not null,
 	`CLK_AWD_ALLOC_END_DT` Datetime not null,
 	`CLK_AWD_PS_FUND_CODE_ID` Varchar(5) not null,
@@ -93,7 +93,7 @@ SET GLOBAL local_infile = 1;
 
 
 
-load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory20190528.csv" 
+load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory20191028.csv" 
 into table loaddata.awards_history 
 fields terminated by '|'
 lines terminated by '\n'
@@ -185,11 +185,8 @@ CLK_MOD_SPON_AWD_ID
 ##ORGNL_FUNDS_ACTIVATED
 );
 
-show variables like '%INFILE%'
-SHOW VARIABLES LIKE "secure_file_priv";
 
-SHOW VARIABLES LIKE 'local_infile';
-ALTER TABLE loaddata.awards_history ADD AcademicUnit Varchar(5);
+
 
 SET SQL_SAFE_UPDATES = 0;
 
@@ -215,7 +212,8 @@ ADD Roster2014 integer(1),
 ADD Roster2015 integer(1),
 ADD Roster2016 integer(1),
 ADD Roster2017 integer(1),
-ADD Roster2018 integer(1);
+ADD Roster2018 integer(1),
+ADD Roster2019 integer(1);
 
 
 UPDATE loaddata.awards_history
@@ -229,7 +227,8 @@ SET Roster2008=0,
 	Roster2015=0,
 	Roster2016=0,
 	Roster2017=0,
-	Roster2018=0;
+	Roster2018=0,
+	Roster2019=0;
 
 
 #########
@@ -247,7 +246,7 @@ UPDATE loaddata.awards_history ah SET Roster2015=1 Where Year(FUNDS_ACTIVATED)=2
 UPDATE loaddata.awards_history ah SET Roster2016=1 Where Year(FUNDS_ACTIVATED)=2016 AND ah.CLK_PI_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2016 and Roster=1);
 UPDATE loaddata.awards_history ah SET Roster2017=1 Where Year(FUNDS_ACTIVATED)=2017 AND ah.CLK_PI_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2017 and Roster=1);
 UPDATE loaddata.awards_history ah SET Roster2018=1 Where Year(FUNDS_ACTIVATED)=2018 AND ah.CLK_PI_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2018 and Roster=1);
-
+UPDATE loaddata.awards_history ah SET Roster2019=1 Where Year(FUNDS_ACTIVATED)=2019 AND ah.CLK_PI_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2019 and Roster=1);
 
 ##select  sum(Roster2009), sum(Roster2010),sum(Roster2011),sum(Roster2012),sum(Roster2013),sum(Roster2014),sum(Roster2015),sum(Roster2016),sum(Roster2017),sum(Roster2018) from loaddata.awards_history;
 
@@ -291,18 +290,22 @@ UNION ALL
 select "AuthAmt" as Measure, min(SPONSOR_AUTHORIZED_AMOUNT) as Minimum, max(SPONSOR_AUTHORIZED_AMOUNT) as Maximum, sum(SPONSOR_AUTHORIZED_AMOUNT) AS Total, Avg(SPONSOR_AUTHORIZED_AMOUNT) as Average from loaddata.awards_history
 ;
 
+
+
+
 SET sql_mode = '';
 SET SQL_SAFE_UPDATES = 0;
-create table loaddata.backupAwardsHistory20190528 AS SELECT * from lookup.awards_history;
+create table loaddata.backupAwardsHistory20191028 AS SELECT * from lookup.awards_history;
 
 
-select * from loaddata.awards_history  Where CLK_AWD_PRJ_END_DT='Research Developmental' ;
+select * from loaddata.awards_history  Where CLK_AWD_PRJ_END_DT='Research Developmental'
+OR 'CLK_AWD_ALLOC_END_DT'='Research Developmental' ;
 
 select distinct CLK_AWD_OVERALL_END_DATE from loaddata.awards_history;
 
 Select distinct EXCEPTION FROM loaddata.awards_history;
 
-
+select * from loaddata.awards_history;
 SET SQL_SAFE_UPDATES = 0;
 delete from loaddata.awards_history where Exception=' \"\"Heterogeneity and Impact of Rotavirus Vaccination in Asia\"\"\"';
 delete from loaddata.awards_history where awards_history_id=1;  ## REmove Headers

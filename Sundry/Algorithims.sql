@@ -19,6 +19,11 @@ SET SQL_SAFE_UPDATES = 1;
 str_to_date('03,31,2015','%m,%d,%Y')
 
 
+
+
+RESET QUERY CACHE;
+
+
 /*  ADD UNDUP Variable
 */
 SET SQL_SAFE_UPDATES = 0;
