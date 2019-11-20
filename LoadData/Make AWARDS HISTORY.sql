@@ -1,3 +1,5 @@
+
+
 DROP TABLE IF EXISTS loaddata.awards_history;
 CREATE TABLE loaddata.awards_history 
 (
@@ -81,11 +83,10 @@ CREATE TABLE loaddata.awards_history
 `CLK_AWD_PROJ_MGR_DEPT` varchar(255) not null,
 `CLK_AWD_PROJ_MGR_COLLEGEID` varchar(25) not null,
 `CLK_AWD_PROJ_MGR_COLLEGE` varchar(255) not null,
-`CLK_MOD_SPON_AWD_ID` varchar(25) not null
-## Following Added December 12 2017
-##CLK_AWD_PURPOSE_NAME varchar(255) not null,
-##CLK_AWD_PURPOSE_GROUP varchar(255) not null,
-##ORGNL_FUNDS_ACTIVATED Datetime not null
+`CLK_MOD_SPON_AWD_ID` varchar(25) null,
+`CLK_AWD_PURPOSE_NAME` varchar(255) null,
+`CLK_AWD_PURPOSE_GROUP` varchar(255)  null,
+`ORGNL_FUNDS_ACTIVATED` Datetime null
 
 );
 
@@ -93,7 +94,7 @@ SET GLOBAL local_infile = 1;
 
 
 
-load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory20191028.csv" 
+load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory20191119.csv" 
 into table loaddata.awards_history 
 fields terminated by '|'
 lines terminated by '\n'
@@ -178,11 +179,11 @@ CLK_AWD_PROJ_MGR_DEPTID,
 CLK_AWD_PROJ_MGR_DEPT,
 CLK_AWD_PROJ_MGR_COLLEGEID,
 CLK_AWD_PROJ_MGR_COLLEGE,
-CLK_MOD_SPON_AWD_ID
+CLK_MOD_SPON_AWD_ID,
 ## Following Added December 12 2017
-##CLK_AWD_PURPOSE_NAME,
-##CLK_AWD_PURPOSE_GROUP,
-##ORGNL_FUNDS_ACTIVATED
+CLK_AWD_PURPOSE_NAME,
+CLK_AWD_PURPOSE_GROUP,
+ORGNL_FUNDS_ACTIVATED
 );
 
 
@@ -190,6 +191,55 @@ CLK_MOD_SPON_AWD_ID
 
 SET SQL_SAFE_UPDATES = 0;
 
+
+
+
+SET SQL_SAFE_UPDATES = 1;
+## select * from loaddata.awards_history;
+
+
+###delete from loaddata.awards_history    where awards_history_id=1;
+
+Select "Old File" AS Measure, Count(*) AS Reccount from lookup.awards_history
+UNION ALL
+Select "New File" AS Measure, Count(*) AS Reccount from loaddata.awards_history;
+
+
+
+
+Select "FUNDS_ACTIVATED" as Measure ,Min(FUNDS_ACTIVATED), Max(FUNDS_ACTIVATED) from loaddata.awards_history
+UNION ALL
+Select "LASTUPD_EW_DTTM" as Measure, Min(LASTUPD_EW_DTTM), Max(LASTUPD_EW_DTTM) from loaddata.awards_history
+UNION ALL
+Select "CLK_AWD_PRJ_START_DT" as Measure,min(CLK_AWD_PRJ_START_DT), MAX(CLK_AWD_PRJ_START_DT) from loaddata.awards_history
+UNION ALL
+Select "CLK_AWD_PRJ_END_DT" as Measure,min(CLK_AWD_PRJ_END_DT), MAX(CLK_AWD_PRJ_END_DT) from loaddata.awards_history
+UNION ALL
+Select "CLK_AWD_ALLOC_STRT_DT",min(CLK_AWD_ALLOC_STRT_DT), MAX(CLK_AWD_ALLOC_STRT_DT) from loaddata.awards_history
+UNION ALL
+Select "CLK_AWD_ALLOC_END_DT"as Measure,min(CLK_AWD_ALLOC_END_DT), MAX(CLK_AWD_PRJ_END_DT) from loaddata.awards_history
+UNION ALL
+Select "CLK_AWD_OVERALL_START_DATE"as Measure,min(CLK_AWD_OVERALL_START_DATE), MAX(CLK_AWD_OVERALL_START_DATE) from loaddata.awards_history
+UNION ALL
+Select "CLK_AWD_OVERALL_END_DATE"as Measure,min(CLK_AWD_OVERALL_START_DATE), MAX(CLK_AWD_OVERALL_END_DATE) from loaddata.awards_history
+;
+
+
+select "Direct" as Measure, min(DIRECT_AMOUNT) as Minimum, max(DIRECT_AMOUNT) as Maximum, sum(DIRECT_AMOUNT) AS Total, Avg(DIRECT_AMOUNT) as Average from loaddata.awards_history
+UNION ALL
+select "Indirect" as Measure, min(INDIRECT_AMOUNT) as Minimum, max(INDIRECT_AMOUNT) as Maximum, sum(INDIRECT_AMOUNT) AS Total, Avg(INDIRECT_AMOUNT) as Average from loaddata.awards_history
+UNION ALL
+select "AuthAmt" as Measure, min(SPONSOR_AUTHORIZED_AMOUNT) as Minimum, max(SPONSOR_AUTHORIZED_AMOUNT) as Maximum, sum(SPONSOR_AUTHORIZED_AMOUNT) AS Total, Avg(SPONSOR_AUTHORIZED_AMOUNT) as Average from loaddata.awards_history
+;
+
+
+#############################################################################################
+#############################################################################################
+#############################################################################################
+#############################################################################################
+#############################################################################################
+#############################################################################################
+#############################################################################################
 
 
 UPDATE loaddata.awards_history ah, lookup.academic_units lu
@@ -252,50 +302,21 @@ UPDATE loaddata.awards_history ah SET Roster2019=1 Where Year(FUNDS_ACTIVATED)=2
 
 
 
-SET SQL_SAFE_UPDATES = 1;
-## select * from loaddata.awards_history;
 
-
-###delete from loaddata.awards_history    where awards_history_id=1;
-
-Select "Old File" AS Measure, Count(*) AS Reccount from lookup.awards_history
-UNION ALL
-Select "New File" AS Measure, Count(*) AS Reccount from loaddata.awards_history;
-
-
-
-
-Select "FUNDS_ACTIVATED" as Measure ,Min(FUNDS_ACTIVATED), Max(FUNDS_ACTIVATED) from loaddata.awards_history
-UNION ALL
-Select "LASTUPD_EW_DTTM" as Measure, Min(LASTUPD_EW_DTTM), Max(LASTUPD_EW_DTTM) from loaddata.awards_history
-UNION ALL
-Select "CLK_AWD_PRJ_START_DT" as Measure,min(CLK_AWD_PRJ_START_DT), MAX(CLK_AWD_PRJ_START_DT) from loaddata.awards_history
-UNION ALL
-Select "CLK_AWD_PRJ_END_DT" as Measure,min(CLK_AWD_PRJ_END_DT), MAX(CLK_AWD_PRJ_END_DT) from loaddata.awards_history
-UNION ALL
-Select "CLK_AWD_ALLOC_STRT_DT",min(CLK_AWD_ALLOC_STRT_DT), MAX(CLK_AWD_ALLOC_STRT_DT) from loaddata.awards_history
-UNION ALL
-Select "CLK_AWD_ALLOC_END_DT"as Measure,min(CLK_AWD_ALLOC_END_DT), MAX(CLK_AWD_PRJ_END_DT) from loaddata.awards_history
-UNION ALL
-Select "CLK_AWD_OVERALL_START_DATE"as Measure,min(CLK_AWD_OVERALL_START_DATE), MAX(CLK_AWD_OVERALL_START_DATE) from loaddata.awards_history
-UNION ALL
-Select "CLK_AWD_OVERALL_END_DATE"as Measure,min(CLK_AWD_OVERALL_START_DATE), MAX(CLK_AWD_OVERALL_END_DATE) from loaddata.awards_history
-;
-
-
-select "Direct" as Measure, min(DIRECT_AMOUNT) as Minimum, max(DIRECT_AMOUNT) as Maximum, sum(DIRECT_AMOUNT) AS Total, Avg(DIRECT_AMOUNT) as Average from loaddata.awards_history
-UNION ALL
-select "Indirect" as Measure, min(INDIRECT_AMOUNT) as Minimum, max(INDIRECT_AMOUNT) as Maximum, sum(INDIRECT_AMOUNT) AS Total, Avg(INDIRECT_AMOUNT) as Average from loaddata.awards_history
-UNION ALL
-select "AuthAmt" as Measure, min(SPONSOR_AUTHORIZED_AMOUNT) as Minimum, max(SPONSOR_AUTHORIZED_AMOUNT) as Maximum, sum(SPONSOR_AUTHORIZED_AMOUNT) AS Total, Avg(SPONSOR_AUTHORIZED_AMOUNT) as Average from loaddata.awards_history
-;
+#############################################################################################
+#############################################################################################
+#############################################################################################
+#############################################################################################
+#############################################################################################
+#############################################################################################
+#############################################################################################
 
 
 
 
 SET sql_mode = '';
 SET SQL_SAFE_UPDATES = 0;
-create table loaddata.backupAwardsHistory20191028 AS SELECT * from lookup.awards_history;
+create table loaddata.backupAwardsHistory20191119 AS SELECT * from lookup.awards_history;
 
 
 select * from loaddata.awards_history  Where CLK_AWD_PRJ_END_DT='Research Developmental'

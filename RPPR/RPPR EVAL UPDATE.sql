@@ -46,6 +46,11 @@ from work.facsvc
 group by Year,nSVC;
 
 
+
+
+
+
+
 drop table if exists work.facsvcagg; 
 create table work.facsvcagg AS
 Select Year,count(distinct Person_key) AS TOTAL,sum(0) as Over2Svc

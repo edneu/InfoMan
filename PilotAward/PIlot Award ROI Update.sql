@@ -21,7 +21,7 @@ CLK_AWD_PROJ_NAME AS Grant_Title,
 DIRECT_AMOUNT,
 INDIRECT_AMOUNT,
 SPONSOR_AUTHORIZED_AMOUNT
- FROM lookup.awards_history where CLK_AWD_PROJ_NAME  like "%Iatrogenic%";
+ FROM lookup.awards_history where CLK_AWD_PROJ_NAME  like "%IGNITE%";
 ;
 
 
@@ -46,11 +46,12 @@ UPDATE pilots.PILOTS_MASTER SET ProjectStatus="Ongoing"
 
 select Category,count(*) from pilots.PILOTS_MASTER
 WHERE Awarded="Awarded"
-AND Award_Year<=2016
+#AND Award_Year<=2016
 GROUP BY Category;
 
-
-
+select count(*) from pilots.PILOTS_MASTER
+WHERE Awarded="Awarded"
+AND Category<>"SECIM";
 
 Completed
 Closed-Low Enrollment 
@@ -327,6 +328,9 @@ FROM pilots.PILOTS_MASTER pi
      LEFT JOIN pilots.PUB_PILOTID_AGG pb ON pi.Pilot_ID=pb.Pilot_ID;
      
      
+UPDATE pilots.PILOTS_SUMMARY SET GrantYear=0 WHERE GrantYear IS NULL;
+UPDATE pilots.PILOTS_SUMMARY SET PubYear=0 WHERE PubYear IS NULL;
+
      
 ALTER TABLE pilots.PILOTS_SUMMARY
 	ADD TotalAMT decimal(11,2),
@@ -342,8 +346,8 @@ RelatedGrant=0;
 
 
 
-UPDATE pilots.PILOTS_SUMMARY SET RelatedPub=1 WHERE PubYear>0 AND PubYear<=2018;
-UPDATE pilots.PILOTS_SUMMARY SET RelatedGrant=1 WHERE GrantYear>0 AND GrantYear<=2018;       
+UPDATE pilots.PILOTS_SUMMARY SET RelatedPub=1 WHERE PubYear>0 AND PubYear<=2019;
+UPDATE pilots.PILOTS_SUMMARY SET RelatedGrant=1 WHERE GrantYear>0 AND GrantYear<=2019;       
 
 SET SQL_SAFE_UPDATES = 1;	
 ##################################################################################################################
