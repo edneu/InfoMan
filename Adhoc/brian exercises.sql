@@ -23,6 +23,12 @@ GROUP BY UF_GENDER_CD;
 
 #2
 Select Count(*),Count(Distinct UF_UFID) from  lookup.ufids ;
+## OR
+
+Select Count(*)=Count(Distinct UF_UFID) from  lookup.ufids ;
+## OR
+Select Count(*)-Count(Distinct UF_UFID) from  lookup.ufids ;
+
 
 #3
 SELECT UF_FIRST_NM

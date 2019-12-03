@@ -17,33 +17,33 @@ GROUP BY YEAR(VISITDATE)
 
 ## OUTPATIENT VISITS FOR 2017
 SELECT COUNT(*) 
-FROM ctsi_webcamp.OPVISIT
+FROM ctsi_webcamp_pr.OPVISIT
 WHERE PROTOCOL IS NOT NULL 
 AND STATUS IN (2,3)
 AND LAB IN (SELECT UNIQUEFIELD FROM ctsi_webcamp.lab WHERE LAB="CRC")
 AND LOCATION IN (SELECT UNIQUEFIELD FROM ctsi_webcamp_pr.location WHERE location IN ("GCRC","JCAHO (non-GCRC)"))
-AND YEAR(VISITDATE)=2017;
+AND YEAR(VISITDATE)=2019;
 
 ## Unduplicated Particpants for 2016
-select * from ctsi_webcamp.location;
+select * from ctsi_webcamp_pr.location;
 
 ### UNDUP PARTICPANTS
 drop table if exists ctsi_webcamp_adhoc.enrollment_tmp1;
 CREATE TABLE ctsi_webcamp_adhoc.enrollment_tmp1 AS
-     SELECT PATIENT,PROTOCOL FROM ctsi_webcamp_pr.OPVISIT WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3) AND YEAR(VISITDATE)=2018
+     SELECT PATIENT,PROTOCOL FROM ctsi_webcamp_pr.OPVISIT WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3) AND YEAR(VISITDATE)=2019
          UNION ALL
-     SELECT PATIENT,PROTOCOL FROM ctsi_webcamp.ADMISSIO WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3)  AND YEAR(ADMITDATE)=2018
+     SELECT PATIENT,PROTOCOL FROM ctsi_webcamp.ADMISSIO WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3)  AND YEAR(ADMITDATE)=2019
          UNION ALL
-     SELECT PATIENT,PROTOCOL FROM ctsi_webcamp.SBADMISSIO WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3) AND YEAR(ADMITDATE)=2018
+     SELECT PATIENT,PROTOCOL FROM ctsi_webcamp.SBADMISSIO WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3) AND YEAR(ADMITDATE)=2019
  ;
 
 drop table if exists ctsi_webcamp_adhoc.enrollment_tmp1;
 CREATE TABLE ctsi_webcamp_adhoc.enrollment_tmp1 AS
-     SELECT PATIENT,PROTOCOL FROM ctsi_webcamp.OPVISIT WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3) AND YEAR(VISITDATE)=2017
+     SELECT PATIENT,PROTOCOL FROM ctsi_webcamp_pr.OPVISIT WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3) AND YEAR(VISITDATE)=2017
          UNION ALL
-     SELECT PATIENT,PROTOCOL FROM ctsi_webcamp.ADMISSIO WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3)  AND YEAR(ADMITDATE)=2017
+     SELECT PATIENT,PROTOCOL FROM ctsi_webcamp_pr.ADMISSIO WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3)  AND YEAR(ADMITDATE)=2017
          UNION ALL
-     SELECT PATIENT,PROTOCOL FROM ctsi_webcamp.SBADMISSIO WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3) AND YEAR(ADMITDATE)=2017
+     SELECT PATIENT,PROTOCOL FROM ctsi_webcamp_pr.SBADMISSIO WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3) AND YEAR(ADMITDATE)=2017
  ;
 
 
@@ -63,20 +63,21 @@ CREATE TABLE ctsi_webcamp_adhoc.enrollment_tmp1 AS
      SELECT YEAR(ADMITDATE) as VisitYear,PATIENT,PROTOCOL FROM ctsi_webcamp.SBADMISSIO WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3) 
  ;
 
+drop table if exists ctsi_webcamp_adhoc.temp;
 create table ctsi_webcamp_adhoc.temp
 select VisitYear,count(distinct PATIENT) AS UndupParticpants, count(*) as Visits from ctsi_webcamp_adhoc.enrollment_tmp1 group by VisitYear;
 
 select count(distinct PATIENT) AS UndupParticpants, count(*) as Visits 
 from ctsi_webcamp_adhoc.enrollment_tmp1
-Where VisitYear in (2012,2013,2014,2015,2016,2017);
+Where VisitYear in (2012,2013,2014,2015,2016,2017,2018,2019);
 
 select count(distinct PATIENT) AS UndupParticpants, count(*) as Visits 
 from ctsi_webcamp_adhoc.enrollment_tmp1
-Where VisitYear in (2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017);
+Where VisitYear in (2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019);
 
 select count(distinct PATIENT) AS UndupParticpants, count(*) as Visits 
 from ctsi_webcamp_adhoc.enrollment_tmp1
-Where VisitYear in (2009,2010,2011,2012,2013,2014,2015,2016,2017);
+Where VisitYear in (2009,2010,2011,2012,2013,2014,2015,2016,2017,2018.2019);
 
 ############# TEST
 
@@ -85,13 +86,14 @@ Where VisitYear in (2009,2010,2011,2012,2013,2014,2015,2016,2017);
 
 drop table if exists ctsi_webcamp_adhoc.enrollment_tmp1;
 CREATE TABLE ctsi_webcamp_adhoc.enrollment_tmp1 AS
-     SELECT YEAR(VISITDATE) AS VisitYear,PATIENT,PROTOCOL FROM ctsi_webcamp.OPVISIT WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3) 
+     SELECT YEAR(VISITDATE) AS VisitYear,PATIENT,PROTOCOL FROM ctsi_webcamp_pr.OPVISIT WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3) 
          UNION ALL
-     SELECT YEAR(ADMITDATE) as VisitYear,PATIENT,PROTOCOL FROM ctsi_webcamp.ADMISSIO WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3)  
+     SELECT YEAR(ADMITDATE) as VisitYear,PATIENT,PROTOCOL FROM ctsi_webcamp_pr.ADMISSIO WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3)  
          UNION ALL
-     SELECT YEAR(ADMITDATE) as VisitYear,PATIENT,PROTOCOL FROM ctsi_webcamp.SBADMISSIO WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3) 
+     SELECT YEAR(ADMITDATE) as VisitYear,PATIENT,PROTOCOL FROM ctsi_webcamp_pr.SBADMISSIO WHERE PROTOCOL IS NOT NULL AND STATUS IN (2,3) 
  ;
 
+drop table ctsi_webcamp_adhoc.temp;
 create table ctsi_webcamp_adhoc.temp
 select VisitYear,count(distinct PATIENT) AS UndupParticpants, count(*) as Visits from ctsi_webcamp_adhoc.enrollment_tmp1 group by VisitYear;
 
