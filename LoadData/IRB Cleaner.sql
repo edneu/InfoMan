@@ -1,10 +1,10 @@
 
 
-desc loaddata.irb_raw_sept_2019;
+desc lookup.irb_raw_nov_2019;
 
 drop table if exists work.irb;
 create table work.irb as
-select * from loaddata.irb_raw_sept_2019;
+select * from lookup.irb_raw_nov_2019;
 
 
 
@@ -323,9 +323,9 @@ WHERE IRB_Approval_Month IS NOT NULL
 group by IRB_Approval_Month;
 
 ALTER TABLE results.IRB_monthly_MEDIAN
-ADD FullReview decimal(10.2),
-ADD Expedited decimal(10.2),
-ADD Exempt decimal(10.2);
+ADD FullReview decimal(10,2),
+ADD Expedited decimal(10,2),
+ADD Exempt decimal(10,2);
 
 SET SQL_SAFE_UPDATES = 0;
 

@@ -66,6 +66,7 @@ WHERE PROTOCOL IS NOT NULL
 AND STATUS IN (2,3)
 AND LAB IN (SELECT UNIQUEFIELD FROM ctsi_webcamp.lab WHERE LAB="CRC")
 AND LOCATION IN (SELECT UNIQUEFIELD FROM ctsi_webcamp.location WHERE location IN ("GCRC","JCAHO (non-GCRC)"))
+AND YEAR(VISITDATE)>=2012
 GROUP BY YEAR(VISITDATE);
 
 
@@ -73,53 +74,29 @@ GROUP BY YEAR(VISITDATE);
 
 drop table if exists ctsi_webcamp_adhoc.inp;
 CREATE TABLE ctsi_webcamp_adhoc.inp AS
-    SELECT Year(ADMITDATE) as ActYear,
+    SELECT Year(ADMITDATE) as AdmYear,
+		   1 as Admit,
 		   datediff(DISCHDATE,ADMITDATE) as days
       FROM ctsi_webcamp_pr.ADMISSIO 
       WHERE PROTOCOL IS NOT NULL 
        AND STATUS IN (2,3) 
     UNION ALL
-    SELECT Year(ADMITDATE) as ActYear,
-           datediff(DISCHDATE,ADMITDATE) as days
-     FROM ctsi_webcamp_pr.SBADMISSIO 
-     WHERE PROTOCOL IS NOT NULL 
-       AND STATUS IN (2,3) 
-;
-drop table if exists ctsi_webcamp_adhoc.inp;
-CREATE TABLE ctsi_webcamp_adhoc.inp AS
-    SELECT Year(ADMITDATE) as ActYear,
-		   datediff(DISCHDATE,ADMITDATE) as days
-      FROM ctsi_webcamp_pr.ADMISSIO 
-      WHERE PROTOCOL IS NOT NULL 
-       AND STATUS IN (2,3) 
-    UNION ALL
-    SELECT Year(ADMITDATE) as ActYear,
+    SELECT Year(ADMITDATE) as AdmYear,
+           1 as Admit, 
            datediff(DISCHDATE,ADMITDATE) as days
      FROM ctsi_webcamp_pr.SBADMISSIO 
      WHERE PROTOCOL IS NOT NULL 
        AND STATUS IN (2,3) 
 ;
 
-drop table if exists ctsi_webcamp_adhoc.inp;
-CREATE TABLE ctsi_webcamp_adhoc.inp AS
-SELECT Year(ADMITDATE) AS AdmYear,
-       count(*) as Admit,
-       sum(datediff(DISCHDATE,ADMITDATE)) as days
-    FROM ctsi_webcamp_pr.ADMISSIO
-    group by Year(ADMITDATE)
-UNION ALL
-  SELECT Year(ADMITDATE) AS AdmYear,
-       count(*) as Admit,
-       sum(datediff(DISCHDATE,ADMITDATE)) as days
-FROM ctsi_webcamp_pr.SBADMISSIO 
-group by Year(ADMITDATE);
+
 
 
 
 ;
 
 
-SELECT AdmYear,Sum(admit) as IPSBAdmit,sum(days) as IPSBdays
+SELECT AdmYear,Sum(Admit) as IPSBAdmit,sum(days) as IPSBdays
 FROM  ctsi_webcamp_adhoc.inp
 WHERE AdmYear>=2012
 GROUP BY AdmYear;
@@ -127,3 +104,7 @@ GROUP BY AdmYear;
 
 
 select ADMITDATE,DISCHDATE from ctsi_webcamp_pr.ADMISSIO ;
+
+
+select ADMITDATE,DISCHDATE, datediff(ADMITDATE,DISCHDATE) AS Days from ctsi_webcamp_pr.ADMISSIO 
+WHERE datediff(ADMITDATE,DISCHDATE)>0;

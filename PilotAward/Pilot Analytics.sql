@@ -535,7 +535,7 @@ AND END_DATE is not Null;
 
 select * from pilots.pilot_master_analysis where ClosedPilot = 0;
 
-UPDATE pilots.PILOTS_MASTER SET Awarded="Withdrew" where Pilot_ID=96;
+####UPDATE pilots.PILOTS_MASTER SET Awarded="Withdrew" where Pilot_ID=96;
 
 
 ALTER TABLE pilots.pilot_master_analysis ADD DaysSinceClosed int(11);
@@ -576,11 +576,13 @@ UPDATE pilots.pilot_master_analysis
    
 SELECT  cATEGORY, aWARDtYPE,CRC_STUDY,COUNT(*) FROM pilots.pilot_master_analysis GROUP BY cATEGORY, aWARDTYPE,CRC_STUDY;
 
-UPDATE pilots.pilot_master_analysis SET CompCat='Clinical - Non-CRC Study' WHERE Category='Clinical' AND AwardType='' AND CRC_STUDY=0;
+UPDATE pilots.pilot_master_analysis SET CompCat='Clinical - Non-CRC Study' WHERE Category='Clinical' AND AwardType IN ('','Junior Faculty') ;
 UPDATE pilots.pilot_master_analysis SET CompCat='Clinical - CRC Study' WHERE Category='Clinical' AND AwardType='' AND CRC_STUDY=1;
+
+
 UPDATE pilots.pilot_master_analysis SET CompCat='Communications' WHERE Category='Communication' AND AwardType='' AND CRC_STUDY=0;
-UPDATE pilots.pilot_master_analysis SET CompCat='Communications' WHERE Category='Communication' AND AwardType='Faculty' AND CRC_STUDY=0;
-UPDATE pilots.pilot_master_analysis SET CompCat='Communications' WHERE Category='Communication' AND AwardType='Trainee' AND CRC_STUDY=0;
+UPDATE pilots.pilot_master_analysis SET CompCat='Communications' WHERE Category='Communication' AND AwardType IN ('Faculty','Junior Faculty') AND CRC_STUDY=0;
+UPDATE pilots.pilot_master_analysis SET CompCat='Communications' WHERE Category='Communication' AND AwardType = 'Trainee' AND CRC_STUDY=0;
 UPDATE pilots.pilot_master_analysis SET CompCat='Pipeline' WHERE Category='Pipeline' AND AwardType='Pipeline' AND CRC_STUDY=0;
 UPDATE pilots.pilot_master_analysis SET CompCat='PRICE' WHERE Category='PRICE' AND AwardType='' AND CRC_STUDY=0;
 UPDATE pilots.pilot_master_analysis SET CompCat='Trad-Junior Faculty' WHERE Category='Traditional' AND AwardType='Junior Faculty' AND CRC_STUDY=0;
@@ -593,11 +595,14 @@ UPDATE pilots.pilot_master_analysis SET CompCat='Translational' WHERE Category='
 UPDATE pilots.pilot_master_analysis SET CompCat='UFII-CTSI' WHERE Category='UFII-CTSI' AND AwardType='' AND CRC_STUDY=0;
 
 SELECT DISTINCT CompCat from pilots.pilot_master_analysis;
+SELECT Awarded,Award_Year,Category,AwardType from pilots.pilot_master_analysis WHERE CompCat is NULL;
 
 
 ALTER TABLE pilots.pilot_master_analysis 
 ADD Pubdate datetime null,
 ADD GrantDate datetime null;
+
+SELECT * from pilots.pilot_master_analysis ;
 
 
 

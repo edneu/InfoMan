@@ -2,8 +2,8 @@ DROP TABLE IF EXISTS pilots.CompPilots;
 create table pilots.CompPilots AS
 Select Distinct Pilot_ID
 FROM pilots.PILOTS_SUMMARY
-WHERE Award_Year>=2012 AND Award_Year<2018
-AND ProjectStatus="Completed"
+WHERE Award_Year>=2012 AND Award_Year<2019
+AND Status="Completed"
 AND Awarded="Awarded"
 AND Category NOT IN ("SECIM")
 ;
@@ -80,4 +80,6 @@ SET SQL_SAFE_UPDATES = 1;
 SELECT PI_LAST, College, numAward
 from work.Pilot_grant_count
 WHERE  numAward>1;
+
+
 

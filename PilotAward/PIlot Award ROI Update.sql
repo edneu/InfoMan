@@ -168,14 +168,14 @@ WHERE pd.CLK_AWD_PROJ_ID=lu.CLK_AWD_PROJ_ID
 
 SET SQL_SAFE_UPDATES = 0;
 
-DELETE from pilots.ROIAward_detail_work
-       WHERE FUNDS_ACTIVATED<AwardLetterDate ;
-
-
-SET SQL_SAFE_UPDATES = 1;
 
 
 ### DELETE PROJECT RECORDS PRIOR TO Pilot Award Letter
+DELETE from pilots.ROIAward_detail_work
+       WHERE FUNDS_ACTIVATED<AwardLetterDate ;
+
+SET SQL_SAFE_UPDATES = 1;
+
 select FUNDS_ACTIVATED,AwardLetterDate from pilots.ROIAward_detail_work
 WHERE FUNDS_ACTIVATED<AwardLetterDate ;
 
@@ -277,6 +277,96 @@ GROUP BY Pilot_ID;
 ### pilots.pilot_award_master IS THE ROOT
 ####### pilots.ROI_PILOTID_AGG are the Grants
 ####### pilots.PUB_PILOTID_AGG are the publications
+######################################################################################################################
+######################################################################################################################
+######################################################################################################################
+######################################################################################################################
+create table pilots.pm_backup as select * from pilots.PILOTS_MASTER;
+
+SELECT Status,ProjectStatus,count(*) from pilots.PILOTS_MASTER group by Status,ProjectStatus;
+
+
+
+
+UPDATE pilots.PILOTS_MASTER SET Status="Open", ProjectStatus="Ongoing"
+WHERE ProjectStatus="Ongoing";
+
+UPDATE pilots.PILOTS_MASTER SET Status="Open", ProjectStatus="Ongoing"
+WHERE Status="Open";
+
+UPDATE pilots.PILOTS_MASTER SET Status="Open", ProjectStatus="Ongoing"
+WHERE Status="Active";
+
+
+UPDATE pilots.PILOTS_MASTER SET Status="Open", ProjectStatus="Ongoing"
+WHERE Status="Open";
+
+UPDATE pilots.PILOTS_MASTER SET Status="Closed" , ProjectStatus="Closed"
+WHERE Status="Closed" OR ProjectStatus="Completed";
+
+
+UPDATE pilots.PILOTS_MASTER SET Status="Closed" 
+WHERE  ProjectStatus='Closed-Low Enrollment ';
+
+
+UPDATE pilots.PILOTS_MASTER SET Status="Closed" , ProjectStatus="Closed"
+WHERE Awarded='Withdrew';
+
+SELECT Awarded,Status,ProjectStatus,count(*) from pilots.PILOTS_MASTER group by Awarded,Status,ProjectStatus;
+
+
+
+
+SELECT Awarded from pilots.PILOTS_MASTER WHERE Status='';
+
+SELECT Award_Year,AwardLetterDate,End_Date,Category,Status,ProjectStatus from pilots.PILOTS_MASTER WHERE Status="Open"
+AND End_Date<CURDATE()  ;
+;
+drop table if Exists work.temp;
+create table work.temp as
+SELECT Pilot_ID,Award_Year,Category,Status,AwardLetterDate,End_Date,Title,PI_Last,PI_First,ProjectStatus from pilots.PILOTS_MASTER
+WHERE Status="Open"
+AND End_Date<CURDATE()  ;
+
+
+SELECT * from pilots.PILOTS_MASTER WHERE Status="Open" and End_Date IS NULL;
+
+SELECT DISTINCT End_Date from pilots.PILOTS_MASTER;
+
+SELECT Award_Year,AwardeeCareerStage,AwardeePositionAtApp,count(*) From pilots.PILOTS_MASTER
+WHERE Awarded="Awarded"
+GROUP BY Award_Year,AwardeeCareerStage,AwardeePositionAtApp;
+
+
+update pilots.PILOTS_MASTER set AwardeeCareerStage="Assistant Professor" WHERE AwardeeCareerStage='Junior Faculty';
+update pilots.PILOTS_MASTER set AwardeeCareerStage="Associate Professor" WHERE AwardeeCareerStage='Mid Career Faculty';
+update pilots.PILOTS_MASTER set AwardeeCareerStage="Professor" WHERE AwardeeCareerStage='Senior Faculty';
+update pilots.PILOTS_MASTER set AwardeePositionAtApp=AwardeeCareerStage WHERE AwardeePositionAtApp IS NULL and AwardeeCareerStage IS NOT NULL;
+
+drop table if Exists work.temp;
+create table work.temp as
+SELECT Pilot_ID, Category,Award_Year,UFID,PI_Last,PI_First,ProjectStatus from pilots.PILOTS_MASTER
+WHERE AwardeePositionAtApp IS NULL 
+AND AwardeeCareerStage IS NULL
+AND Awarded="Awarded";
+
+
+
+select * from pilots.PILOTS_MASTER WHERE Pilot_id=324;
+select * from lookup.Employees WHERE Name Like "HArtman%J%";
+
+
+
+
+
+######################################################################################################################
+######################################################################################################################
+######################################################################################################################
+######################################################################################################################
+
+
+
+###########################################################################################################################
 
 drop table if exists pilots.PILOTS_SUMMARY;
 CREATE TABLE pilots.PILOTS_SUMMARY AS
@@ -294,15 +384,15 @@ SELECT    pi.Pilot_ID,
           pi.PI_First,
           pi.PI_Last,
           pi.Title,
-          pi.Remain_Amt,
-          pi.Return_Amt,
+          ##pi.Remain_Amt,
+          ##pi.Return_Amt,
           pi.Role,
           pi.Institution,
-          pi.NumCollab,
+          ##pi.NumCollab,
           pi.Begin_Date,
           pi.End_Date,
-          pi.NCE_Date,
-          pi.PI_DEPT,
+          ##pi.NCE_Date,
+          ##pi.PI_DEPT,
           pi.PI_DEPTID,
           pi.PI_DEPTNM,
           pi.Orig_Award_Year,
@@ -321,8 +411,8 @@ SELECT    pi.Pilot_ID,
           pi.AwardeePositionAtApp,
           pi.AwardeeCareerStage,
           pi.Award_HummanSubjectResearch,
-          pi.CancerScore,
-          pi.AprilPilotID
+          pi.CancerScore
+          ##pi.AprilPilotID
 FROM pilots.PILOTS_MASTER pi
      LEFT JOIN pilots.ROI_PILOTID_AGG gr ON pi.Pilot_ID=gr.Pilot_ID
      LEFT JOIN pilots.PUB_PILOTID_AGG pb ON pi.Pilot_ID=pb.Pilot_ID;
@@ -346,10 +436,23 @@ RelatedGrant=0;
 
 
 
-UPDATE pilots.PILOTS_SUMMARY SET RelatedPub=1 WHERE PubYear>0 AND PubYear<=2019;
-UPDATE pilots.PILOTS_SUMMARY SET RelatedGrant=1 WHERE GrantYear>0 AND GrantYear<=2019;       
+UPDATE pilots.PILOTS_SUMMARY SET RelatedPub=1 WHERE PubYear>0 ;#AND PubYear<=2019;
+UPDATE pilots.PILOTS_SUMMARY SET RelatedGrant=1 WHERE GrantYear>0; # AND GrantYear<=2019;       
 
 SET SQL_SAFE_UPDATES = 1;	
+
+drop table if exists work.cb_pilot;
+create table work.cb_pilot as
+Select * from  pilots.PILOTS_SUMMARY
+WHERE Award_year>=2012
+AND Awarded="Awarded"
+AND Category NOT IN ("SECIM") ;
+
+
+SELECT SUM(Award_Amt),SUM(Total)
+from work.cb_pilot;
+
+
 ##################################################################################################################
 ##################################################################################################################
 ##################################################################################################################
@@ -442,3 +545,6 @@ select * from pilots.roi_awards where PilotID=379;
 ##################################################################
 
 
+desc pilots.PILOTS_PUB_MASTER;
+
+desc pilots.PILOTS_MASTER;
