@@ -118,4 +118,41 @@ TL1 TR001428	2015-2018	TL1 2015-2018
 UL1 RR029890    2009-2011	UL1 2009-2011
 UL1 TR000064	2012-2015	UL1 2012-2015
 UL1 TR001427	2015-2018	UL1 2015-2018
+
+
+select 
 */
+drop table if exists work.temp;
+create table work.temp as 
+Select PMID,
+       max(Publication_Date) as PubDate,
+       max(Article_Title) as Title,
+       max(First_Author_Name) FirstAuth
+       from work.pubmon
+where CTSIGrant=1
+AND STatus='NonComp'
+GROUP BY PMID;
+
+desc work.temp;
+
+select distinct PMID 
+from work.pubmon
+where CTSIGrant=1
+AND STatus='NonComp'
+GROUP BY PMID;
+
+
+
+/*
+ALTER TABLE work.PubmedOUT
+ADD Pubdate datetime,
+ADD FirstAuth varchar(255);
+
+
+UPDATE work.PubmedOUT po, work.temp lu
+SET po.Pubdate=lu.Pubdate,
+	po.FirstAuth=lu.FirstAuth
+WHERE po.PMID=lu.PMID;
+*/
+
+select * from work.PubmedOUT;

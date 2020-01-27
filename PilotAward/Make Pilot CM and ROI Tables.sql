@@ -5,10 +5,10 @@ SET SQL_SAFE_UPDATES = 0;
 
 
 ######################################################################
-ALTER TABLE pilots.PILOTS_SUMMARY
-	ADD TotalAMT decimal(11,2),
-	ADD RelatedPub int(1),
-	ADD RelatedGrant int(1);
+#ALTER TABLE pilots.PILOTS_SUMMARY
+	#ADD TotalAMT decimal(11,2),
+	#ADD RelatedPub int(1),
+	#ADD RelatedGrant int(1);
  ALTER TABLE pilots.PILOTS_SUMMARY   
    	ADD ROIRelatedPub int(1),
     ADD ROIRelatedGrant int(1);
@@ -41,12 +41,11 @@ Select * from pilots.PILOTS_SUMMARY
 WHERE Award_Year>=2012
 AND Awarded="Awarded"
 AND Category NOT IN ("SECIM")
-##AND ProjectStatus<>"Ongoing";
-### AND ProjectStatus="Completed";
 ;
+
 drop table if exists work.temp;
 create table work.temp AS
-Select Pilot_ID, AwardLetterDate,Title,End_Date,Begin_Date,NCE_Date
+Select Pilot_ID, AwardLetterDate,Title,End_Date,Begin_Date
 from work.cmpilotcalc;
 
 
@@ -100,7 +99,7 @@ SET Pub2012=0,
     
 SELECT "Number of Pilots with Pubs" as Measure, count(*) as nPilots from work.cmpilotcalc WHERE PubYear>=2012 AND PubYear<=2019    
 UNION ALL
-SELECT "Number of Pilots with Pubs" as Measure, count(*) as nPilots from work.cmpilotcalc WHERE GrantYear>=2012 AND GrantYear<=2019;    
+SELECT "Number of Pilots with Grants" as Measure, count(*) as nPilots from work.cmpilotcalc WHERE GrantYear>=2012 AND GrantYear<=2019;    
 
 
 ### select distinct PubYear,count(*) from work.cmpilotcalc group by PubYear ;
@@ -208,10 +207,14 @@ GROUP BY Category;
 ##
 
 
+ select distinct ProjectStatus from pilots.PILOTS_SUMMARY;
+ 
+ select * from pilots.PILOTS_SUMMARY where ProjectStatus='' AND Awarded="Awarded" ;
+
 Select Award_Year, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAmt) AS GrantAmt, Sum(ROIRelatedPub) AS HasPub, Sum(ROIRelatedGrant) AS HasGrant
 FROM pilots.PILOTS_SUMMARY
 WHERE Award_Year>=2012 AND Award_Year<=2019
-AND ProjectStatus="Completed"
+AND ProjectStatus="Closed"
 AND Awarded="Awarded"
 AND Category NOT IN ("SECIM")
 GROUP BY Award_Year;
@@ -223,7 +226,7 @@ Select Category, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAm
 FROM pilots.PILOTS_SUMMARY
 WHERE Award_Year>=2012 AND Award_Year<=2019
 AND Awarded="Awarded"
-AND ProjectStatus="Completed"
+AND ProjectStatus="Closed"
 AND Category NOT IN ("SECIM")
 GROUP BY Category;
 ;
@@ -237,10 +240,12 @@ Select AwardType, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalA
 FROM pilots.PILOTS_SUMMARY
 WHERE Award_Year>=2012 AND Award_Year<=2019
 AND Awarded="Awarded"
-AND ProjectStatus<>"Ongoing"
+AND ProjectStatus="Closed"
 AND Category IN ("Traditional")
 GROUP BY AwardType;
 ;
+
+
 
 ###################################
 ### AWRD BY COLLEGE
@@ -255,9 +260,10 @@ SELECT College,
 FROM pilots.PILOTS_SUMMARY
 WHERE Award_Year>=2012 AND Award_Year<=2019
 AND Awarded="Awarded"
-AND ProjectStatus<>"Ongoing"
+AND ProjectStatus="Closed"
 AND Category NOT IN ("SECIM")
-GROUP BY College;
+GROUP BY College
+ORDER BY GrantAmt DESC ;
 
 
 ###################################
@@ -268,7 +274,7 @@ Select AwardeeCareerStage, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,S
 FROM pilots.PILOTS_SUMMARY
 WHERE Award_Year>=2012 AND Award_Year<=2019
 AND Awarded="Awarded"
-AND ProjectStatus<>"Ongoing"
+AND ProjectStatus="Closed"
 AND Category NOT IN ("SECIM")
 GROUP BY AwardeeCareerStage;
 ;
@@ -282,7 +288,7 @@ Select PI_GENDER, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalA
 FROM pilots.PILOTS_SUMMARY
 WHERE Award_Year>=2012 AND Award_Year<=2019
 AND Awarded="Awarded"
-AND ProjectStatus<>"Ongoing"
+AND ProjectStatus="Closed"
 AND Category NOT IN ("SECIM")
 GROUP BY PI_GENDER ;
 ;
@@ -407,70 +413,47 @@ DROP TABLE IF EXISTS work.APIlotAwardExtract;
 CREATE TABLE work.APIlotAwardExtract AS
 Select 
 
-        AwardLetterDate,
+        AwardLetterDate;
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        PubVerifyNote,
-        GrantVerifyNote,
-
-
- from lookup.pilots
-WHERE Award_Year>=2012
+Select 	COUNT(*) as NumProjects, 
+        Sum(Award_Amt) AS PilotAmt,
+        Sum(TotalAmt) AS GrantAmt,
+        Sum(ROIRelatedPub) AS HasPub,
+        Sum(ROIRelatedGrant) AS HasGrant,
+        Min(Award_Amt) AS MINAWD,
+        MAx(Award_Amt) AS MAXAWD
+FROM pilots.PILOTS_SUMMARY
+WHERE Award_Year>=2012 AND Award_Year<=2019
+AND ProjectStatus="Closed"
 AND Awarded="Awarded"
 AND Category NOT IN ("SECIM")
-ORDER BY Award_Year,
-       Category,
-       AwardType,
-       Award_Amt,
-       PI_Last
+
 ;
 
-/*
-## Check Sums
-Select Pilot_ID,
-       sum(DirectAmt),
 
-
- from lookup.pilots
-WHERE Award_Year>=2012
+SELECT Count(distinct pilot_ID),COUNT(*) from pilots.PILOTS_PUB_MASTER
+WHERE Pilot_ID IN 
+(select Distinct Pilot_ID FROM pilots.PILOTS_SUMMARY
+WHERE Award_Year>=2012 AND Award_Year<=2019
+AND ProjectStatus="Closed"
 AND Awarded="Awarded"
-AND ProjectStatus<>"Ongoing"
-AND (PubYear<>0 OR GrantYear<>0)
-AND Category NOT IN ("SECIM")
-group by Pilot_ID;
+AND Category NOT IN ("SECIM"));
 
 
-Select PilotID,
-       sum(DIRECT_AMOUNT),
+
+SELECT COunt(distinct pilot_ID), COUNT(*) from pilots.ROI_AWARD_AGG
+WHERE Pilot_ID IN 
+(select Distinct Pilot_ID FROM pilots.PILOTS_SUMMARY
+WHERE Award_Year>=2012 AND Award_Year<=2019
+AND ProjectStatus="Closed"
+AND Awarded="Awarded"
+AND Category NOT IN ("SECIM"));
 
 
- from work.pilottesttotal
-group by PilotID;
-
-;
-*/
-Create table loaddata.backuppilot20170523 AS select * from lookup.pilots;
 
 
-select distinct College from lookup.pilots;
-;
+

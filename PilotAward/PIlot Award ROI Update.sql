@@ -94,6 +94,16 @@ select sum(DIRECT_AMOUNT), Sum(INDIRECT_AMOUNT),sum(SPONSOR_AUTHORIZED_AMOUNT)  
 ##  CREATE DETAIL AWARDS TABLE FOR UPDATES ###################################
 ##############################################################################
 
+### CREATE BACKUPS
+create table loaddata.BU2_PILOTS_MASTER AS Select * from pilots.PILOTS_MASTER;
+create table loaddata.BU2_PILOTS_GRANT_SUMMARY AS Select * from pilots.PILOTS_GRANT_SUMMARY;
+create table loaddata.BU2_PILOTS_PUB_MASTER AS Select * from pilots.PILOTS_PUB_MASTER;
+create table loaddata.BU2_PILOTS_ROI_DETAIL AS Select * from pilots.PILOTS_ROI_DETAIL;
+create table loaddata.BU2_PILOTS_ROI_MASTER AS Select * from pilots.PILOTS_ROI_MASTER;
+create table loaddata.BU2_PILOTS_SUMMARY AS Select * from pilots.PILOTS_SUMMARY;
+
+
+##  CREATE DETAIL AWARDS TABLE FOR UPDATES ###################################
 DROP TABLE IF EXISTS pilots.ROIAward_detail_work;
 Create table pilots.ROIAward_detail_work AS
 SELECT
@@ -131,10 +141,10 @@ SELECT
 	SPONSOR_AUTHORIZED_AMOUNT
 from lookup.awards_history
 WHERE CLK_AWD_PROJ_ID IN (SELECT DISTINCT CLK_AWD_PROJ_ID from pilots.PILOTS_ROI_MASTER WHERE AggLevel="Project");
+
 ##
 ## ADD Pilot Award Information to Award Data
 ##
-
 
 
 ALTER TABLE pilots.ROIAward_detail_work
@@ -171,12 +181,15 @@ SET SQL_SAFE_UPDATES = 0;
 
 
 ### DELETE PROJECT RECORDS PRIOR TO Pilot Award Letter
+#### VERIFY
+
+select Pilot_ID,FUNDS_ACTIVATED,AwardLetterDate,datediff(FUNDS_ACTIVATED,AwardLetterDate) from pilots.ROIAward_detail_work
+WHERE FUNDS_ACTIVATED<AwardLetterDate ;
+#### DELETE GRANT RECORDS FUNDS_ACTIVATED BEFORE AwardLetterDate
 DELETE from pilots.ROIAward_detail_work
        WHERE FUNDS_ACTIVATED<AwardLetterDate ;
 
-SET SQL_SAFE_UPDATES = 1;
-
-select FUNDS_ACTIVATED,AwardLetterDate from pilots.ROIAward_detail_work
+select Pilot_ID,FUNDS_ACTIVATED,AwardLetterDate,datediff(FUNDS_ACTIVATED,AwardLetterDate) from pilots.ROIAward_detail_work
 WHERE FUNDS_ACTIVATED<AwardLetterDate ;
 
 
@@ -208,12 +221,13 @@ SELECT
 from pilots.ROIAward_detail_work, (SELECT @ROI_Detail_id := 0) n
 ORDER BY Pilot_ID;
 
-### DROP TABLE pilots.ROIAward_detail_work
+### Create table Aggregated by PilotID and Award 
 
 DROP TABLE IF EXISTS pilots.ROI_AWARD_AGG;
 CREATE TABLE pilots.ROI_AWARD_AGG AS
 	SELECT 	Pilot_ID,
             Concat("AwdID: ",CLK_AWD_ID) AS GrantID ,
+            1 as nAwards,
             MAX(Pilot_Award_Date) AS Pilot_Award_Date,
 			MIN(Grant_Title) AS Grant_Title,
 			MIN(Year_Activiated) AS GrantYear,
@@ -232,6 +246,7 @@ Group by Pilot_ID, Concat("AwdID: ",CLK_AWD_ID)
 UNION ALL
 	SELECT 	Pilot_ID,
            	Concat("ProjID: ",CLK_AWD_PROJ_ID) AS GrantID ,
+            1 as nAwards,
             MAX(Pilot_Award_Date) AS Pilot_Award_Date,
 			MIN(Grant_Title) AS Grant_Title,
 			MIN(Year_Activiated) AS GrantYear,
@@ -248,10 +263,13 @@ FROM pilots.ROI_Detail
 WHERE AggLevel="Project"
 Group by Pilot_ID, Concat("ProjID: ",CLK_AWD_PROJ_ID) ;
 
+
+
 #### This table is for the grants summary for the single Pilot View
 DROP TABLE IF EXISTS pilots.ROI_PILOTID_AGG;
 CREATE TABLE pilots.ROI_PILOTID_AGG AS
 	SELECT 	Pilot_ID,
+            SUM(nAwards) as nAwards,
             MIN(Pilot_Award_Date) AS Pilot_Award_Date,
             Min(YEAR(Year_Activiated)) AS GrantYear,
             GROUP_CONCAT(CONCAT(Grant_Title," (",Year_Activiated,") ",Grant_Sponsor," (",Grant_Sponsor_ID,") $",Fmt_Total)," | ") AS Grant_Summary,
@@ -261,13 +279,17 @@ CREATE TABLE pilots.ROI_PILOTID_AGG AS
 FROM pilots.ROI_AWARD_AGG
 GROUP BY Pilot_ID;
 
-SELECT SUM(TOTAL) from pilots.ROI_PILOTID_AGG;
+### COMPARE TABLE TOTALS
+SELECT "ROI_AWARD_AGG" AS TableName, SUM(Total) from pilots.ROI_AWARD_AGG
+UNION ALL
+SELECT "ROI_AWARD_AGG" AS TableName, SUM(TOTAL) from pilots.ROI_PILOTID_AGG;
 
 
 #### This table is for the publication summary for the single Pilot View
 DROP TABLE IF EXISTS pilots.PUB_PILOTID_AGG;
 CREATE TABLE pilots.PUB_PILOTID_AGG AS
 SELECT	Pilot_ID,
+        SUM(1) as nPUBS,
 		Min(PubYear) AS PubYear,
 		GROUP_CONCAT(Concat(Citation) ," | ") AS PubSummary
 FROM pilots.PILOTS_PUB_MASTER
@@ -281,84 +303,6 @@ GROUP BY Pilot_ID;
 ######################################################################################################################
 ######################################################################################################################
 ######################################################################################################################
-create table pilots.pm_backup as select * from pilots.PILOTS_MASTER;
-
-SELECT Status,ProjectStatus,count(*) from pilots.PILOTS_MASTER group by Status,ProjectStatus;
-
-
-
-
-UPDATE pilots.PILOTS_MASTER SET Status="Open", ProjectStatus="Ongoing"
-WHERE ProjectStatus="Ongoing";
-
-UPDATE pilots.PILOTS_MASTER SET Status="Open", ProjectStatus="Ongoing"
-WHERE Status="Open";
-
-UPDATE pilots.PILOTS_MASTER SET Status="Open", ProjectStatus="Ongoing"
-WHERE Status="Active";
-
-
-UPDATE pilots.PILOTS_MASTER SET Status="Open", ProjectStatus="Ongoing"
-WHERE Status="Open";
-
-UPDATE pilots.PILOTS_MASTER SET Status="Closed" , ProjectStatus="Closed"
-WHERE Status="Closed" OR ProjectStatus="Completed";
-
-
-UPDATE pilots.PILOTS_MASTER SET Status="Closed" 
-WHERE  ProjectStatus='Closed-Low Enrollment ';
-
-
-UPDATE pilots.PILOTS_MASTER SET Status="Closed" , ProjectStatus="Closed"
-WHERE Awarded='Withdrew';
-
-SELECT Awarded,Status,ProjectStatus,count(*) from pilots.PILOTS_MASTER group by Awarded,Status,ProjectStatus;
-
-
-
-
-SELECT Awarded from pilots.PILOTS_MASTER WHERE Status='';
-
-SELECT Award_Year,AwardLetterDate,End_Date,Category,Status,ProjectStatus from pilots.PILOTS_MASTER WHERE Status="Open"
-AND End_Date<CURDATE()  ;
-;
-drop table if Exists work.temp;
-create table work.temp as
-SELECT Pilot_ID,Award_Year,Category,Status,AwardLetterDate,End_Date,Title,PI_Last,PI_First,ProjectStatus from pilots.PILOTS_MASTER
-WHERE Status="Open"
-AND End_Date<CURDATE()  ;
-
-
-SELECT * from pilots.PILOTS_MASTER WHERE Status="Open" and End_Date IS NULL;
-
-SELECT DISTINCT End_Date from pilots.PILOTS_MASTER;
-
-SELECT Award_Year,AwardeeCareerStage,AwardeePositionAtApp,count(*) From pilots.PILOTS_MASTER
-WHERE Awarded="Awarded"
-GROUP BY Award_Year,AwardeeCareerStage,AwardeePositionAtApp;
-
-
-update pilots.PILOTS_MASTER set AwardeeCareerStage="Assistant Professor" WHERE AwardeeCareerStage='Junior Faculty';
-update pilots.PILOTS_MASTER set AwardeeCareerStage="Associate Professor" WHERE AwardeeCareerStage='Mid Career Faculty';
-update pilots.PILOTS_MASTER set AwardeeCareerStage="Professor" WHERE AwardeeCareerStage='Senior Faculty';
-update pilots.PILOTS_MASTER set AwardeePositionAtApp=AwardeeCareerStage WHERE AwardeePositionAtApp IS NULL and AwardeeCareerStage IS NOT NULL;
-
-drop table if Exists work.temp;
-create table work.temp as
-SELECT Pilot_ID, Category,Award_Year,UFID,PI_Last,PI_First,ProjectStatus from pilots.PILOTS_MASTER
-WHERE AwardeePositionAtApp IS NULL 
-AND AwardeeCareerStage IS NULL
-AND Awarded="Awarded";
-
-
-
-select * from pilots.PILOTS_MASTER WHERE Pilot_id=324;
-select * from lookup.Employees WHERE Name Like "HArtman%J%";
-
-
-
-
-
 ######################################################################################################################
 ######################################################################################################################
 ######################################################################################################################
@@ -411,16 +355,31 @@ SELECT    pi.Pilot_ID,
           pi.AwardeePositionAtApp,
           pi.AwardeeCareerStage,
           pi.Award_HummanSubjectResearch,
-          pi.CancerScore
-          ##pi.AprilPilotID
+          pi.CancerScore,
+          gr.nAwards,
+          pb.nPUBs
 FROM pilots.PILOTS_MASTER pi
      LEFT JOIN pilots.ROI_PILOTID_AGG gr ON pi.Pilot_ID=gr.Pilot_ID
      LEFT JOIN pilots.PUB_PILOTID_AGG pb ON pi.Pilot_ID=pb.Pilot_ID;
      
+
+SELECT "ROI_AWARD_AGG" AS TableName, SUM(Total) from pilots.ROI_AWARD_AGG
+UNION ALL
+SELECT "ROI_AWARD_AGG" AS TableName, SUM(TOTAL) from pilots.ROI_PILOTID_AGG
+UNION ALL
+SELECT "PILOTS_SUMMARY" AS TableName, SUM(TOTAL) from pilots.PILOTS_SUMMARY;
+
+
      
 UPDATE pilots.PILOTS_SUMMARY SET GrantYear=0 WHERE GrantYear IS NULL;
 UPDATE pilots.PILOTS_SUMMARY SET PubYear=0 WHERE PubYear IS NULL;
 
+SELECT Pilot_ID,PubYear,nPUBs,GrantYear,nAwards
+FROM  pilots.PILOTS_SUMMARY;   
+
+
+     
+     
      
 ALTER TABLE pilots.PILOTS_SUMMARY
 	ADD TotalAMT decimal(11,2),
@@ -430,14 +389,17 @@ ALTER TABLE pilots.PILOTS_SUMMARY
 SET SQL_SAFE_UPDATES = 0;	
 
 UPDATE pilots.PILOTS_SUMMARY
-SET TotalAMT=Total,
+SET TotalAMT=TOTAL,
 RelatedPub=0,
 RelatedGrant=0;
 
 
 
 UPDATE pilots.PILOTS_SUMMARY SET RelatedPub=1 WHERE PubYear>0 ;#AND PubYear<=2019;
-UPDATE pilots.PILOTS_SUMMARY SET RelatedGrant=1 WHERE GrantYear>0; # AND GrantYear<=2019;       
+UPDATE pilots.PILOTS_SUMMARY SET RelatedGrant=1 WHERE GrantYear>0; # AND GrantYear<=2019;     
+
+
+  
 
 SET SQL_SAFE_UPDATES = 1;	
 
@@ -448,9 +410,13 @@ WHERE Award_year>=2012
 AND Awarded="Awarded"
 AND Category NOT IN ("SECIM") ;
 
+create table work.transsumm as
+SELECT Pilot_ID,Award_Year,Category,AwardLetterDate,Award_Amt,PI_Last,PI_First,Email,Title,Grant_Summary,Total,PubSummary 
+from work.cb_pilot
+WHERE category="Translational";
 
-SELECT SUM(Award_Amt),SUM(Total)
-from work.cb_pilot;
+
+SELECT SUM(TOTAL),SUM(TotalAMT) from work.cb_pilot;
 
 
 ##################################################################################################################

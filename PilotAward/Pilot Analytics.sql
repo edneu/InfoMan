@@ -572,8 +572,7 @@ SET pubin12mon=0 ,
 ALTER TABLE pilots.pilot_master_analysis 
 	ADD CompCat varchar(40);
 
-UPDATE pilots.pilot_master_analysis
-   
+
 SELECT  cATEGORY, aWARDtYPE,CRC_STUDY,COUNT(*) FROM pilots.pilot_master_analysis GROUP BY cATEGORY, aWARDTYPE,CRC_STUDY;
 
 UPDATE pilots.pilot_master_analysis SET CompCat='Clinical - Non-CRC Study' WHERE Category='Clinical' AND AwardType IN ('','Junior Faculty') ;

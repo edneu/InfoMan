@@ -1,6 +1,9 @@
 #### PARSE PUBMED SUMMARY OUTPUT
-##DROP table work.pubmed_raw;
-## CREATE TABLE work.pubmed_raw AS select * from work.from_pubmed;
+##
+## drop table work.from_pubmed;
+DROP table work.pubmed_raw;
+
+## CREATE TABLE work.pubmed_raw AS select * from pilots.pubmed_raw;
 
 ############################################
 ##########  ADD COLUMNS TO RAW PUBMED OUTPUT
@@ -45,7 +48,7 @@ select PMID,PMCID,Citation from
 work.pubmed_raw
 order by PMID;
 
-select * from work.PubmedOUT;
+select * from work.PubmedOUT ;
 /*
 ##############################
 ### UPDATE Pub_CORE

@@ -1,10 +1,9 @@
 
 
-desc lookup.irb_raw_nov_2019;
 
 drop table if exists work.irb;
 create table work.irb as
-select * from lookup.irb_raw_nov_2019;
+select * from work.irb_raw_jan_2020;
 
 
 
@@ -62,6 +61,13 @@ WHERE Committee="IRB-01"
   AND Review_Type="Full IRB Review"
 GROUP BY IRB_Approval_Month;
 ;
+
+
+ALTER TABLE work.irb ADD Ceded_Review  int(1);
+UPDATE work.irb SET Ceded_Review=0;
+UPDATE work.irb SET Ceded_Review=1 WHERE substr(ID,1,3)="CED";
+
+
 
 ########## ANNUAL MEDIANS!!!!!
 
@@ -187,9 +193,9 @@ WHERE IRB_Approval_Year IS NOT NULL
 group by IRB_Approval_Year;
 
 ALTER TABLE results.IRB_CM_MEDIAN
-ADD FullReview decimal(10.2),
-ADD Expedited decimal(10.2),
-ADD Exempt decimal(10.2);
+ADD FullReview decimal(10,2),
+ADD Expedited decimal(10,2),
+ADD Exempt decimal(10,2);
 
 SET SQL_SAFE_UPDATES = 0;
 
@@ -372,3 +378,4 @@ drop table if exists lookup.myIRB;
 Create table lookup.myIRB as Select * from work.irb;
 
 select Review_Type,Committee,min(IRB_Approval_Month) from lookup.myIRB group by Committee,Review_Type;
+
