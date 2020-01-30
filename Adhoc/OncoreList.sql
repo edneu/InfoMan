@@ -105,3 +105,26 @@ WHERE  maxYear>=2018;
 select CLINICALTRIAL,count(*) from ctsi_webcamp_adhoc.protocol201819 group by CLINICALTRIAL; #FEW
 select MULTICENTE,count(*) from ctsi_webcamp_adhoc.protocol201819 group by MULTICENTE; # FEW
 select CLINTRIALSGOVID,count(*) from ctsi_webcamp_adhoc.protocol201819 group by CLINTRIALSGOVID;  #NONE
+
+DROP TABLE IF EXISTS ctsi_webcamp_adhoc.update18_1;
+CREATE TABLE ctsi_webcamp_adhoc.update18_1 AS
+Select UNIQUEFIELD AS PROTOCOL,
+	   Phase,
+       IDE,
+       IND,
+       PEDIATRICS ,
+       DATEFIRSTSUBJECTACCRUED,
+       DATECLOSEDTOACCRUAL,
+	   CLINICALTRIAL,
+	   MULTICENTE,
+	   INDUSTRYSUPPORTINIT,
+       FEDERALSUPPORT,
+       FOUNDATIONSUPPORT,
+       INDUSTRYSUPPORT,
+       OTHERSUPPORT,
+       OTHERSUPPORTSPEC,
+       STAGET0T4
+from ctsi_webcamp_pr.protocol
+WHERE UNIQUEFIELD IN (Select DISTINCT PROTOCOL from ctsi_webcamp_adhoc.protocol18)
+ORDER BY UNIQUEFIELD;
+

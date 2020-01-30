@@ -59,3 +59,83 @@ AND ocr.IRB_NO IS NULL;
  ;
  
  SELECT * from work.webcamp_ocr;    
+ 
+ 
+ 
+ drop table work.temp;
+ create table work.temp as
+ 
+ 
+ select EMAIL,
+		Employee_ID AS UFID, 
+		Department_Code,
+        Department,
+        Name,
+        ERACommons,
+        Job_Code
+ from lookup.Employees
+ Where Name like "%Leeuwenburgh%c%";
+ 
+ 
+ WHERE EMAIL IN
+ 
+('bbyrne@ufl.edu',
+'santon@aging.ufl.edu',
+'bbyrne@ufl.edu',
+'brantml@medicine.ufl.edu',
+'cmavian@ufl.edu',
+'coy.heldermon@medicine.ufl.edu',
+'hallemj@peds.ufl.edu',
+'muna.canales@medicine.ufl.edu',
+'santon@aging.ufl.edu',
+'bbyrne@ufl.edu',
+'cookrl@ufl.edu',
+'cookrl@ufl.edu',
+'oshechtm@phhp.url.edu',
+'cleeuwen@aging.ufl.edu',
+'davidclark@phhp.ufl.edu',
+'sjnixon@psychiatry.ufl.edu')
+ORDER BY EMAIL;
+
+
+drop table work.temp;
+create table work.temp as
+SELECT ID AS IRBNUMBER,
+NCT_Number,
+Study_Staff,
+Study_Staff_Role,
+PeopleSoft_Proposal_Number,
+Date_First_Subject_Signed_ICF,
+Actual_Enrollment_Number,
+Approved_Number_Of_Subjects,
+Brief_Description
+from lookup.myIRB
+WHERE ID IN
+(
+'CED000000110',
+'IRB201600271',
+'IRB201600334',
+'IRB201601141',
+'IRB201601667',
+'IRB201700035',
+'IRB201700315',
+'IRB201702227',
+'IRB201702564',
+'IRB201801264',
+'IRB201802914'
+);
+
+
+drop table work.temp;
+create table work.temp as
+select * from lookup.wirb
+WHERE `Protocol_#` IN
+('20161353',
+'20170344',
+'20170440',
+'20172089',
+'20172226',
+'20172818',
+'20180018');
+
+select * from lookup.wirb;

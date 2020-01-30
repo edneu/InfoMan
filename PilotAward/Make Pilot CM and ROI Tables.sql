@@ -415,10 +415,6 @@ Select
 
         AwardLetterDate;
 
-
-
-
-
 Select 	COUNT(*) as NumProjects, 
         Sum(Award_Amt) AS PilotAmt,
         Sum(TotalAmt) AS GrantAmt,
@@ -435,7 +431,9 @@ AND Category NOT IN ("SECIM")
 ;
 
 
-SELECT Count(distinct pilot_ID),COUNT(*) from pilots.PILOTS_PUB_MASTER
+############   Closed Pilots, Number of Publicaitons
+
+SELECT Count(distinct pilot_ID),COUNT(Distinct PMID) as nPUBS from pilots.PILOTS_PUB_MASTER
 WHERE Pilot_ID IN 
 (select Distinct Pilot_ID FROM pilots.PILOTS_SUMMARY
 WHERE Award_Year>=2012 AND Award_Year<=2019
@@ -444,16 +442,14 @@ AND Awarded="Awarded"
 AND Category NOT IN ("SECIM"));
 
 
+############   Closed Pilots, Number of Awards
 
-SELECT COunt(distinct pilot_ID), COUNT(*) from pilots.ROI_AWARD_AGG
+SELECT COunt(distinct pilot_ID), SUM(nAWARDS_UD) as nAwards from pilots.ROI_AWARD_AGG
 WHERE Pilot_ID IN 
 (select Distinct Pilot_ID FROM pilots.PILOTS_SUMMARY
 WHERE Award_Year>=2012 AND Award_Year<=2019
 AND ProjectStatus="Closed"
 AND Awarded="Awarded"
 AND Category NOT IN ("SECIM"));
-
-
-
 
 

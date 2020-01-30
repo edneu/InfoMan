@@ -6,6 +6,8 @@ select * from ctsi_webcamp_adhoc.merged_webcamp_oncore;
 
 desc ctsi_webcamp_pr.OPVISIT;
 
+select distinct VISITTYPE from ctsi_webcamp_pr.OPVISIT;
+
 
 drop table if exists ctsi_webcamp_adhoc.protopat;
 Create table ctsi_webcamp_adhoc.protopat as
@@ -45,3 +47,17 @@ SET SQL_SAFE_UPDATES = 1;
 
 
 SELECT * from ctsi_webcamp_adhoc.merged_webcamp_oncore;
+
+
+
+SELECT table_name, table_rows
+   FROM INFORMATION_SCHEMA.TABLES
+   WHERE TABLE_SCHEMA = 'ctsi_webcamp_pr'
+   AND table_name LIKE "%proto%";
+
+
+
+SELECT * from ctsi_webcamp_pr.protocol
+WHERE protocol in (	943,913,617,691,865,704,692,860,743,
+					810,902,610,708,607,690,732,700,695);
+
