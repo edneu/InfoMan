@@ -12,7 +12,7 @@ SELECT * from lookup.Employees;
 
 DROP TABLE IF EXISTS work.activeemp;
 CREATE TABLE work.activeemp AS
-select * from loaddata.active_emp_20191001;
+select * from loaddata.active_emp_20200214;
 
 
 ## Replace Active Employee File in Lookup
@@ -56,8 +56,8 @@ WHERE Employee_ID NOT IN (SELECT DISTINCT Employee_ID from work.activeemp);
 ## EMPLOYEE EMAIL FILE UPDATE
 
 DROP TABLE IF EXISTS work.EmpEmail;
-CREATE TABLE work.EmpEmail
-AS SELECT * from loaddata.empemail20191001;
+CREATE TABLE work.EmpEmail AS
+SELECT * from loaddata.empemail20200214;
 
 
 
@@ -241,6 +241,8 @@ AND lu.UF_USER_NM<>' ';
 DROP TABLE IF EXISTS lookup.Employees;
 CREATE TABLE lookup.Employees AS
 SELECT * FROM work.EmployeeUpdate;
+
+select count(*) from work.EmployeeUpdate;
 */
 select * from lookup.Employees;
 ###########################

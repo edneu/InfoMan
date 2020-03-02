@@ -40,3 +40,5 @@ UPDATE work.ctsi_profile_sample SET IncludeRec=1 WHERE facSEQ<=10;
 create table ctsi_frame AS
 select * from work.ctsi_profile_sample where IncludeRec=1
 ORDER BY FacType,LastName,FirstName;
+
+

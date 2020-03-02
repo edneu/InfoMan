@@ -24,7 +24,7 @@ UF_PRIMARY_AFFL varchar (3) NOT NULL,
 UF_WORK_TITLE varchar (50) NOT NULL,
 UF_TELEPHONE varchar (50) NOT NULL,
 UF_GENDER_CD varchar (3) NOT NULL,
-UF_BIRTH_DT date NULL,
+UF_BIRTH_DT datetime NULL,
 UF_ADDR_LINE1 varchar (50) NOT NULL,
 UF_ADDR_LINE2 varchar (50) NOT NULL,
 UF_ADDR_LINE3 varchar (50) NOT NULL,
@@ -38,11 +38,11 @@ TenureDEPTID varchar (30) NOT NULL
 );
 commit;
 
+select * from loaddata.ufids;
 
 
 
-
-load data local infile "P:\\My Documents\\My Documents\\Loaddata\\UFIDs20191029.dat" 
+load data local infile "P:\\My Documents\\My Documents\\Loaddata\\UFIDs20200214.dat" 
 into table loaddata.ufids 
 fields terminated by '\t'
 lines terminated by '\n'
@@ -76,12 +76,14 @@ TenureDEPTID
 
 select min(UF_BIRTH_DT), MAX(UF_BIRTH_DT) from loaddata.ufids ;
 
+SELECT DISTINCT UF_BIRTH_DT from loaddata.ufids;
+
 select UF_GENDER_CD,count(*) from loaddata.ufids group by UF_GENDER_CD;
 
 /*
-select * from loaddata.ufids where UF_GENDER_CD='UF_'; 
+select * from loaddata.ufids where UF_GENDER_CD LIKE 'UF%'; 
 SET SQL_SAFE_UPDATES = 0;
-delete from loaddata.ufids where UF_GENDER_CD='UF_';
+delete from loaddata.ufids where UF_GENDER_CD LIKE 'UF%';
 */
 
 select "New Table (loaddata.ufids):",count(*), count(distinct uf_ufid) from loaddata.ufids
@@ -172,7 +174,7 @@ select * from loaddata.ufids where UF_LAST_NM="Neu";
 select * from loaddata.backupufid20191029 where UF_LAST_NM="Neu";
 
 
-
+select * from lookup.ufids where UF_LAST_NM="fischbach";
 
 
 

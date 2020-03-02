@@ -180,8 +180,8 @@ Group by Year,FacType ;
 SELECT 	Year,
         Count(Distinct Person_key)
 from lookup.roster
-WHERE Affiliation="UF"
-  AND Year>=2012
+#WHERE Affiliation="UF"
+WHERE Year>=2012
 Group by Year; 
 
 
@@ -1187,3 +1187,46 @@ SELECT IRB_Approval_Year, count(distinct ID) from lookup.myIRB WHERE Ceded_Revie
 
 
 SELECT IRB_Approval_Year, count(distinct ID) from lookup.myIRB WHERE Committee='IRB-01' and Review_Type='Full IRB Review' group by IRB_Approval_Year;
+
+
+
+###################################
+
+SELECT 	Year,
+		Faculty,
+        Count(Distinct Person_key)
+from lookup.roster
+WHERE #Affiliation="UF"   AND
+   Faculty="Faculty"
+  AND Year>=2012
+Group by Year,Faculty ; 
+
+
+
+
+
+SELECT 	Year,
+		FacType,
+        Count(Distinct Person_key)
+from lookup.roster
+WHERE Affiliation="UF"
+  AND FacType='Trainee'
+  AND Year>=2012
+Group by Year,FacType ;  
+
+SELECT 	Year,
+		FacType,
+        Count(Distinct Person_key)
+from lookup.roster
+WHERE Affiliation="UF"
+AND FacType='Non-Faculty'
+  AND Year>=2012
+Group by Year,FacType ; 
+
+
+SELECT 	Year,
+        Count(Distinct Person_key)
+from lookup.roster
+WHERE Affiliation="UF"
+AND Year>=2012
+Group by Year; 
