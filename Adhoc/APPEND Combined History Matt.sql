@@ -265,7 +265,7 @@ SELECT
 	Accounting_Period,
 	Posted_Amount
 	#DupKEY
-from loaddata.newtranshist WHERE DupFlag=1;
+from loaddata.newtranshist WHERE DupFlag=0;
 
 
 desc loaddata.newtranshist;
@@ -312,11 +312,20 @@ select CTSI_Fiscal_Year,min(Journal_Date),max(Journal_Date),count(*) from Adhoc.
 ##################################################################################################################
 ##################################################################################################################
 ##################################################################################################################
+##### BACKUP AND rename
+/*
+CREATE TABLE Adhoc.comb_hist_report20200302BU AS
+SELECT * from Adhoc.combined_hist_rept;
+
+DROP TABLE IF EXISTS Adhoc.combined_hist_rept;
+CREATE TABLE Adhoc.combined_hist_rept AS
+SELECT * from Adhoc.combined_hist_rept_NEW;
+
 
 SELECT Grant_Year,sum(Posted_Amount)
 from Adhoc.combined_hist_rept
 group by Grant_Year;
-
+*/
 
 DROP TABLE IF EXISTS Adhoc.MattOut;
 create table Adhoc.MattOut AS
@@ -329,7 +338,7 @@ ORDER BY Grant_Year,Account_Code,ERP_Account_Level_4;
 
 DROP TABLE IF EXISTS Adhoc.MattOut2;
 create table Adhoc.MattOut2 AS
-SELECT Grant_Year,Alt_Dept_ID,Account_Code,ERP_Account_Level_4,sum(Posted_Amount)
+SELECT Grant_Year,Alt_Dept_ID,Account_Code,ERP_Account_Level_4,round(sum(Posted_Amount),2)
 from Adhoc.combined_hist_rept
 WHERE Journal_Date>str_to_date('04,01,2012', '%m,%d,%Y')
 AND Alt_Dept_ID IN ('29680240',

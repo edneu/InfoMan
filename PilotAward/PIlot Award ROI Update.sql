@@ -429,6 +429,8 @@ SELECT SUM(TOTAL),SUM(TotalAMT) from work.cb_pilot;
 ##################################################################################################################
 
  
+ 
+ SELECT 
 
 
 
@@ -514,3 +516,38 @@ select * from pilots.roi_awards where PilotID=379;
 desc pilots.PILOTS_PUB_MASTER;
 
 desc pilots.PILOTS_MASTER;
+
+
+DROP TABLE if exists work.temp_pilot;
+Create table work.temp_pilot As
+SELECT Pilot_ID, Award_Year, Status, Category
+FROM pilots.PILOTS_MASTER pm
+WHERE Award_Year>2012
+AND Awarded="Awarded";
+#AND Status="Completed";
+
+
+
+Alter table work.temp_pilot
+ADD NUM_Pilots int(5),
+ADD HAS_PUB int(1),
+ADD HAS_GRANT int(1);
+
+
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE work.temp_pilot
+       SET 	NUM_Pilots=1,
+			HAS_PUB=0,
+            HAS_GRANT=0;
+		
+
+UPDATE  work.temp_pilot tp, pilots.PILOTS_PUB_MASTER lu
+	SET HAS_PUB=1
+    WHERE tp.Pilot_ID=lu.Pilot_ID;
+    
+    
+UPDATE  work.temp_pilot tp, pilots.PILOTS_ROI_MASTER lu
+	SET HAS_GRANT=1
+    WHERE tp.Pilot_ID=lu.Pilot_ID;
+    
