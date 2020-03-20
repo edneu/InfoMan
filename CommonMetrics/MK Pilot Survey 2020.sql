@@ -34,6 +34,8 @@ UPDATE work.pilotpi pp, pilots.PILOTS_PUB_MASTER lu
 SET pp.Has_PUB=1
 WHERE pp.Pilot_ID=lu.Pilot_ID;
 
+#########
+
 
 
 
@@ -42,8 +44,8 @@ SET sql_mode = '';
 DROP TABLE IF EXISTS work.pilot_grant1;
 Create table work.pilot_grant1 as 
 SELECT * from lookup.awards_history
-WHERE CLK_PI_UFID in (SELECT DISTINCT UFID from work.pilotpi)
-   OR CLK_AWD_PROJ_MGR_UFID in (SELECT DISTINCT UFID from work.pilotpi);
+WHERE CLK_PI_UFID in (SELECT DISTINCT UFID from work.pilotpi  WHERE UFID<>'')
+   OR CLK_AWD_PROJ_MGR_UFID in (SELECT DISTINCT UFID from work.pilotpi WHERE UFID<>'');
    
    
 ALter table work.pilot_grant1
@@ -53,10 +55,16 @@ ADD AggLevel varchar(12);
 
 SET SQL_SAFE_UPDATES = 0;
 
+UPDATE work.pilot_grant1 
+SET PIlot_ID=NULL,
+	AggLevel=NULL;
+
+
 UPDATE work.pilot_grant1 gr, work.pilotpi lu
 SET gr.Pilot_ID=lu.Pilot_ID,
     gr.Agglevel = "Project"
 WHERE lu.UFID=gr.CLK_AWD_PROJ_MGR_UFID
+AND lu.UFID<>''
 AND lu.AwardLetterDate<=gr.FUNDS_ACTIVATED
 ;
 
@@ -66,6 +74,7 @@ UPDATE work.pilot_grant1 gr, work.pilotpi lu
 SET gr.Pilot_ID=lu.Pilot_ID,
     gr.AggLevel = "Award"
 WHERE lu.UFID=gr.CLK_PI_UFID
+AND lu.UFID<>''
 AND lu.AwardLetterDate<=gr.FUNDS_ACTIVATED
 ;
 
@@ -83,7 +92,29 @@ SELECT 	Pilot_ID,
 FROM  work.pilot_possgrant
 GROUP BY Pilot_ID;       
 
-select * from work.pilotpi where Pilot_ID in (299,83,57,59,64);
+
+Alter table work.pilotpi  	ADD NPossAWD int(11),
+							ADD NPossProj int(11),
+                            ADD PossTotlal decimal(65,10);
+                            
+                            
+UPDATE work.pilotpi pi, work.temp lu
+SET pi.NPossAWD=lu.NumAwards,
+	pi.NPossProj=lu.NumProj,
+    pi.PossTotlal=lu.Totamt
+WHERE pi.Pilot_ID = lu.Pilot_ID;
+
+select * from lookup.Employees WHERE Employee_ID='85067340';
+
+
+select * from work.pilotpi ;
+
+
+
+
+
+
+select sum(Has_GRANT), SUM(Has_PUB), count(*) from work.pilotpi;
 
 
 
