@@ -522,7 +522,7 @@ DROP TABLE if exists work.temp_pilot;
 Create table work.temp_pilot As
 SELECT Pilot_ID, Award_Year, Status, Category
 FROM pilots.PILOTS_MASTER pm
-WHERE Award_Year>2012
+WHERE Award_Year>=2012
 AND Awarded="Awarded";
 #AND Status="Completed";
 
@@ -550,4 +550,26 @@ UPDATE  work.temp_pilot tp, pilots.PILOTS_PUB_MASTER lu
 UPDATE  work.temp_pilot tp, pilots.PILOTS_ROI_MASTER lu
 	SET HAS_GRANT=1
     WHERE tp.Pilot_ID=lu.Pilot_ID;
+    
+SELECT 	Award_Year,
+		sum(NUM_Pilots) AS Num_Pilots,
+		sum(HAS_PUB) AS HAS_PUB,
+        sum(HAS_GRANT) AS HAS_GRANT
+from work.temp_pilot 
+#WHERE Status="Completed"
+WHERE Category="SECIM"
+group by Award_Year;        
+
+
+
+SELECT 	Award_Year,
+		sum(NUM_Pilots) AS Num_Pilots,
+		sum(HAS_PUB) AS HAS_PUB,
+        sum(HAS_GRANT) AS HAS_GRANT
+from work.temp_pilot 
+WHERE Status="Completed"
+AND (HAS_PUB=0 or HAS_GRANT=0)
+group by Award_Year;  
+;
+        
     

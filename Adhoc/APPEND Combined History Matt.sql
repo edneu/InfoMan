@@ -314,7 +314,7 @@ select CTSI_Fiscal_Year,min(Journal_Date),max(Journal_Date),count(*) from Adhoc.
 ##################################################################################################################
 ##### BACKUP AND rename
 /*
-CREATE TABLE Adhoc.comb_hist_report20200302BU AS
+CREATE TABLE Adhoc.comb_hist_report20200415BU AS
 SELECT * from Adhoc.combined_hist_rept;
 
 DROP TABLE IF EXISTS Adhoc.combined_hist_rept;
