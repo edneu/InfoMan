@@ -3,8 +3,14 @@
 
 drop table if exists work.covidacttemp;
 Create table work.covidacttemp AS
-select * from work.covindact_infile;
+select * from work.`covid-19_related_activities_apr`;
 
+
+ALTER TABLE work.covidacttemp ADD Category varchar(125);
+
+
+
+##  Standardize Qualtrics coding of Cateogry in the tree segements
 
 UPDATE work.covidacttemp SET Q4=1 WHERE Q4=1;
 UPDATE work.covidacttemp SET Q4=2 WHERE Q4=13;
@@ -46,10 +52,11 @@ UPDATE work.covidacttemp SET Q15=10 WHERE Q15=22;
 UPDATE work.covidacttemp SET Q15=11 WHERE Q15=23;
 UPDATE work.covidacttemp SET Q15=12 WHERE Q15=24;
 
+#####
 
 
 
-
+## Denormalize table HEader + reconse span (up to 3)
 
 
 DROP TABLE IF EXISTS  work.COVID_ACTIVITY;
@@ -97,15 +104,23 @@ from work.covidacttemp
 WHERE Q14 IS NOT NULL;
 
 
-ALTER TABLE work.COVID_ACTIVITY ADD Category varchar(125);
 
-UPDATE work.COVID_ACTIVITY 
-SET Category=OtherCat
-WHERE Category="Other" and OtherCat IS NOT NULL;
+ALTER TABLE work.COVID_ACTIVITY ADD Category varchar(125);
 
 UPDATE work.COVID_ACTIVITY ca, lookup.covid_proj_cat lu
 SET ca.Category=lu.Category
 WHERE ca.CatCODE=lu.CatCODE;
+
+
+UPDATE work.COVID_ACTIVITY 
+SET Category=CONCAT("Other: ",OtherCat)
+WHERE Category="Other" and OtherCat IS NOT NULL;
+
+UPDATE work.COVID_ACTIVITY 
+SET Category="Other: Not Specified"
+WHERE Category="Other" and OtherCat IS NULL;
+
+
 
 
 DROP  TABLE IF EXISTS results.COVID_ACT_OUT;
@@ -141,3 +156,6 @@ from work.covidacttemp
 WHERE Q12 IS NOT NULL
 ORDER BY Q2_2,Q2_1;
 ;
+
+select * from results.COVID_ACT_OUT;
+select * from results.COVID_ACT_COMMENT_OUT;
