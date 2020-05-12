@@ -15,6 +15,8 @@
 
 select * from loaddata.newtranshist;
 
+select min(Posted_Amount),max(Posted_Amount) from loaddata.newtranshist;
+
 Alter table loaddata.newtranshist
 		ADD CTSI_Fiscal_Year varchar(25),
         ADD Grant_Year varchar(25),
@@ -89,13 +91,18 @@ UPDATE loaddata.newtranshist SET Grant_Year='Year 5-R' WHERE Journal_Date BETWEE
 
 
 ### VERIFY FY assignemnts
+select Journal_Date,count(*) from loaddata.newtranshist  group by Journal_Date;
+select Grant_Year,count(*) from loaddata.newtranshist  group by Grant_Year;
+select CTSI_Fiscal_Year,count(*) from loaddata.newtranshist  group by CTSI_Fiscal_Year;
+
+
 select Journal_Date,count(*) from loaddata.newtranshist where CTSI_Fiscal_Year IS NULL group by Journal_Date;
 select Journal_Date,count(*) from loaddata.newtranshist where Grant_Year IS NULL group by Journal_Date;
 
 
 ######################   FLEX CODES
 
-SELECT count(*) from loaddata.newtranshist 
+SELECT Flex_Code,count(*) from loaddata.newtranshist 
 WHERE Flex_Code NOT IN (SELECT DISTINCT DeptFlex from Adhoc.flex_codes)
 group by Flex_Code;
 
@@ -314,7 +321,7 @@ select CTSI_Fiscal_Year,min(Journal_Date),max(Journal_Date),count(*) from Adhoc.
 ##################################################################################################################
 ##### BACKUP AND rename
 /*
-CREATE TABLE Adhoc.comb_hist_report20200415BU AS
+CREATE TABLE Adhoc.comb_hist_report20200430BU AS
 SELECT * from Adhoc.combined_hist_rept;
 
 DROP TABLE IF EXISTS Adhoc.combined_hist_rept;
@@ -331,8 +338,8 @@ DROP TABLE IF EXISTS Adhoc.MattOut;
 create table Adhoc.MattOut AS
 SELECT Grant_Year,Account_Code,ERP_Account_Level_4,sum(Posted_Amount)
 from Adhoc.combined_hist_rept
-WHERE Alt_Dept_ID='29680300'
-AND Journal_Date>str_to_date('04,01,2012', '%m,%d,%Y')
+#WHERE Alt_Dept_ID='29680300'
+WHERE Journal_Date>str_to_date('04,01,2012', '%m,%d,%Y')
 group by Grant_Year,Account_Code,ERP_Account_Level_4
 ORDER BY Grant_Year,Account_Code,ERP_Account_Level_4;
 
@@ -360,6 +367,15 @@ ORDER BY Grant_Year,Alt_Dept_ID,Account_Code,ERP_Account_Level_4;
 
 
 
+## ALL AltDept_IDs
+
+DROP TABLE IF EXISTS Adhoc.MattOut3;
+create table Adhoc.MattOut3 AS
+SELECT Grant_Year,Alt_Dept_ID,Account_Code,ERP_Account_Level_4,round(sum(Posted_Amount),2) AS Amount
+from Adhoc.combined_hist_rept
+WHERE Journal_Date>str_to_date('04,01,2012', '%m,%d,%Y')
+group by Grant_Year,Alt_Dept_ID,Account_Code,ERP_Account_Level_4
+ORDER BY Grant_Year,Alt_Dept_ID,Account_Code,ERP_Account_Level_4;
 
 
 

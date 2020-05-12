@@ -3,14 +3,16 @@
 
 drop table if exists work.covidacttemp;
 Create table work.covidacttemp AS
-select * from work.`covid-19_related_activities_apr`;
+select * from work.`covidact0504`;
 
 
 ALTER TABLE work.covidacttemp ADD Category varchar(125);
 
+SET SQL_SAFE_UPDATES = 0;
 
+##  Standardize Qualtrics coding of Cateogry in the three segements
+## Recode
 
-##  Standardize Qualtrics coding of Cateogry in the tree segements
 
 UPDATE work.covidacttemp SET Q4=1 WHERE Q4=1;
 UPDATE work.covidacttemp SET Q4=2 WHERE Q4=13;
@@ -113,7 +115,7 @@ WHERE ca.CatCODE=lu.CatCODE;
 
 
 UPDATE work.COVID_ACTIVITY 
-SET Category=CONCAT("Other: ",OtherCat)
+SET Category=CONCAT("Other: ",SUBSTR(OtherCat,1,20))
 WHERE Category="Other" and OtherCat IS NOT NULL;
 
 UPDATE work.COVID_ACTIVITY 

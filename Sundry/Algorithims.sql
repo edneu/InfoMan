@@ -2,8 +2,8 @@ SET sql_mode = '';
 SET sql_mode = "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION";
 set global sql_mode= 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';
 
- SELECT VERSION();
 
+ SELECT VERSION();
 SET GLOBAL local_infile = 1;
 
 SHOW VARIABLES LIKE 'local_infile';
@@ -16,7 +16,7 @@ set @@global.net_write_timeout = 9999999;
 SET SQL_SAFE_UPDATES = 1;
 
 
-str_to_date('03,31,2015','%m,%d,%Y')
+str_to_date('03,31,2015','%m,%d,%Y');
 
 
 
@@ -24,7 +24,7 @@ str_to_date('03,31,2015','%m,%d,%Y')
 RESET QUERY CACHE;
 
 
-/*  ADD UNDUP Variable
+/*  ADD UNDUP Variable DISCONTINED
 */
 SET SQL_SAFE_UPDATES = 0;
 

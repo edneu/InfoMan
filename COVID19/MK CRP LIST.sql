@@ -23,8 +23,6 @@ group by email;
 
 
 
-select Job_Title,count(*) from work.CRPMailList1 group by Job_Title;  
-
 
 SET SQL_SAFE_UPDATES = 0;
 
