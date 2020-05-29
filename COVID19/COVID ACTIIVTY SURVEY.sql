@@ -3,7 +3,7 @@
 
 drop table if exists work.covidacttemp;
 Create table work.covidacttemp AS
-select * from work.`covidact0504`;
+select * from work.covidact20200521;
 
 
 ALTER TABLE work.covidacttemp ADD Category varchar(125);
