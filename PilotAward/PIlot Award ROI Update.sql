@@ -573,5 +573,5 @@ group by Award_Year;
 ;
         
         
-        
+  select Count(*) from lookup.active_emp ;     
     

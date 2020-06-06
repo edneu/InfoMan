@@ -1,10 +1,11 @@
 drop table if exists work.irbtemp;
 create table work.irbtemp
-select * from work.irbcat0527;
+select * from work.irbcat0603d;
 
 drop table if exists work.proptemp;
 create table work.proptemp
-select * from work.propcat0527;
+select * from work.propcat0603b;
+
 
 
 ###########################################################################################################
@@ -65,6 +66,11 @@ AND   ic.Summ_Status=lu.Summ_Status;
 SELECT * from work.irbstatcomm;
 
 
+SELECT Summ_Status, SUM(IRB01+IRB02) AS Total_Prot
+FROM work.irbstatcomm
+GROUP BY Summ_Status;
+
+
 # # # # # # # ## # # ## # # ## # # ## # # ## # # ## # # ## # # ## # # ## # # #
 Drop table if exists work.irbcommcat;
 Create table work.irbcommcat as 
@@ -72,6 +78,10 @@ Select Committee, Reporting_Category, count(*) AS N
 from  work.irbtemp
 WHERE Summ_Status="Approved"
 group by Committee, Reporting_Category;
+
+Reporting_Category
+
+desc work.irbtemp;
 
 DROP TABLE IF EXISTS work.irbcatcomm;
 Create table work.irbcatcomm as 
@@ -92,7 +102,7 @@ AND   ic.Reporting_Category=lu.Reporting_Category;
 UPDATE work.irbcatcomm ic,  work.irbcommcat lu
 SET ic.IRB02=lu.N 
 WHERE lu.Committee="IRB-02"
-AND   ic.Reporting_Category=lu.Reporting_Category;
+AND   ic.Reporting_Category=lu.Reporting_Category; 
 
 
 SELECT * from work.irbcatcomm
@@ -136,7 +146,7 @@ from work.proptemp
 group by Summ_Status;
 
 
-### NO Blcock Grants
+### NO Block Grants
 select Summ_Status,count(*) AS N, sum(CLK_GRAND_TOTAL) as Total 
 from work.proptemp
 WHERE Reporting_Category NOT IN ('FED Approp/Block Grant')

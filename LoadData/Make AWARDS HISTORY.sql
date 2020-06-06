@@ -94,7 +94,7 @@ SET GLOBAL local_infile = 1;
 
 
 
-load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory20200416.csv" 
+load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory20200605.csv" 
 into table loaddata.awards_history 
 fields terminated by '|'
 lines terminated by '\n'
@@ -245,6 +245,9 @@ select * from loaddata.awards_history;
 #############################################################################################
 
 
+ALTER TABLE loaddata.awards_history
+ADD AcademicUnit varchar(45);
+
 UPDATE loaddata.awards_history ah, lookup.academic_units lu
        SET ah.AcademicUnit=lu.AcademicUnit
        WHERE ah.CLK_AWD_PI_COLLEGE=lu.College;
@@ -269,6 +272,8 @@ ADD Roster2018 integer(1),
 ADD Roster2019 integer(1);
 
 
+SET SQL_SAFE_UPDATES = 0;
+
 UPDATE loaddata.awards_history
 SET Roster2008=0,
     Roster2009=0,
@@ -286,6 +291,10 @@ SET Roster2008=0,
 
 #########
 
+SET SQL_SAFE_UPDATES = 0;
+
+CREATE INDEX rosterufid ON lookup.roster (UFID);
+CREATE INDEX rosteryear ON lookup.roster (Year);
 
 
 UPDATE loaddata.awards_history ah SET Roster2008=1 Where Year(FUNDS_ACTIVATED)=2008 AND ah.CLK_PI_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2009 and Roster=1);  ## USE 2009 roster for 2008 (AT)
@@ -309,17 +318,14 @@ UPDATE loaddata.awards_history ah SET Roster2019=1 Where Year(FUNDS_ACTIVATED)=2
 #############################################################################################
 #############################################################################################
 #############################################################################################
-#############################################################################################
-#############################################################################################
-#############################################################################################
-#############################################################################################
+##################################################################################
 
 
 
 
 SET sql_mode = '';
 SET SQL_SAFE_UPDATES = 0;
-create table loaddata.backupAwardsHistory20200416 AS SELECT * from lookup.awards_history;
+create table loaddata.backupAwardsHistory20200605 AS SELECT * from lookup.awards_history;
 
 
 select distinct (CLK_AWD_PRJ_END_DT) from loaddata.awards_history;
@@ -371,5 +377,6 @@ select min(CLK_AWD_PRJ_END_DT) from lookup.awards_history;
 
 Select * from loaddata.awards_history where CLK_AWD_PRJ_END_DT IN (SELECT MAX(CLK_AWD_PRJ_END_DT) from loaddata.awards_history)  ;
 
+*/
 
-
+SELECT Year,Roster,COunt(*) from lookup.roster group by Year,Roster;
