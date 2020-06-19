@@ -344,7 +344,20 @@ UPDATE space.bondmaster
            Good_Research_Revenue=0,
            Bad_Research_Revenue=0; 
 
+
+Alter Table space.bondmaster Add IncludeInSurv integer(1);
+UPDATE space.bondmaster SET IncludeInSurv=1;
+
+select * from space.bondmaster where Lastname="Byrne" and CTRB_PCT_PREV IS NOT NULL;
+
+
+
+
+
 select LastName, max(SPAN) from space.bondmaster group by LastName order by Max(SPAN) DESC;
+
+
+
 
 ## SHENKMAN PCORI
 ##UPDATE work.bondmaster SET IP_USAGE=NULL WHERE AWARD_ID_Number='00098554';

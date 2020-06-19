@@ -848,16 +848,47 @@ Drop table if exists space.SurveyTable;
 create table space.SurveyTable AS
 select * from work.SurveyTable3;
 
+##UPDATE space.SurveyTable SET EMAIL='Lauren.Morelli@medicine.ufl.edu' WHERE AWARD_INV_UFID ='77447370';
+
 
 Drop table if exists space.SurveyTableTEST;
 create table space.SurveyTableTEST AS
 select * from work.SurveyTable3;
+
+
+UPDATE space.SurveyTableTEST SET EMAIL=NULL;
+ 
+UPDATE space.SurveyTableTEST SET EMAIL='edneu@ufl.edu'
+WHERE LastName in (	'Byrne',
+					'Schatz',
+					'Cottler',
+					'Johnson',
+					'Bartley',
+					 'Qiu',
+                     'Nelson');
+                     
+UPDATE space.SurveyTableTEST SET EMAIL='pelirojo23@ufl.edu'
+WHERE LastName in (	'Firpi-Morell',
+					'Datta',
+					'Gurka',
+					'Guirgis');
+                    
+                    
+DELETE FROM space.SurveyTableTEST WHERE email is NULL;
+);
+
+SELECT * from space.SurveyTableTEST;
+
+
 
 ## FOR TESTING
 SET SQL_SAFE_UPDATES = 0;
 
 UPDATE space.SurveyTableTEST SET EMAIL="edneu@ufl.edu";
 
+select * from space.SurveyTable;
+
+select * from space.SurveyTableTEST;
 ## END TESTING
 select * from work.Span48;
 

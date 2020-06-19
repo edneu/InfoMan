@@ -1,10 +1,10 @@
 drop table if exists work.irbtemp;
 create table work.irbtemp
-select * from work.irbcat0603d;
+select * from work.irbcatd;
 
 drop table if exists work.proptemp;
 create table work.proptemp
-select * from work.propcat0603b;
+select * from work.proptemp2;
 
 
 
@@ -39,9 +39,13 @@ SELECT DISTINCT Summ_Status FROM work.irbtemp;
 
 ALTER TABLE work.irbstatcomm
 	ADD IRB01 int(5),
-	ADD IRB02 int(5);
+	ADD IRB02 int(5),
+    ADD TOT int(5);
 
-
+UPDATE work.irbstatcomm
+       SET  IRB01=0,
+			IRB02=0,
+            TOT=0;
 
 DROP TABLE IF EXISTS work.irbcommsumm;
 Create table work.irbcommsumm as 
@@ -63,12 +67,17 @@ SET ic.IRB02=lu.N
 WHERE lu.Committee="IRB-02"
 AND   ic.Summ_Status=lu.Summ_Status;
 
+
+
+UPDATE work.irbstatcomm 
+SET TOT=IRB01+IRB02;
+;
+
+
 SELECT * from work.irbstatcomm;
 
 
-SELECT Summ_Status, SUM(IRB01+IRB02) AS Total_Prot
-FROM work.irbstatcomm
-GROUP BY Summ_Status;
+
 
 
 # # # # # # # ## # # ## # # ## # # ## # # ## # # ## # # ## # # ## # # ## # # #
@@ -123,7 +132,28 @@ select * from work.proptemp;
 
 ## ADD SUMMARY STATUS TO IRM FOR REPORTING
 Alter table work.proptemp
-ADD Summ_Status varchar(45);
+ADD Summ_Status varchar(45),
+ADD Sponsor_Cat varchar(45),
+ADD AppSumm varchar (45);
+
+/*
+DROP TABLE IF EXISTS lookup.sponsortype;
+create table lookup.sponsortype AS
+SELECT REPORTING_SPONSOR_NAME,REPORTING_SPONSOR_CAT
+FROM lookup.awards_history
+GROUP BY REPORTING_SPONSOR_NAME,REPORTING_SPONSOR_CAT;
+
+
+select distinct CLK_SPONSOR_NAME,Sponsor_Cat from work.proptemp
+WHERE Sponsor_Cat IS NULL;
+*/
+
+SET SQL_SAFE_UPDATES = 0;
+UPDATE work.proptemp pt, lookup.sponsortype lu
+SET pt.Sponsor_Cat=lu.REPORTING_SPONSOR_CAT 
+WHERE pt.CLK_SPONSOR_NAME=lu.REPORTING_SPONSOR_NAME;
+
+
 
 UPDATE work.proptemp SET Summ_Status='Award Pending' WHERE CLK_CURRENTSTATE='Award Pending';
 UPDATE work.proptemp SET Summ_Status='Awarded' WHERE CLK_CURRENTSTATE='Awarded';
@@ -136,8 +166,11 @@ UPDATE work.proptemp SET Summ_Status='Core Office/ Dept / Team Review' WHERE CLK
 UPDATE work.proptemp SET Summ_Status='Pending Sponsor Review' WHERE CLK_CURRENTSTATE='Pending Sponsor Review';
 UPDATE work.proptemp SET Summ_Status='Teminated' WHERE CLK_CURRENTSTATE='Terminated';
 UPDATE work.proptemp SET Summ_Status='Withdrawn' WHERE CLK_CURRENTSTATE='Withdrawn';
+UPDATE work.proptemp SET Summ_Status='Budget Revisions' WHERE CLK_CURRENTSTATE='Budget Revisions';
 
 select distinct concat(Summ_Status," - ",CLK_CURRENTSTATE) from work.proptemp;
+
+select distinct CLK_CURRENTSTATE from work.proptemp WHERE Summ_Status IS NULL;
 
 select count(*) from work.proptemp;
 
@@ -221,8 +254,61 @@ ADD InProcess int(5),
 ADD WithNF int(5);
 
 
+
+###########################  ADD APPLICATION SUMMARY VARIABLE
+UPDATE work.proptemp SET AppSumm="Awarded / Award Pending" WHERE CLK_CURRENTSTATE IN ('Awarded','Award Pending');
+
+UPDATE work.proptemp SET AppSumm="In Process" WHERE CLK_CURRENTSTATE IN ('Core Office Review',
+							'Core Office Review Post Submission Updates',
+							'Department Review',
+							'Draft',
+							'Pending Proposal Team Response: Core Office Review',
+							'Pending Sponsor Review');   
+                            
+
+UPDATE work.proptemp SET AppSumm="Not Funded / Withdrawn" WHERE CLK_CURRENTSTATE IN ('Not Funded','Terminated','Withdrawn');                            
  
-# AWARD OR PENDINF  
+
+DROP TABLE IF EXISTS work.PropStat;  
+create table work.PropStat AS
+SELECT AppSumm,Sponsor_Cat, count(*) AS N  from work.proptemp group by AppSumm, Sponsor_Cat;
+
+DROP TABLE IF EXISTS work.PropSummStat;  
+CREATE TABLE work.PropSummStat AS 
+SELECT DISTINCT Sponsor_Cat from work.proptemp; 
+
+
+ALTER TABLE work.PropSummStat
+ADD AppPend int(5),
+ADD InProcess int(5),
+ADD NotFund int(5);
+
+
+UPDATE work.PropSummStat ps, work.PropStat lu
+SET ps.AppPend=lu.N 
+WHERE ps.Sponsor_Cat=lu.Sponsor_Cat 
+AND lu.AppSumm="Awarded / Award Pending";
+
+UPDATE work.PropSummStat ps, work.PropStat lu
+SET ps.InProcess=lu.N 
+WHERE ps.Sponsor_Cat=lu.Sponsor_Cat 
+AND lu.AppSumm="In Process";
+
+UPDATE work.PropSummStat ps, work.PropStat lu
+SET ps.NotFund=lu.N 
+WHERE ps.Sponsor_Cat=lu.Sponsor_Cat 
+AND lu.AppSumm="Not Funded / Withdrawn" ;
+
+
+
+SELECT * from work.PropSummStat;
+
+ 
+ 
+ 
+##################################################### 
+ 
+# AWARD OR PENDING 
 drop table if exists work.catstatAPP;
 create table work.catstatAPP As
 SELECT Reporting_Category,count(*) as N, SUM(CLK_GRAND_TOTAL) AS Total
@@ -272,9 +358,9 @@ SELECT * from work.catstat WHERE Reporting_Category<>'IGNORE' ORDER BY Reporting
 ##############################################################################################################################
 ## Summarize Oppurtunities by Sponsor Category
 
-select * from work.covidopps;
+select * from work.research_oppurtunities;
 
-Select Sponsor_Cateogry,count(*) AS N from work.covidopps group by Sponsor_Cateogry;
+Select Sponsor_Category,count(*) AS N from work.research_oppurtunities group by Sponsor_Category;
 
 
 ##############################################################################################################################

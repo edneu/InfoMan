@@ -12,7 +12,7 @@ SELECT * from lookup.Employees;
 
 DROP TABLE IF EXISTS work.activeemp;
 CREATE TABLE work.activeemp AS
-select * from loaddata.active_emp_20200214;
+select * from loaddata.active_emp_20200608;
 
 
 ## Replace Active Employee File in Lookup

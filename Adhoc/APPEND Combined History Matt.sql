@@ -174,7 +174,8 @@ SET DupKEY=TRIM(CONCAT(
 );
 
 
-SELECT min(Journal_Date) FROM loaddata.newtranshist;
+SELECT min(Journal_Date), max(Journal_Date) FROM loaddata.newtranshist;
+SELECT min(Journal_Date), max(Journal_Date) FROM Adhoc.combined_hist_rept;
 
 drop table if exists work.combidup;
 Create table work.combidup as
@@ -218,6 +219,11 @@ select max(combined_hist_rept_id) from Adhoc.combined_hist_rept_NEW;
 
 UPDATE loaddata.newtranshist
 SET newtranshist_id=newtranshist_id+( SELECT max(combined_hist_rept_id)+1 from Adhoc.combined_hist_rept);
+
+
+
+select * from loaddata.newtranshist;
+
 
 drop table if exists Adhoc.combined_hist_rept_NEW;
 create table Adhoc.combined_hist_rept_NEW AS
@@ -275,7 +281,16 @@ SELECT
 from loaddata.newtranshist WHERE DupFlag=0;
 
 
-desc loaddata.newtranshist;
+SELECT "Previous Combined File"  as Measure, COUNT(*) as N from Adhoc.combined_hist_rept
+UNION ALL
+SELECT "New File Total N"  as Measure, COUNT(*) as N from loaddata.newtranshist
+UNION ALL
+SELECT "New File Total Dups"  as Measure, COUNT(*) as N from loaddata.newtranshist WHERE DupFlag=1
+UNION ALL
+SELECT "New File Total NonDups"  as Measure, COUNT(*) as N from loaddata.newtranshist WHERE DupFlag=0
+UNION ALL 
+SELECT "New Combined File Total"  as Measure, COUNT(*) as N from Adhoc.combined_hist_rept_NEW ;
+
 
 desc Adhoc.combined_hist_rept;
 ##################################################################################################################
@@ -321,7 +336,7 @@ select CTSI_Fiscal_Year,min(Journal_Date),max(Journal_Date),count(*) from Adhoc.
 ##################################################################################################################
 ##### BACKUP AND rename
 /*
-CREATE TABLE Adhoc.comb_hist_report20200430BU AS
+CREATE TABLE Adhoc.comb_hist_report20200617BU AS
 SELECT * from Adhoc.combined_hist_rept;
 
 DROP TABLE IF EXISTS Adhoc.combined_hist_rept;
@@ -336,12 +351,12 @@ group by Grant_Year;
 
 DROP TABLE IF EXISTS Adhoc.MattOut;
 create table Adhoc.MattOut AS
-SELECT Grant_Year,Account_Code,ERP_Account_Level_4,sum(Posted_Amount)
+SELECT Grant_Year,Alt_Dept_ID,Account_Code,ERP_Account_Level_4,round(sum(Posted_Amount),2)
 from Adhoc.combined_hist_rept
 #WHERE Alt_Dept_ID='29680300'
 WHERE Journal_Date>str_to_date('04,01,2012', '%m,%d,%Y')
 group by Grant_Year,Account_Code,ERP_Account_Level_4
-ORDER BY Grant_Year,Account_Code,ERP_Account_Level_4;
+ORDER BY Grant_Year,Alt_Dept_ID,Account_Code,ERP_Account_Level_4;
 
 DROP TABLE IF EXISTS Adhoc.MattOut2;
 create table Adhoc.MattOut2 AS
@@ -371,12 +386,12 @@ ORDER BY Grant_Year,Alt_Dept_ID,Account_Code,ERP_Account_Level_4;
 
 DROP TABLE IF EXISTS Adhoc.MattOut3;
 create table Adhoc.MattOut3 AS
-SELECT Grant_Year,Alt_Dept_ID,Account_Code,ERP_Account_Level_4,round(sum(Posted_Amount),2) AS Amount
+SELECT Grant_Year,Alt_Dept_ID,Fund_Code,Account_Code,ERP_Account_Level_4,round(sum(Posted_Amount),2) AS Amount
 from Adhoc.combined_hist_rept
 WHERE Journal_Date>str_to_date('04,01,2012', '%m,%d,%Y')
-group by Grant_Year,Alt_Dept_ID,Account_Code,ERP_Account_Level_4
-ORDER BY Grant_Year,Alt_Dept_ID,Account_Code,ERP_Account_Level_4;
+group by Grant_Year,Alt_Dept_ID,Fund_Code,Account_Code,ERP_Account_Level_4
+ORDER BY Grant_Year,Alt_Dept_ID,Fund_Code,Account_Code,ERP_Account_Level_4;
 
-
+combined_hist_rept
 
 
