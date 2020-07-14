@@ -358,6 +358,36 @@ select LastName, max(SPAN) from space.bondmaster group by LastName order by Max(
 
 
 
+##############################
+
+drop table if exists space.NewOld;
+create table space.NewOld AS
+select AWARD_INV_UFID, max(LastName) AS LastName, max(Firstname) As FirstName, max(SPAN) AS TotSpan, max(0) as PSpan 
+from space.bondmaster 
+group by AWARD_INV_UFID;
+
+
+drop table if exists work.temp2;
+create table work.temp2 AS
+select AWARD_INV_UFID, count(*) as PSpan  
+from space.bondmaster 
+WHERE CTRB_PCT_PREV IS NOT NULL
+group by AWARD_INV_UFID;
+
+
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE space.NewOld t1, work.temp2 lu
+SET t1.PSpan=lu.PSpan
+WHERE t1.AWARD_INV_UFID=lu.AWARD_INV_UFID;
+
+
+drop table if exists work.temp2;
+
+
+SELECT * from space.NewOld;
+
+SELECT * from space.NewOld WHERE TotSpan=PSpan;
 
 ## SHENKMAN PCORI
 ##UPDATE work.bondmaster SET IP_USAGE=NULL WHERE AWARD_ID_Number='00098554';

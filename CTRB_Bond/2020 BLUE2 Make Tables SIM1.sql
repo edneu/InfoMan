@@ -7,6 +7,28 @@ Required Files     	ctrb_alloc_YYYY file from Jody Chase at UF Planning and Cons
 
 
 */
+DROP TABLE IF EXISTS work.reconsal;
+create table work.reconsal AS
+Select '2020' as BondYear,Fund_Code,count(*) as nRECs, COUNT(DISTINCT Person_ID) AS Undup, sum(Earnings) AS Earn, sum(Estimated_Fringe) AS Frng from space.salary2020 GROUP BY '2020',Fund_Code
+UNION ALL
+Select '2019' as BondYear,Fund_Code,count(*) as nRECs, COUNT(DISTINCT Person_ID) AS Undup, sum(Earnings) AS Earm, sum(Estimated_Fringe) AS Frng from space.salary2019 GROUP BY '2019',Fund_Code;
+
+
+
+SELECT * from work.reconsal;
+
+DROP TABLE if EXISTS work.reconsalfc;
+CREATE TABLE work.reconsalfc AS
+SELECT DISTINCT Fund_Code from work.reconsal;
+
+ALTER TABLE work.reconsalfc ADD BY2019 decimal(12,2),
+							ADD BY2020 decimal(12,2);
+                            
+UPDATE work.reconsalfc rfc,  work.reconsal lu SET rfc.BY2019=lu.Earn+lu.Frng WHERE rfc.Fund_Code=lu.Fund_Code and BondYear='2019';                           
+UPDATE work.reconsalfc rfc,  work.reconsal lu SET rfc.BY2020=lu.Earn+lu.Frng WHERE rfc.Fund_Code=lu.Fund_Code and BondYear='2020';  
+
+select * from work.reconsalfc
+
 #####################################################################################################
 ##### Supporting Tables
 #####################################################################################################
@@ -20,7 +42,7 @@ AND UFID IS NOT NULL
 group by UFID, NAME
 order by UFID, NAME;
 
-## Use space.sal_rqst to request salry Data from Bryan Cooke  REQUESTED 6/19/2017
+## Use space.sal_rqst to request salry Data from Bryan Cooke  REQUESTED 6/05/2017
 ##################################################################################################
 ##################################################################################################
 ##################################################################################################
@@ -95,8 +117,6 @@ WHERE cld.Department=lu.Department;
 
 SELECT * FROM space.colonylistdept ORDER BY Area DESC;
 
-
-SELECT * FROM space.colonylist;
 ##################################################################################################################
 
 
@@ -118,20 +138,12 @@ Drop table if exists space.salaryraw;
 create table space.salaryraw AS
 select * from space.salary2020;
 
-select "2020" as YR, count(*) AS nRECS,sum(Earnings+Estimated_Fringe) AS AMT from space.salary2020
-UNION ALL
-select "2019" as YR, count(*) AS nRECS,sum(Earnings+Estimated_Fringe) AS AMT from space.salary2019;
-
-
-select * from space.salaryraw where Person_ID='14236305';
-
-
 ## Create Working Allocatrion file Containing only the "Minor" departments in the CTRB
 
 drop table if exists space.allocate;
 create table space.allocate as
 select *
-from space.ctrb_alloc_2020
+from space.ctrb_alloc_2019
 WHERE DEPTID IN (SELECT DISTINCT DEPTID FROM space.colonylistdept WHERE Zone="Blue2");
 
 select * from space.colonylist;
@@ -159,30 +171,6 @@ AND al.DEPT_NAME="";
 select distinct DEPT_NAME   from space.allocate;Blue2
 */
 # FUNDCODE TABLE
-
-##Check for Fundcodes with no lookup.fundcodes records
-SELECT distinct FundCode,FundDesc,BondFundClass from space.salary WHERE FundCode NOT IN (SELECT DISTINCT FundCode from lookup.fundcodes);
-
-
-UPDATE lookup.fundcodes SET BondFundClass="Bad" WHERE FundCode=159;	
-
-
-SELECT FundCode,FundDesc,BondFundClass, sum(SalFringe) AS Paid from space.salary WHERE FundCode NOT IN (SELECT DISTINCT FundCode from lookup.fundcodes) group by FundCode,FundDesc,BondFundClass;
-
-SELECT FundCode,FundDesc,BondFundClass, sum(SalFringe) AS Paid from space.salary WHERE FundCode IN (108,144,103) group by FundCode,FundDesc,BondFundClass;
-
-
-SELECT FundCode,FundDesc,BondFundClass, sum(SalFringe) AS Paid from space.salary  group by FundCode,FundDesc,BondFundClass;
-
-
-
-SELECT FundCode,
-       Description,
-       BondFundClass
-FROM lookup.fundcodes;
-
-desc space.salary;
-
 DROP TABLE space.Blue2FundList ;
 CREATE TABLE space.Blue2FundList AS
 SELECT FundCode,
@@ -192,35 +180,11 @@ FROM lookup.fundcodes
 WHERE FundCode in (select distinct FundCode from space.salary)
 ORDER BY FundCode;
 
+
+
 ## MIssing BondFundCalss
 ##   UPDATE lookup.fundcodes SET BondFundClass="GOOD" Where FundCode='185';
-##   UPDATE lookup.fundcodes SET BondFundClass="GOOD" Where FundCode='222'
-##UPDATE lookup.fundcodes SET BondFundClass="Bad" WHERE FundCode='159';	
-
-
-
-
-/*    NEED DETERMINATION
-103	E&G-GEN REV - IFAS	
-144	AUX - INFORMATION TECH FUND	;
-108 ????????
-
- UPDATE lookup.fundcodes SET BondFundClass="GOOD" Where FundCode='103';
- 
- UPDATE lookup.fundcodes SET 	BondFundClass="GOOD",
-								Description="E&G- General Revenue - World Class Faculty & Scholar Program"  Where FundCode="108";
-   
-   
- UPDATE lookup.fundcodes SET BondFundClass="BAD" Where FundCode='144';  
-   
-*/
-
-
-
-
-
-
-
+##   UPDATE lookup.fundcodes SET BondFundClass="GOOD" Where FundCode='222';
  
 ############################################################################################################
 ############################################################################################################
@@ -246,7 +210,7 @@ WHERE occ.UFID NOT IN (SELECT DISTINCT AWARD_INV_UFID from space.bondmaster)
 ##AND  occ.DEPTID NOT IN ('29310000','29310100','29310200','29310201','29310202','29310203','29310204','63620000')
 AND  occ.DEPTID in (SELECT DISTINCT DEPTID FROM space.colonylistdept WHERE Zone="Blue2")
 AND   al.DEPTID in (SELECT DISTINCT DEPTID FROM space.colonylistdept WHERE Zone="Blue2");
-
+select * from space.allocate;
 
 ### SELECT DeptID,Department from space.Blue2Master group by DeptID,Department;
 
@@ -276,8 +240,6 @@ FROM space.salaryraw sal
 LEFT JOIN lookup.fundcodes fc
        ON sal.Fund_Code=fc.FundCode;
 ;
-
-select FundCode, FundDesc, BondFundClass, sum( SalaryRaw+FringeAmtRaw) AS Paid from space.salary group by FundCode, FundDesc, BondFundClass;
 ##########
 SELECT sum(Earnings+Estimated_Fringe) from space.salaryraw where Person_ID="00387480";
 SELECT sum(SalaryRaw+FringeAmtRaw) from space.salary where UFID="00387480";
@@ -308,13 +270,13 @@ ALTER TABLE space.salary
 ##
 
 # FUNDCODE TABLE
-SELECT * from space.salary where Fundcode='108';
+
 
 
 UPDATE space.salary
-       SET Salary=SalaryRaw*1.050,      
-           Fringe=FringeAmtRaw*1.050,
-           SalFringe=(SalaryRaw+FringeAmtRaw)*1.050,
+       SET Salary=SalaryRaw*1.040,      
+           Fringe=FringeAmtRaw*1.040,
+           SalFringe=(SalaryRaw+FringeAmtRaw)*1.040,
            KeepFund=1,
            GoodMask=0,
 	       BadMask=0;
@@ -331,8 +293,6 @@ UPDATE space.salary
        SET BadMask=1
        WHERE BondFundClass="BAD";
 
-
-select FundCode, FundDesc, BondFundClass, sum( SalaryRaw+FringeAmtRaw) AS RawPaid, sum(SalFringe) As Paid from space.salary group by FundCode, FundDesc, BondFundClass;
 
 
 DROP TABLE if exists space.blue2Salary;
@@ -360,7 +320,6 @@ AND UFID IN (select Distinct UFID from space.Blue2Master)
 GROUP BY UFID, PersonName;
 
 
-
 ## Add Resrach Percentage
 
 DROP TABLE if exists space.lookupRschPct;
@@ -373,8 +332,6 @@ FROM space.Blue2Master
 WHERE UFID<>""
 GROUP BY UFID;
 
-
-14236305
 
 ## select * from space.lookupRschPct;
 
@@ -466,7 +423,6 @@ GROUP BY "Total Research Revenue";
 
 select * from space.Blue2Summary;
 
-
 ##*************** Supporting Tables
 
 
@@ -479,7 +435,7 @@ select * from space.colonylist order by Area DESC;
 ## MAKE REPORT TABLE
 select * from space.colonylist order by Area DESC;
 
-select * from space.colonylistdept order by Area DESC;
+
 
 # FUNDCODE TABLE
 DROP TABLE if exists space.FundList ;
@@ -502,4 +458,4 @@ select count(*) from  space.Blue2Master;
 SELECT * from space.salaryraw where Fund_Code=159;
 
 
-select * from lookup.active_emp where Employee_ID="01151533";
+DESC 
