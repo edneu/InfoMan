@@ -4,15 +4,21 @@
 
 drop table if exists work.irb;
 create table work.irb as
-select * from loaddata.irb_jun_2019;
+select * from loaddata.irb_jul_2020;
 
 #### Fix Date ERROR
+
+## CHECK DATE
+##SELECT min(Approval_Date), MAx(Approval_Date), Min(Date_Originally_Approved), MAx(Date_Originally_Approved) from work.irb;
+
+/*
 SET SQL_SAFE_UPDATES = 0;
 UPDATE work.irb SET Approval_Date=str_to_date('05,30,2018','%m,%d,%Y') ,
                     Date_Originally_Approved=str_to_date('05,30,2018','%m,%d,%Y')   
     WHERE irb_jan_2019_id=7421;
 
 SET SQL_SAFE_UPDATES = 1;
+*/
 ### FIX UFIDS
 
 
@@ -179,6 +185,8 @@ WHERE
 GROUP BY median_group;
 
 
+
+
 drop table if exists results.IRB_CM_MEDIAN  ;
 create table results.IRB_CM_MEDIAN AS
 SELECT IRB_Approval_Year as IRB_Approval_Year
@@ -187,9 +195,9 @@ WHERE IRB_Approval_Year IS NOT NULL
 group by IRB_Approval_Year;
 
 ALTER TABLE results.IRB_CM_MEDIAN
-ADD FullReview decimal(10.2),
-ADD Expedited decimal(10.2),
-ADD Exempt decimal(10.2);
+ADD FullReview decimal(10,2),
+ADD Expedited decimal(10,2),
+ADD Exempt decimal(10,2);
 
 SET SQL_SAFE_UPDATES = 0;
 
@@ -247,6 +255,8 @@ WHERE
 	count_of_group BETWEEN total_of_group / 2.0 AND total_of_group / 2.0 + 1
 GROUP BY median_group;
 
+
+CREATE INDEX irbgroup ON work.irb (Committee,Review_Type,IRB_Approval_Month);
 
 ############# 'Expedited'
 DROP TABLE if exists work.mExpedited;
@@ -323,9 +333,9 @@ WHERE IRB_Approval_Month IS NOT NULL
 group by IRB_Approval_Month;
 
 ALTER TABLE results.IRB_monthly_MEDIAN
-ADD FullReview decimal(10.2),
-ADD Expedited decimal(10.2),
-ADD Exempt decimal(10.2);
+ADD FullReview decimal(10,2),
+ADD Expedited decimal(10,2),
+ADD Exempt decimal(10,2);
 
 SET SQL_SAFE_UPDATES = 0;
 
@@ -379,6 +389,7 @@ from work.irb
 WHERE Committee="IRB-01"
 	AND Review_Type='Full IRB Review'
 group by IRB_Approval_Month;
+
 
 
 

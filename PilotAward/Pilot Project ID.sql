@@ -262,5 +262,5 @@ UPDATE pilots.PILOTS_MASTER SET PROJECT_ID='P0102948' WHERE Pilot_ID=487;
 
 
 
-
+select * from lookup.Employees WHERE Name like "NEU%EDWARD%";
 
