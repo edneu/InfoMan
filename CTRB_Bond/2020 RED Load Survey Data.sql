@@ -6,7 +6,7 @@ The Investigators supply a value for the CTRB_PCT variable in the space.bondmast
 Required Tables for this process :  space.bondmaster
 									space.redsurveyresults Results table uploaded from Qualtrics
 
-drop table if exists space.redsurveyresults2018;
+drop table if exists space.redsurveyresults2020;
 */
 
 
@@ -93,6 +93,9 @@ select CTRB_PCT, CTRB_PCT*.01 from  space.redsurveydata;
 ## VERIFY
 select EMAIL from space.redsurveydata where EMAIL not in (select distinct EMAIL from space.bondmaster);
 
+### CORRECT EMAIL ERROR
+#UPDATE space.redsurveydata SET EMAIL="julie.johnson@ufl.edu" WHERE EMAIL='Lauren.Morelli@medicine.ufl.edu';
+
 select distinct EMAIL from space.bondmaster where EMAIL not in (select distinct EMAIL from space.redsurveydata);
 
 
@@ -110,6 +113,38 @@ UPDATE space.bondmaster bm, space.redsurveydata sd
 SET bm.CTRB_PCT=sd.CTRB_PCT
 WHERE bm.Span=sd.Span
   AND bm.EMAIL=sd.EMAIL  ;
+
+
+
+##### Correct Vandenborne
+/*
+UPDATE space.bondmaster SET CTRB_PCT=85 WHERE bondmaster_key=44;
+UPDATE space.bondmaster SET CTRB_PCT=85 WHERE bondmaster_key=45;
+UPDATE space.bondmaster SET CTRB_PCT=85 WHERE bondmaster_key=46;
+UPDATE space.bondmaster SET CTRB_PCT=85 WHERE bondmaster_key=47;
+UPDATE space.bondmaster SET CTRB_PCT=85 WHERE bondmaster_key=48;
+UPDATE space.bondmaster SET CTRB_PCT=85 WHERE bondmaster_key=49;
+UPDATE space.bondmaster SET CTRB_PCT=85 WHERE bondmaster_key=50;
+UPDATE space.bondmaster SET CTRB_PCT=85 WHERE bondmaster_key=51;
+UPDATE space.bondmaster SET CTRB_PCT=85 WHERE bondmaster_key=53;
+UPDATE space.bondmaster SET CTRB_PCT=85 WHERE bondmaster_key=54;
+UPDATE space.bondmaster SET CTRB_PCT=85 WHERE bondmaster_key=56;
+UPDATE space.bondmaster SET CTRB_PCT=85 WHERE bondmaster_key=57;
+UPDATE space.bondmaster SET CTRB_PCT=85 WHERE bondmaster_key=58;
+UPDATE space.bondmaster SET CTRB_PCT=80 WHERE bondmaster_key=59;
+UPDATE space.bondmaster SET CTRB_PCT=100 WHERE bondmaster_key=60;
+UPDATE space.bondmaster SET CTRB_PCT=80 WHERE bondmaster_key=61;
+UPDATE space.bondmaster SET CTRB_PCT=90 WHERE bondmaster_key=63;
+UPDATE space.bondmaster SET CTRB_PCT=85 WHERE bondmaster_key=64;
+UPDATE space.bondmaster SET CTRB_PCT=90 WHERE bondmaster_key=66;
+UPDATE space.bondmaster SET CTRB_PCT=80 WHERE bondmaster_key=52;
+UPDATE space.bondmaster SET CTRB_PCT=80 WHERE bondmaster_key=55;
+UPDATE space.bondmaster SET CTRB_PCT=80 WHERE bondmaster_key=62;
+UPDATE space.bondmaster SET CTRB_PCT=80 WHERE bondmaster_key=65;
+
+*/
+######
+
 
 
 ## Add Previously Collected Values for records with No Survey Data.
@@ -259,7 +294,7 @@ from space.bondmaster
 
 
 
-DROP TABLE work.contract_class;
+DROP TABLE if exists work.contract_class;
 Create table work.contract_class AS
 SELECT 	Prime_Sponsor_Type,
 		COUNT(DISTINCT AWARD_ID) AS Good,
@@ -302,7 +337,7 @@ GROUP BY SponsorName
 ########### CHECK THIS
 
 
-DROP TABLE work.red_research_revenue;
+DROP TABLE if exists work.red_research_revenue;
 Create table work.red_research_revenue AS
 SELECT 	Prime_Sponsor_Type,
 		Sum(Total_Award) AS Good_Research_Revenue,
@@ -334,6 +369,7 @@ GROUP BY Prime_Sponsor_Type;
 DROP TABLE space.red_research_revenue;
 Create table space.red_research_revenue AS
 SELECT  Prime_Sponsor_Type,
+         
 		Sum(Good_Research_Revenue) AS Good_Research_Revenue,
         Sum(Bad_Research_Revenue) AS Bad_Research_Revenue,
         Sum(Total_Research_Revenue) AS Total_Research_Revenue
