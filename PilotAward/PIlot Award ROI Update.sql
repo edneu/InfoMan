@@ -32,7 +32,7 @@ SELECT DISTINCT ProjectStatus from pilots.PILOTS_MASTER;
 drop table if exists work.projstatus;
 create table work.projstatus as
 SELECT Pilot_ID,Category,Award_Year,AwardLetterDate,ProjectStatus,PI_Last,PI_First,Title from pilots.PILOTS_MASTER WHERE ProjectStatus NOT IN ('Completed','Active','Closed-Low Enrollment')
-AND AWARDED="Awarded" AND Award_Year<=2018;
+AND AWARDED="Awarded" AND Award_Year<=2019;
 
 UPDATE pilots.PILOTS_MASTER SET ProjectStatus="Completed" WHERE Category="SECIM";
 UPDATE pilots.PILOTS_MASTER SET ProjectStatus="Completed" WHERE ProjectStatus="" and Award_Year=2011 AND AWARDED="Awarded"; 
@@ -95,12 +95,12 @@ select sum(DIRECT_AMOUNT), Sum(INDIRECT_AMOUNT),sum(SPONSOR_AUTHORIZED_AMOUNT)  
 ##############################################################################
 
 ### CREATE BACKUPS
-create table loaddata.BU2_PILOTS_MASTER AS Select * from pilots.PILOTS_MASTER;
-create table loaddata.BU2_PILOTS_GRANT_SUMMARY AS Select * from pilots.PILOTS_GRANT_SUMMARY;
-create table loaddata.BU2_PILOTS_PUB_MASTER AS Select * from pilots.PILOTS_PUB_MASTER;
-create table loaddata.BU2_PILOTS_ROI_DETAIL AS Select * from pilots.PILOTS_ROI_DETAIL;
-create table loaddata.BU2_PILOTS_ROI_MASTER AS Select * from pilots.PILOTS_ROI_MASTER;
-create table loaddata.BU2_PILOTS_SUMMARY AS Select * from pilots.PILOTS_SUMMARY;
+create table loaddata.BU3_PILOTS_MASTER AS Select * from pilots.PILOTS_MASTER;
+create table loaddata.BU3_PILOTS_GRANT_SUMMARY AS Select * from pilots.PILOTS_GRANT_SUMMARY;
+create table loaddata.BU3_PILOTS_PUB_MASTER AS Select * from pilots.PILOTS_PUB_MASTER;
+create table loaddata.BU3_PILOTS_ROI_DETAIL AS Select * from pilots.PILOTS_ROI_DETAIL;
+create table loaddata.BU3_PILOTS_ROI_MASTER AS Select * from pilots.PILOTS_ROI_MASTER;
+create table loaddata.BU3_PILOTS_SUMMARY AS Select * from pilots.PILOTS_SUMMARY;
 
 
 ##  CREATE DETAIL AWARDS TABLE FOR UPDATES ###################################
