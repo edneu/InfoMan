@@ -240,7 +240,7 @@ WHERE UFID<>""
 AND UFID IN (select Distinct UFID from space.Blue2Master)
 GROUP BY UFID, PersonName;
 
-
+select * from space.blue2Salary ;
 
 #######################
 
