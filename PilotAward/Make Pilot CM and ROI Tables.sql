@@ -348,7 +348,15 @@ GROUP BY AWD_AMT_CAT;
 ;
 
 
+## BY AWARD SIZE   COVID PILOTS
 
+
+Select AWD_AMT_CAT, COUNT(*) as NumProjects, Sum(Award_Amt) AS PilotAmt,Sum(TotalAmt) AS GrantAmt, Sum(RelatedPub) AS HasPub, Sum(RelatedGrant) AS HasGrant
+FROM pilots.PILOTS_SUMMARY
+WHERE Award_Year>=2012 AND Award_Year<=2020
+AND Category LIKE ("%COVID%")
+GROUP BY AWD_AMT_CAT;
+;
 
 ###################################
 ### AWD BY HUMAN SUBJECT
@@ -369,8 +377,7 @@ WHERE Award_Year>=2012 AND Award_Year<=2020
 AND Awarded="Awarded"
 AND ProjectStatus<>"Ongoing"
 AND Category NOT IN ("SECIM"));
- ;
-;;
+;
 /*
 SELECT PIlot_ID, Category, TITLE, PI_LAST,PI_FIRST from lookup.pilots 
 where Award_HummanSubjectResearch IS NULL
