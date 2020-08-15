@@ -401,8 +401,8 @@ WHERE Journal_Date>str_to_date('04,01,2012', '%m,%d,%Y');
 DROP TABLE IF EXISTS Adhoc.MattOutALL;
 create table Adhoc.MattOutALL AS
 SELECT *
-from Adhoc.combined_hist_rept
-WHERE Journal_Date>str_to_date('07,01,2018', '%m,%d,%Y');
+from Adhoc.combined_hist_rept;
+##WHERE Journal_Date>=str_to_date('07,01,2018', '%m,%d,%Y');
 
 
 
@@ -416,6 +416,12 @@ select * from Adhoc.MattOutALL;
 
 select distinct Alt_Dept_ID from Adhoc.MattOutALL;
 select Grant_Year,count(*) as N, sum(Posted_Amount) as Amount from  Adhoc.MattOutALL group by Grant_Year;
+
+
+select Grant_Year,count(*) as N, sum(Posted_Amount) as Amount from  Adhoc.combined_hist_rept group by Grant_Year;
+
+
+select Fiscal_Year,count(*) as N, sum(Posted_Amount) as Amount from  Adhoc.combined_hist_rept group by Fiscal_Year;
 
 ############################################################################################################################################
 ################### UPDATE OLD DATAWITN ADDED FLEX CODES 2020-08-05 
