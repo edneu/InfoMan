@@ -2,7 +2,7 @@
 
 
 
-
+alltrans20200818
 
 
 ###DELETE FROM Adhoc.combined_hist_rept where Journal_Date is Null;
@@ -11,7 +11,7 @@
 
 ## drop table if exists loaddata.newtranshist;
 create table loaddata.newtranshist AS
-SELECT * from loaddata.secimdetail;
+SELECT * from Adhoc.alltrans20200818;
 
 ### LOAD FROM EXCEL SPREADHEET
 
@@ -111,6 +111,7 @@ SELECT Flex_Code,count(*) from loaddata.newtranshist
 WHERE Flex_Code NOT IN (SELECT DISTINCT DeptFlex from Adhoc.flex_codes)
 group by Flex_Code;
 
+desc Adhoc.flex_codes;
 
 select Alt_Dept_ID,count(*) from  loaddata.newtranshist group by Alt_Dept_ID;
 
@@ -361,11 +362,38 @@ select CTSI_Fiscal_Year,min(Journal_Date),max(Journal_Date),count(*) from Adhoc.
 ##################################################################################################################
 ##### BACKUP AND RENAME
 /*
-CREATE TABLE Adhoc.comb_hist_report20200813BU AS
+CREATE TABLE Adhoc.comb_hist_report20200818BU AS
 SELECT * from Adhoc.combined_hist_rept;
 
+*/
+/*
 DROP TABLE IF EXISTS Adhoc.combined_hist_rept;
 CREATE TABLE Adhoc.combined_hist_rept AS
+SELECT 	alltrans20200818_id AS combined_hist_rept_id,
+		Alt_Dept_ID,
+        CTSI_Fiscal_Year,
+        Grant_Year,
+        Transaction_Detail,
+        DeptID,
+        Fund_Code,
+        Program_Code,
+        Source_of_Funds_Code,
+        Flex_Code,
+        Project_Code,
+        ERP_Account_Level_4,
+        Account_Code,
+        Doc_Desc,
+        Doc_Detail,
+        Encumbrance_Description,
+        Journal_ID,
+        Journal_Date,
+        Fiscal_Year,
+        Accounting_Period,
+        Posted_Amount
+ from loaddata.newtranshist;
+*/
+/*
+
 SELECT * from Adhoc.combined_hist_rept_NEW;
 
 
@@ -383,18 +411,18 @@ DROP TABLE IF EXISTS Adhoc.MattOut;
 create table Adhoc.MattOut AS
 SELECT Grant_Year,Alt_Dept_ID,Fund_Code,Account_Code,ERP_Account_Level_4,round(sum(Posted_Amount),2) AS Amount
 from Adhoc.combined_hist_rept
-WHERE Journal_Date>str_to_date('04,01,2012', '%m,%d,%Y')
+#WHERE Journal_Date>str_to_date('04,01,2012', '%m,%d,%Y')
 group by Grant_Year,Alt_Dept_ID,Fund_Code,Account_Code,ERP_Account_Level_4
 ORDER BY Grant_Year,Alt_Dept_ID,Fund_Code,Account_Code,ERP_Account_Level_4;
 
-
+/*
 ## Not Aggregated since 4/1/2012
 DROP TABLE IF EXISTS Adhoc.MattOutALL;
 create table Adhoc.MattOutALL AS
 SELECT Grant_Year,Alt_Dept_ID,Fund_Code,Account_Code,ERP_Account_Level_4,round(Posted_Amount,2) AS Amount
 from Adhoc.combined_hist_rept
 WHERE Journal_Date>str_to_date('04,01,2012', '%m,%d,%Y');
-
+*/
 ## ALL YEARS
 
 
