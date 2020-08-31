@@ -130,3 +130,14 @@ SUM(Hours_Used)/Sum(Avail_Hours) AS URate,
 (Sum(Avail_Hours)-SUM(Hours_Used))/Sum(Avail_Hours) as PCTnotUsed
 from crc.crc_occ_fy_2017_2020
 group by Month;
+
+
+#For Room servies months Adustment
+SELECT Bed,
+SUM(Hours_Used) AS Hours_Used, 
+Sum(Avail_Hours) as Avail_Hours,
+Sum(Avail_Hours)-SUM(Hours_Used) AS UnusedHours,
+Count(Distinct Month)
+from crc.crc_occ_fy_2017_2020
+group by Bed;
+

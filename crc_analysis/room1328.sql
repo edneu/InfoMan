@@ -151,5 +151,63 @@ ALTER TABLE crc.temp1328A
         SUM(UnusedHours) AS UnusedHours,
         SUM(Hours_Used)/Sum(Avail_Hours) AS URate,
         (Sum(Avail_Hours)-SUM(Hours_Used))/Sum(Avail_Hours) as PCTnotUsed
- FROM crc.temp1328A;       
+ FROM crc.temp1328A;  
+ 
+ 
+ ############
+ SELECT SUM(Hours_Used) AS Hours_Used,
+		SUM(Avail_Hours) AS Avail_Hours,
+        SUM(UnusedHours) AS UnusedHours,
+        COUNT(DISTINCT Month) as  nMonth
+ FROM crc.temp1328A; 
+ 
+ #################################################################
+ 
+DROP TABLE IF EXISTS crc.temp1328lu;
+create table crc.temp1328lu AS
+SELECT MONTH,
+	   trim(User) as User,
+       SUM(DURATION/60) AS HoursUsed  
+from crc.room_1238
+GROUP BY MONTH, User;
+
+
+DROP TABLE IF EXISTS crc.temp1328B;
+create table crc.temp1328B AS
+SELECT DISTINCT Month from crc.room_1238
+ORDER BY MONTH;
         
+ALTER TABLE crc.temp1328B
+	ADD Vandenborne decimal(65,10),
+	ADD Lott decimal(65,10),
+	ADD George decimal(65,10),
+	ADD Avail_Hours decimal(65,10);
+    
+SET SQL_SAFE_UPDATES = 0;
+    
+UPDATE crc.temp1328B cr,   crc.temp1328lu lu
+SET cr.Vandenborne=lu.HoursUsed
+WHERE lu.User='Vandenborne '
+AND cr.Month=lu.Month ;
+
+UPDATE crc.temp1328B cr,   crc.temp1328lu lu
+SET cr.Lott=lu.HoursUsed
+WHERE lu.User='Lott'
+AND cr.Month=lu.Month ;
+
+UPDATE crc.temp1328B cr,   crc.temp1328lu lu
+SET cr.George=lu.HoursUsed
+WHERE lu.User='George '
+AND cr.Month=lu.Month ;
+
+UPDATE crc.temp1328B cu, crc.avail_hours lu
+SET cu.Avail_Hours = lu.Avail_hours
+WHERE cu.Month=lu.Month;
+
+
+UPDATE crc.temp1328B SET Vandenborne=0 WHERE Vandenborne IS NULL and Avail_Hours IS NOT NULL;
+UPDATE crc.temp1328B SET Lott=0 WHERE Lott IS NULL and Avail_Hours IS NOT NULL;
+UPDATE crc.temp1328B SET George=0 WHERE George IS NULL and Avail_Hours IS NOT NULL;
+
+
+select * from crc.temp1328B;
