@@ -141,3 +141,80 @@ Count(Distinct Month)
 from crc.crc_occ_fy_2017_2020
 group by Bed;
 
+#
+SELECT 
+Month,
+SUM(Hours_Used) AS Hours_Used, 
+Sum(Avail_Hours) as Avail_Hours,
+Sum(Avail_Hours)-SUM(Hours_Used) AS UnusedHours,
+SUM(Hours_Used)/Sum(Avail_Hours) AS URate,
+(Sum(Avail_Hours)-SUM(Hours_Used))/Sum(Avail_Hours) as PCTnotUsed
+from crc.crc_occ_fy_2017_2020
+group by Month;
+
+
+drop table if Exists crc.load1328;
+create table crc.load1328 AS
+SELECT 
+	MONTH AS Month,
+	max("1238") AS Bed,
+	sum(Duration)/60 AS Hours_Used,
+	max(SvcMon) AS SvcMon,
+	max(SvcYear) AS SvcYear,
+	max(SFY) AS SFY
+from crc.room_1238
+GROUP BY Month;
+
+ALTER TABLE crc.load1328
+	ADD crc_occ_id int(11),
+    ADD Occupancy1 Decimal(65,20),
+	ADD le2hr int(11),
+	ADD le4hr int(11),
+	ADD le8hr int(11),
+	ADD gt8hr int(11),
+	ADD Extended int(11),
+	ADD Weekend int(11),
+    ADD Overnight int(11),
+	ADD Avail_Hours int(5);
+    
+    
+UPDATE crc.load1328 lf, crc.avail_hours lu
+SET lf.Avail_Hours=lu.Avail_hours
+WHERE lf.Month=lu.Month ;   
+
+UPDATE crc.load1328 SET Occupancy1=Hours_Used/Avail_Hours;
+
+
+     SET SQL_SAFE_UPDATES = 0;
+      UPDATE crc.load1328 SET crc_occ_id = 0 ;
+      SELECT @i:=(SELECT max(crc_occ_id) from crc.crc_occ_fy_2017_2020);
+      UPDATE crc.load1328  SET crc_occ_id = @i:=@i+1;
+
+
+
+
+
+drop table if exists crc.crc_month_room_occ;
+create table crc.crc_month_room_occ AS 
+SELECT * from crc.crc_occ_fy_2017_2020
+UNION ALL
+select crc_occ_id,
+		Month,
+        Bed,
+        Hours_Used,
+        Occupancy1,
+        le2hr,
+        le4hr,
+        le8hr,
+        gt8hr,
+        Overnight,
+        Extended,
+        Weekend,
+        SvcMon,
+        SvcYear,
+        SFY,
+        Avail_Hours
+from crc.load1328 WHERE Avail_Hours is NOT NULL;
+
+select * from crc.load1328;
+select * from crc.crc_month_room_occ;

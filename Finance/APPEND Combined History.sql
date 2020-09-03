@@ -1,8 +1,8 @@
 
 
+#### select * from Adhoc.combined_hist_rept;
 
-
-alltrans20200818
+select count(*) from Adhoc.alltrans20200818;
 
 
 ###DELETE FROM Adhoc.combined_hist_rept where Journal_Date is Null;
@@ -11,7 +11,9 @@ alltrans20200818
 
 ## drop table if exists loaddata.newtranshist;
 create table loaddata.newtranshist AS
-SELECT * from Adhoc.alltrans20200818;
+SELECT * from Adhoc.trans_02020901;
+
+
 
 ### LOAD FROM EXCEL SPREADHEET
 
@@ -106,7 +108,7 @@ select Journal_Date,count(*) from loaddata.newtranshist where Grant_Year IS NULL
 
 ######################   FLEX CODES
 
-## Chek for undefined Flex Codes
+## Check for undefined Flex Codes
 SELECT Flex_Code,count(*) from loaddata.newtranshist 
 WHERE Flex_Code NOT IN (SELECT DISTINCT DeptFlex from Adhoc.flex_codes)
 group by Flex_Code;
@@ -121,7 +123,6 @@ UPDATE loaddata.newtranshist SET Alt_Dept_ID=NULL;
 
 CREATE INDEX flex1 ON loaddata.newtranshist (Flex_Code);
 CREATE INDEX flex2 ON Adhoc.flex_codes (DeptFlex);
-
 
 ### Assign from Flex Code Table
 UPDATE loaddata.newtranshist hr, Adhoc.flex_codes lu
@@ -145,7 +146,7 @@ ALTER TABLE loaddata.newtranshist 	ADD DupFlag int(1),
 
 desc loaddata.newtranshist;
 
-SET SQL_SAFE_UPDATES = 0;
+
 UPDATE loaddata.newtranshist
 SET  DupKEY=TRIM(CONCAT(
 		Trim(Transaction_Detail),
@@ -180,56 +181,17 @@ SET DupKEY=TRIM(CONCAT(
 		Trim(round(Posted_Amount,2)))
 );
 
+select count(*) from Adhoc.combined_hist_rept_NEW;
 
-SELECT min(Journal_Date), max(Journal_Date) FROM loaddata.newtranshist;
-SELECT min(Journal_Date), max(Journal_Date) FROM Adhoc.combined_hist_rept;
-
-## Create overlapping subset for lookup
-
-drop table if exists work.combidup;
-Create table work.combidup as
-SELECT DISTINCT DupKey as DupKEY
-FROM Adhoc.combined_hist_rept
-WHERE Journal_Date>=(Select min(Journal_Date) from loaddata.newtranshist);
-
-### Verify Key Length
-select max(length(DupKEY)) from work.combidup;
-select max(length(DupKEY)) from loaddata.newtranshist;
+SELECT "Newtranshist" as Filename,min(Journal_Date) as Earliest, max(Journal_Date) As Latest FROM loaddata.newtranshist
+UNION ALL
+SELECT "Combined History Report" AS Filename, min(Journal_Date) as Earliest, max(Journal_Date) As Latest FROM Adhoc.combined_hist_rept
+UNION ALL
+SELECT "Combined History Report NEW" AS Filename, min(Journal_Date) as Earliest, max(Journal_Date) As Latest FROM Adhoc.combined_hist_rept_NEW;
 
 
 
-##################  Initialize DupFlag
-SET SQL_SAFE_UPDATES = 0;
-
-UPDATE loaddata.newtranshist SET DupFlag=0;
-
-#####
-
-
-UPDATE loaddata.newtranshist nth, work.combidup lu
- SET nth.DupFlag=1
-WHERE nth.DupKEY =lu.DupKEY;
-
-### CHECK Assignment
-select DupFlag,count(*) from  loaddata.newtranshist group by DupFlag;
-/*
-drop table if exists work.fromhist1;
-create table work.fromhist1 as 
-SELECT * from Adhoc.combined_hist_rept 
-WHERE Journal_Date>=str_to_date('07,01,2019','%m,%d,%Y');
-
-drop table if exists work.fromhist;
-create table work.fromhist as 
-select * from  work.fromhist1
-WHERE DupKEY IN (SELECT SUBSTR(DupKey,1,133) from loaddata.newtranshist WHERE DupFlag=1); 
-
-
-ALTER TABLE Adhoc.combined_hist_rept CHANGE `CTSI_Fiscal_Year_`  `CTSI_Fiscal_Year` varchar(25);
-*/
-
-select max(combined_hist_rept_id) from Adhoc.combined_hist_rept_NEW;
-
-select "MASTER FILE ID" As Measure, min(combined_hist_rept_id) As MinID, max(combined_hist_rept_id) As MaxID FROM Adhoc.combined_hist_rept_NEW
+select "MASTER FILE ID" As Measure, min(combined_hist_rept_id) As MinID, max(combined_hist_rept_id) As MaxID FROM Adhoc.combined_hist_rept
 UNION ALL 
 select "NEW FILE ID" As Measure, min(newtranshist_id) As MinID, max(newtranshist_id) As MaxID FROM loaddata.newtranshist;
 
@@ -242,6 +204,9 @@ ALTER TABLE loaddata.newtranshist ADD newtranshist_id int(20);
       UPDATE loaddata.newtranshist SET newtranshist_id = @i:=@i+1;
      SET SQL_SAFE_UPDATES = 1;
 
+select "MASTER FILE ID" As Measure, min(combined_hist_rept_id) As MinID, max(combined_hist_rept_id) As MaxID FROM Adhoc.combined_hist_rept
+UNION ALL 
+select "NEW FILE ID" As Measure, min(newtranshist_id) As MinID, max(newtranshist_id) As MaxID FROM loaddata.newtranshist;
 
 
 select * from Adhoc.combined_hist_rept;
@@ -318,9 +283,12 @@ UNION ALL
 SELECT "New Combined File Total"  as Measure, COUNT(*) as N from Adhoc.combined_hist_rept_NEW ;
 
 
-desc Adhoc.combined_hist_rept;
-##################################################################################################################
 
+
+desc Adhoc.combined_hist_rept;
+desc Adhoc.combined_hist_rept_NEW;
+##################################################################################################################
+SET SQL_SAFE_UPDATES = 0;
 UPDATE Adhoc.combined_hist_rept_NEW SET CTSI_Fiscal_Year=2000 WHERE Journal_Date BETWEEN str_to_date('07,01,2000', '%m,%d,%Y') AND  str_to_date('06,30,2001','%m,%d,%Y');
 UPDATE Adhoc.combined_hist_rept_NEW SET CTSI_Fiscal_Year=2001 WHERE Journal_Date BETWEEN str_to_date('07,01,2001', '%m,%d,%Y') AND  str_to_date('06,30,2002','%m,%d,%Y');
 UPDATE Adhoc.combined_hist_rept_NEW SET CTSI_Fiscal_Year=2002 WHERE Journal_Date BETWEEN str_to_date('07,01,2002', '%m,%d,%Y') AND  str_to_date('06,30,2003','%m,%d,%Y');
@@ -369,7 +337,7 @@ SELECT * from Adhoc.combined_hist_rept;
 /*
 DROP TABLE IF EXISTS Adhoc.combined_hist_rept;
 CREATE TABLE Adhoc.combined_hist_rept AS
-SELECT 	alltrans20200818_id AS combined_hist_rept_id,
+SELECT 	combined_hist_rept_id,
 		Alt_Dept_ID,
         CTSI_Fiscal_Year,
         Grant_Year,
@@ -390,7 +358,7 @@ SELECT 	alltrans20200818_id AS combined_hist_rept_id,
         Fiscal_Year,
         Accounting_Period,
         Posted_Amount
- from loaddata.newtranshist;
+ from Adhoc.combined_hist_rept_NEW;
 */
 /*
 
@@ -473,3 +441,6 @@ Jul 11, 2020
 
 ##################################
 
+SELECT Flex_Code,count(*) from loaddata.combined_hist_rept
+WHERE Flex_Code NOT IN (SELECT DISTINCT DeptFlex from Adhoc.flex_codes)
+group by Flex_Code;

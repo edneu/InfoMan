@@ -3,12 +3,16 @@
 
 DROP TABLE IF EXISTS work.pymatch ;
 Create table work.pymatch AS
-Select * from work.payollmatch;
+Select * from work.payrollmatchsept;
 
+
+select distinct Source from  work.pymatch;
+
+select Source,(count(distinct UFID)) from work.pymatch group by Source;
 
 DROP TABLE IF EXISTS work.pyxmatch ;
 Create table work.pyxmatch AS
-SELECT UFID,max(Employee_Name)
+SELECT UFID,max(Employee_Name) AS Employee_Name
 FROM work.pymatch 
 GROUP BY UFID
 ORDER BY max(Employee_Name);
@@ -44,3 +48,4 @@ UPDATE work.pyxmatch pm, work.pymatch lu SET CERHB=1 WHERE pm.UFID=lu.UFID AND l
 UPDATE work.pyxmatch SET On_Payroll= CTSI+SECIM+MD_PHD+OCR+CERHB;
 ##UPDATE work.pyxmatch SET On_Payroll= 1 WHERE (CTSI+SECIM+MD_PHD+OCR+CERHB)>0;
 
+select *  from work.pyxmatch;
