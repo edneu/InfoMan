@@ -8,10 +8,13 @@ SELECT
       Month,
       max(SFY) as SFY,
       count(Distinct Employee_ID) AS Num_emps,
+      sum(FTE) as FTE,
       sum(HoursWorked) AS HoursWorked,
       sum(Avail_Hours) AS Avail_Hours,
       sum(CRC_Activities) AS CRC_Activities,
-      sum(CRC_Other_Activities) AS CRC_Other_Activities
+      sum(CRC_CTSI_Funded) AS CRC_CTSI_Funded,
+      sum(CRC_Other_Activities) AS CRC_Other_Activities,
+      sum(Total) as TotalSalFng
 FROM crc.EmpTimeSal
 GROUP BY Month;       
 

@@ -276,16 +276,29 @@ ADD SFY varchar(15),
 ADD CRC_Activities decimal (65,11),
 ADD CRC_Other_Activities decimal (65,11);
 
+ALTER TABLE crc.cost_dist
+ADD CRC_CTSI_Funded decimal (65,11);
 
-UPDATE crc.cost_dist SET CRC_Activities=NULL,  CRC_Other_Activities=Null;
+/*
+•	CRC_Activities  --  DeptID="29680300" and Fund_Code="149"
+•	CRC_CTSI_Funded  –   DeptID=”xxxx2968”
+•	CRC_Other_Activities – Anything Else
+*/
+select distinct DeptID from crc.cost_dist;
+
+
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE crc.cost_dist SET CRC_Activities=NULL, CRC_CTSI_Funded=Null , CRC_Other_Activities=Null ;
 
 UPDATE crc.cost_dist SET MONTH=concat(YEAR(Accounting_Date),"-",LPAD(MONTH(Accounting_Date),2,"0")) ;
 UPDATE crc.cost_dist SET SvcMon = substr(Month,6,2);
 UPDATE crc.cost_dist SET SvcYear = substr(Month,1,4);
 UPDATE crc.cost_dist SET  CRC_Activities=`Salary_+_Fringe` WHERE DeptID="29680300" and Fund_Code="149";
-UPDATE crc.cost_dist SET  CRC_Other_Activities=`Salary_+_Fringe` WHERE CRC_Activities IS NULL;  
+UPDATE crc.cost_dist SET  CRC_CTSI_Funded= `Salary_+_Fringe` WHERE DeptID LIKE "2968%" AND CRC_Activities IS NULL;
+UPDATE crc.cost_dist SET  CRC_Other_Activities=`Salary_+_Fringe` WHERE CRC_Activities IS NULL AND CRC_CTSI_Funded  IS NULL;  
 
-SELECT * from crc.cost_dist; ##WHERE CRC_Activities IS NULL AND CRC_Other_Activities IS NULL;
+SELECT * from crc.cost_dist WHERE CRC_Activities IS NULL AND CRC_Other_Activities IS NULL;
 
 
 
@@ -356,11 +369,19 @@ SELECT Month,
        Person_ID AS Employee_ID,
        max(Name_) AS Emp_Name,
        sum(CRC_Activities) as CRC_Activities,
-       sum(CRC_Other_Activities) as CRC_Other_Activities
+       sum(CRC_CTSI_Funded) AS CRC_CTSI_Funded,
+       sum(CRC_Other_Activities) as CRC_Other_Activities,
+       sum(`Salary_+_Fringe`) as Total
 from crc.cost_dist   
 group by Month, Person_ID  ;  
 
-
+UPDATE crc.emplist el, lookup.Employees lu
+SET el.FTE=lu.FTE,
+	el.Job_Code=lu.Job_Code,
+    el.Salary_Plan=lu.Salary_Plan,
+    el.empname=lu.Name
+WHERE el.Employee_ID=lu.Employee_ID
+  AND el.empname IS NULL;
 
 
 drop table if exists crc.EmpTimeSal;
@@ -373,10 +394,23 @@ SELECT ts.Employer,
        ts.HoursWorked,
        ts.Avail_hours,
        lu.CRC_Activities,
-       lu.CRC_Other_Activities
+       lu.CRC_CTSI_Funded,
+       lu.CRC_Other_Activities,
+       lu.Total
 FROM crc.TimeMonSumm ts 
 	 left join crc.empsallu lu 
      on ts.Month=lu.Month AND ts.Employee_ID=lu.Employee_ID;
+     
+     
+ALTER TABLE crc.EmpTimeSal ADD FTE decimal(65,11);
+
+
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE crc.EmpTimeSal es, crc.emplist lu
+SET es.FTE=lu.FTE
+WHERE es.Employee_ID=lu.Employee_id;     
+
 
 
 
