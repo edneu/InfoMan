@@ -94,7 +94,7 @@ SET GLOBAL local_infile = 1;
 
 
 
-load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory20200605.csv" 
+load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory20200913.csv" 
 into table loaddata.awards_history 
 fields terminated by '|'
 lines terminated by '\n'
@@ -247,6 +247,8 @@ select * from loaddata.awards_history;
 
 ALTER TABLE loaddata.awards_history
 ADD AcademicUnit varchar(45);
+
+SET SQL_SAFE_UPDATES = 0;
 
 UPDATE loaddata.awards_history ah, lookup.academic_units lu
        SET ah.AcademicUnit=lu.AcademicUnit
