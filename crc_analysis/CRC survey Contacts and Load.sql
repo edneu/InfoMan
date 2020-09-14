@@ -109,7 +109,8 @@ ALTER TABLE crc.crcsurvmaster
 	ADD AprvOCRUFR VARCHAR(5),
 	ADD SeePartic VARCHAR(5),
 	ADD AtCRC VARCHAR(5),
-	ADD AntStart VARCHAR(25);   ## VERIFY INPUT FORMAT FROM QUALTRICS TABLES
+	ADD AntStart VARCHAR(250),
+    ADD AntStartDate DATETIME;   VERIFY INPUT FORMAT FROM QUALTRICS TABLES;
 
 UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q3, sc.AprvSponsor=lu.Q4, sc.AprvOCRUFR=lu.Q5, sc.SeePartic=lu.Q6, sc.AtCRC=lu.Q7, sc.AntStart=lu.Q8  WHERE sc.Email=lu.RecipientEmail AND sc.Span=1;
 UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q10, sc.AprvSponsor=lu.Q11, sc.AprvOCRUFR=lu.Q12, sc.SeePartic=lu.Q13, sc.AtCRC=lu.Q14, sc.AntStart=lu.Q15  WHERE sc.Email=lu.RecipientEmail AND sc.Span=2;
@@ -124,6 +125,8 @@ UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q66, sc.Apr
 UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q73, sc.AprvSponsor=lu.Q74, sc.AprvOCRUFR=lu.Q75, sc.SeePartic=lu.Q76, sc.AtCRC=lu.Q77, sc.AntStart=lu.Q78  WHERE sc.Email=lu.RecipientEmail AND sc.Span=11;
 UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q80, sc.AprvSponsor=lu.Q81, sc.AprvOCRUFR=lu.Q82, sc.SeePartic=lu.Q83, sc.AtCRC=lu.Q84, sc.AntStart=lu.Q85  WHERE sc.Email=lu.RecipientEmail AND sc.Span=12;
 UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q87, sc.AprvSponsor=lu.Q88, sc.AprvOCRUFR=lu.Q89, sc.SeePartic=lu.Q90, sc.AtCRC=lu.Q91, sc.AntStart=lu.Q92  WHERE sc.Email=lu.RecipientEmail AND sc.Span=13;
+
+UPDATE crc.crcsurvmaster SET AntStartDate=STR_TO_DATE(AntStart, '%Y-%m-%d %H:%i:%s') where AntStart is not null;
 
 
 
