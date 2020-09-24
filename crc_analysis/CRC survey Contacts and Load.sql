@@ -110,7 +110,9 @@ ALTER TABLE crc.crcsurvmaster
 	ADD SeePartic VARCHAR(5),
 	ADD AtCRC VARCHAR(5),
 	ADD AntStart VARCHAR(250),
-    ADD AntStartDate DATETIME;   VERIFY INPUT FORMAT FROM QUALTRICS TABLES;
+    ADD AntStartDate DATETIME;  
+    
+
 
 UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q3, sc.AprvSponsor=lu.Q4, sc.AprvOCRUFR=lu.Q5, sc.SeePartic=lu.Q6, sc.AtCRC=lu.Q7, sc.AntStart=lu.Q8  WHERE sc.Email=lu.RecipientEmail AND sc.Span=1;
 UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q10, sc.AprvSponsor=lu.Q11, sc.AprvOCRUFR=lu.Q12, sc.SeePartic=lu.Q13, sc.AtCRC=lu.Q14, sc.AntStart=lu.Q15  WHERE sc.Email=lu.RecipientEmail AND sc.Span=2;

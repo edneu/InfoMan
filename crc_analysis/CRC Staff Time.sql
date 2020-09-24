@@ -9,13 +9,37 @@ ALTER TABLE crc.timerept
 ADD Month varchar(7),
 ADD SvcMon varchar(2),
 ADD SvcYear varchar(4),
-ADD SFY varchar(15);
+ADD SFY varchar(15),
+ADD WorkTime decimal (65,30),
+ADD NonWorkTime decimal (65,30)
+;
+
+SELECT Time_Reporting_Code_Code,Time_Reporting_Code from crc.crc_time_all_years group by Time_Reporting_Code_Code,Time_Reporting_Code;
+
+
 
 SET SQL_SAFE_UPDATES = 0;
 
 UPDATE crc.timerept SET MONTH=concat(YEAR(Date_Used),"-",LPAD(MONTH(Date_Used),2,"0")) ;
 UPDATE crc.timerept SET SvcMon = substr(Month,6,2);
 UPDATE crc.timerept SET SvcYear = substr(Month,1,4);
+
+UPDATE crc.timerept SET WorkTime = 0, NonWorkTime=0 ;
+
+UPDATE crc.timerept 
+SET WorkTime = Quantity
+WHERE Time_Reporting_Code_Code IN (SELECT DISTINCT Time_Reporting_Code_Code 
+									from crc.timecode_lookup 
+                                    WHERE Work_Classification="Work Hours");
+
+
+UPDATE crc.timerept 
+SET NonWorkTime = Quantity
+WHERE Time_Reporting_Code_Code IN (SELECT DISTINCT Time_Reporting_Code_Code 
+									from crc.timecode_lookup 
+                                    WHERE Work_Classification="Non-Work Hours");
+
+
 
 
 UPDATE crc.timerept SET SFY="SFY 2017-2018"
@@ -85,7 +109,9 @@ SELECT 	"UFHealth" as Employer,
         tr.Month,
 		tr.Employee_ID,
         tr.Name,
-        round(SUM(tr.Quantity),2) AS HoursWorked,
+        round(SUM(tr.Quantity),2) AS TotalHours,
+        round(SUM(tr.WorkTime),2) AS WorkedHours,
+        round(SUM(tr.NonWorkTime),2) AS NonWorkedHours,
         Min(ah.Avail_hours) as Avail_hours
 from crc.timerept tr 
 LEFT JOIN crc.avail_hours ah
@@ -100,12 +126,15 @@ Create table crc.shandstime AS
 select * from crc.shands_shifts;
 
 
+
 ALTER TABLE crc.shandstime
 ADD Month varchar(7),
 ADD SvcMon varchar(2),
 ADD SvcYear varchar(4),
 ADD SFY varchar(15),
-ADD  HoursWorked decimal(65,11),
+ADD TotalHours decimal(65,11),
+ADD WorkedHours decimal(65,11),
+ADD NonWorkedHours decimal(65,11),
 ADD Avail_hours int(11);
 
 SET SQL_SAFE_UPDATES = 0;
@@ -113,7 +142,18 @@ SET SQL_SAFE_UPDATES = 0;
 UPDATE crc.shandstime SET MONTH=concat(YEAR(Apply_Date),"-",LPAD(MONTH(Apply_Date),2,"0")) ;
 UPDATE crc.shandstime SET SvcMon = substr(Month,6,2);
 UPDATE crc.shandstime SET SvcYear = substr(Month,1,4);
-UPDATE crc.shandstime SET HoursWorked=TIME_TO_SEC(timediff(Shift_End_Time_,Shift_Start_Time_))/3600;
+
+
+UPDATE crc.shandstime SET TotalHours=0, WorkedHours=0, NonWorkedHours=0;
+
+UPDATE crc.shandstime SET TotalHours=TIME_TO_SEC(timediff(Shift_End_Time_,Shift_Start_Time_))/3600;
+UPDATE crc.shandstime SET WorkedHours=TIME_TO_SEC(timediff(Shift_End_Time_,Shift_Start_Time_))/3600;
+
+/*
+TotalHours 
+WorkedHours 
+NonWorkedHours
+*/
 
 
 UPDATE crc.shandstime SET SFY="SFY 2017-2018"
@@ -187,12 +227,20 @@ SELECT 	"Shands" as Employer,
         tr.Month,
 		tr.ID as Employee_ID,
         tr.Name,
-        round(SUM(tr.HoursWorked),2) AS HoursWorked,
+        round(SUM(tr.TotalHours),2) AS TotalHours,
+        round(SUM(tr.WorkedHours),2) AS WorkedHours,        
+        round(SUM(tr. NonWorkedHours),2) AS  NonWorkedHours,        
         Min(ah.Avail_hours) as Avail_hours
 from crc.shandstime tr 
 LEFT JOIN crc.avail_hours ah
 ON tr.Month=ah.Month
 GROUP BY "Shands",tr.SFY,tr.Month,tr.ID,tr.Name;
+
+/*
+TotalHours
+WorkedHours 
+NonWorkedHours
+*/
 
 
 drop table if exists crc.TimeMonSumm;
@@ -391,12 +439,14 @@ SELECT ts.Employer,
        ts.SFY,
        ts.Employee_ID,
        ts.Name,
-       ts.HoursWorked,
+       ts.TotalHours, 
+	   ts.WorkedHours, 
+	   ts.NonWorkedHours,
        ts.Avail_hours,
        lu.CRC_Activities,
        lu.CRC_CTSI_Funded,
        lu.CRC_Other_Activities,
-       lu.Total
+       lu.Total AS TotalSalFRng
 FROM crc.TimeMonSumm ts 
 	 left join crc.empsallu lu 
      on ts.Month=lu.Month AND ts.Employee_ID=lu.Employee_ID;
@@ -407,10 +457,40 @@ ALTER TABLE crc.EmpTimeSal ADD FTE decimal(65,11);
 
 SET SQL_SAFE_UPDATES = 0;
 
+drop table if exists crc.fte1 ;
+create table crc.fte1 AS
+SELECT Employee_ID,Name,Salary_Plan,FTE
+FROM lookup.active_emp
+WHERE Employee_ID IN (SELECT DISTINCT Employee_ID from crc.EmpTimeSal);
+
+drop table if exists crc.fte_lookup;
+Create table crc.fte_lookup as
+SELECT * from crc.fte1
+UNION ALL 
+SELECT Employee_ID,Name,Salary_Plan,FTE
+FROM lookup.Employees
+WHERE Employee_ID IN (SELECT DISTINCT Employee_ID from crc.EmpTimeSal)
+AND Employee_ID  NOT IN (SELECT DISTINCT Employee_ID from crc.fte1);
+
+
+SELECT * from crc.fte_lookup;
+
+
 UPDATE crc.EmpTimeSal es, crc.emplist lu
 SET es.FTE=lu.FTE
-WHERE es.Employee_ID=lu.Employee_id;     
+WHERE es.Employee_ID=lu.Employee_id;    
 
+UPDATE crc.EmpTimeSal SET FTE=1 WHERE Employer="Shands"; 
+UPDATE crc.EmpTimeSal SET FTE=1 WHERE Employee_ID="50435800";
 
+UPDATE crc.EmpTimeSal SET CRC_Activities=0 WHERE CRC_Activities IS NULL;
+UPDATE crc.EmpTimeSal SET CRC_CTSI_Funded=0 WHERE CRC_CTSI_Funded IS NULL;
+UPDATE crc.EmpTimeSal SET CRC_Other_Activities=0 WHERE CRC_Other_Activities IS NULL;
 
+select * from crc.EmpTimeSal;
 
+drop table if exists  crc.staffsummoa;
+Create table crc.staffsummoa as
+Select Name,max(FTE) As FTE, sum(WorkedHours) AS WorkedHours, Sum(Avail_hours) as AvailbleHours, sum(FTE*Avail_hours) as FTE_AvailHrs
+from crc.EmpTimeSal WHERE MOnth<>"2020-08"
+group by Name;

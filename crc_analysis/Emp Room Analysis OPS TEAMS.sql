@@ -4,21 +4,33 @@
 
 drop table if exists crc.EmpTimeSalSumm;
 create table crc.EmpTimeSalSumm AS
-SELECT   
+SELECT    
       Month,
       max(SFY) as SFY,
       count(Distinct Employee_ID) AS Num_emps,
-      sum(FTE) as FTE,
       sum(TotalHours) AS TotalHours,
       sum(WorkedHours) AS WorkedHours,
       sum(NonWorkedHours) AS NonWorkedHours,
+     
+      sum(OPS_WorkedHours) AS OPS_WorkedHours,
+      Sum(Teams_WorkedHours) AS Teams_WorkedHours,
+      sum(FTE_OPS) AS FTE_OPS,
+      sum(FTE_Teams) AS FTE_Teams,
+
       sum(Avail_Hours) AS Avail_Hours,
+      
+      SUM(OPS_FTE_ADJ_Avail) AS OPS_FTE_ADJ_Avail,
+      SUM(Teams_FTE_ADJ_Avail) AS Teams_FTE_ADJ_Avail,
+      
       sum(CRC_Activities) AS CRC_Activities,
       sum(CRC_CTSI_Funded) AS CRC_CTSI_Funded,
       sum(CRC_Other_Activities) AS CRC_Other_Activities,
       sum(TotalSalFRng) as TotalSalFng
 FROM crc.EmpTimeSal
 GROUP BY Month;       
+
+
+select * from crc.EmpTimeSalSumm;
 
 
 ### crc.crc_month_room_occ   ALL ROOMS INCLUDING 1328
