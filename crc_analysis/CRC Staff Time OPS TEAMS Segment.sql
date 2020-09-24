@@ -332,6 +332,8 @@ SELECT ts.Employer,
        ts.FTE_OPS,
        ts.FTE_Teams,
        ts.Avail_hours,
+       ts.FTE_OPS*ts.Avail_hours AS OPS_FTE_ADJ_Avail,
+       ts.FTE_Teams*ts.Avail_hours AS Teams_FTE_ADJ_Avail,
        lu.CRC_Activities,
        lu.CRC_CTSI_Funded,
        lu.CRC_Other_Activities,
@@ -341,14 +343,17 @@ FROM crc.TimeMonSumm ts
      on ts.Month=lu.Month AND ts.Employee_ID=lu.Employee_ID;
      
 
+
 ## CLEAN UP Nulls for Salary Categroy Allocations  
 UPDATE crc.EmpTimeSal SET CRC_Activities=0 WHERE CRC_Activities IS NULL;
 UPDATE crc.EmpTimeSal SET CRC_CTSI_Funded=0 WHERE CRC_CTSI_Funded IS NULL;
 UPDATE crc.EmpTimeSal SET CRC_Other_Activities=0 WHERE CRC_Other_Activities IS NULL;
 
 
+
 ## HAVE A LOOK!
 SELECT * FROM crc.EmpTimeSal;
+
 
 ################################################################################################################
 ################################################################################################################
