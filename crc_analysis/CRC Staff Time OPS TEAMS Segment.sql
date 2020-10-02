@@ -189,6 +189,8 @@ UPDATE crc.shandstime SET 	OPS_WorkTime=0,
                             SalPlanType="Shand";
 
 
+select Name,ID from crc.shandstime group by Name,ID;
+
 ################################################
 ### CREATE Shands Table to Append to UF Health STaff Time Table (crc.UFtimeMonSumm)
 drop table if exists crc.ShandstimeMonSumm;
@@ -342,18 +344,96 @@ FROM crc.TimeMonSumm ts
 	 left join crc.empsallu lu 
      on ts.Month=lu.Month AND ts.Employee_ID=lu.Employee_ID;
      
+####ADD Shands Salary 
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE crc.EmpTimeSal ts, crc.shandssalary lu
+SET    ts.CRC_Activities=lu.Hourly*ts.WorkedHours,
+       ts.OPS_FTE_ADJ_Avail=0,
+       ts.Teams_FTE_ADJ_Avail=lu.FTE*ts.Avail_hours,
+       ts.CRC_CTSI_Funded=0,
+       ts.CRC_Other_Activities=0,
+       ts.TotalSalFRng=lu.Hourly*ts.WorkedHours,
+       ts.FTE_OPS=0,
+       ts.FTE_Teams=lu.FTE
+WHERE ts.Employee_ID=lu.Employee_ID
+AND ts.Employer="Shands";
 
 
-## CLEAN UP Nulls for Salary Categroy Allocations  
+select distinct Employee_ID from crc.EmpTimeSal where Employer="Shands";
+## CLEAN UP Nulls for Salary Categegory Allocations  
 UPDATE crc.EmpTimeSal SET CRC_Activities=0 WHERE CRC_Activities IS NULL;
 UPDATE crc.EmpTimeSal SET CRC_CTSI_Funded=0 WHERE CRC_CTSI_Funded IS NULL;
 UPDATE crc.EmpTimeSal SET CRC_Other_Activities=0 WHERE CRC_Other_Activities IS NULL;
+
+#### PUT SHANDS UPDATES HERE 
+
+DROP TABLE IF EXISTS crc.EMPCount;
+Create table crc.EMPCount AS
+SELECT Employer,
+	   Month,
+       Employee_ID,
+       MAX(FTE_OPS) AS nOPSEmp,
+       MAX(FTE_Teams) AS nTeamsEmp
+FROM crc.EmpTimeSal
+GROUP BY Employer,
+	     Month,
+         Employee_ID;
+         
+         desc crc.EMPCount;
+         
+
+UPDATE crc.EMPCount SET nOPSEmp=1 WHERE nOPSEmp >0; 
+UPDATE crc.EMPCount SET nTeamsEmp=1 WHERE  nTeamsEmp>0; 
+
+ALTER TABLE crc.EmpTimeSal
+	ADD nOPSEmp int(1),
+	ADD  nTeamsEmp int(1);
+    
+UPDATE crc.EmpTimeSal ts,  crc.EMPCount lu
+SET ts.nOPSEmp=lu.nOPSEmp,
+	ts.nTeamsEmp=lu.nTeamsEmp
+WHERE ts.Employer=lu.Employer
+  AND ts.Month=lu.Month
+  AND ts.Employee_ID=lu.Employee_ID;
+  
 
 
 
 ## HAVE A LOOK!
 SELECT * FROM crc.EmpTimeSal;
 
+
+#Create a formatted file
+DROP TABLE IF EXISTS crc.EmpTimeSalTEMP;
+CREATE TABLE crc.EmpTimeSalTEMP AS SELECT * FROM crc.EmpTimeSal;
+DROP TABLE IF EXISTS crc.EmpTimeSal;
+CREATE TABLE crc.EmpTimeSal AS
+SELECT  Employer,
+		Month,
+        SFY,
+        Employee_ID,
+        Name,
+        nTeamsEMP,
+        nOPSEmp,
+        TotalHours,
+        WorkedHours,
+        NonWorkedHours,
+        Teams_WorkedHours,
+        OPS_WorkedHours,
+        FTE_Teams,
+        FTE_OPS,
+		Avail_hours,
+        Teams_FTE_ADJ_Avail,
+        OPS_FTE_ADJ_Avail,
+        CRC_Activities,
+        CRC_CTSI_Funded,
+        CRC_Other_Activities,
+        TotalSalFRng
+FROM crc.EmpTimeSalTEMP
+ORDER BY Month,Name;
+
+SELECT * FROM crc.EmpTimeSal;
 
 ################################################################################################################
 ################################################################################################################

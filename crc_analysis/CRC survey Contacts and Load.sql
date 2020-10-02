@@ -101,7 +101,7 @@ select * from crc.SurvContact;
 DROP TABLE IF EXISTS crc.SurveyRslt;
 CREATE TABLE crc.SurveyRslt AS
 SELECT * FROM crc.uf_ctsi_crc_study_status_survey;
-
+#drop table crc.uf_ctsi_crc_study_status_survey;
 
 ALTER TABLE crc.crcsurvmaster
 	ADD StudyClosed VARCHAR(5),
@@ -113,7 +113,7 @@ ALTER TABLE crc.crcsurvmaster
     ADD AntStartDate DATETIME;  
     
 
-
+SET SQL_SAFE_UPDATES = 0;
 UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q3, sc.AprvSponsor=lu.Q4, sc.AprvOCRUFR=lu.Q5, sc.SeePartic=lu.Q6, sc.AtCRC=lu.Q7, sc.AntStart=lu.Q8  WHERE sc.Email=lu.RecipientEmail AND sc.Span=1;
 UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q10, sc.AprvSponsor=lu.Q11, sc.AprvOCRUFR=lu.Q12, sc.SeePartic=lu.Q13, sc.AtCRC=lu.Q14, sc.AntStart=lu.Q15  WHERE sc.Email=lu.RecipientEmail AND sc.Span=2;
 UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q17, sc.AprvSponsor=lu.Q18, sc.AprvOCRUFR=lu.Q19, sc.SeePartic=lu.Q20, sc.AtCRC=lu.Q21, sc.AntStart=lu.Q22  WHERE sc.Email=lu.RecipientEmail AND sc.Span=3;

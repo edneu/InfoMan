@@ -8,6 +8,8 @@ SELECT
       Month,
       max(SFY) as SFY,
       count(Distinct Employee_ID) AS Num_emps,
+      sum(nTeamsEmp) as nTeamsEmp,
+      sum(nOPSEmp) as nOPSEmp,
       sum(TotalHours) AS TotalHours,
       sum(WorkedHours) AS WorkedHours,
       sum(NonWorkedHours) AS NonWorkedHours,
@@ -28,6 +30,11 @@ SELECT
       sum(TotalSalFRng) as TotalSalFng
 FROM crc.EmpTimeSal
 GROUP BY Month;       
+
+
+
+
+
 
 
 select * from crc.EmpTimeSalSumm;

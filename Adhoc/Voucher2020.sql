@@ -141,123 +141,129 @@ ADD SFY varchar(15);
 
 
 UPDATE Adhoc.VouchWork SET MONTH=concat(YEAR(Date_Issued),"-",LPAD(MONTH(Date_Issued),2,"0")) ;
-
-
-
-
-UPDATE Adhoc.VouchWork SET SFY="SFY 2014-2015"
-WHERE Month IN (
-'2014-07',
-'2014-08',
-'2014-09',
-'2014-10',
-'2014-11',
-'2014-12',
-'2015-01',
-'2015-02',
-'2015-03',
-'2015-04',
-'2015-05',
-'2015-06');
-
-
-
-UPDATE Adhoc.VouchWork SET SFY="SFY 2015-2016"
-WHERE Month IN (
-'2015-07',
-'2015-08',
-'2015-09',
-'2015-10',
-'2015-11',
-'2015-12',
-'2016-01',
-'2016-02',
-'2016-03',
-'2016-04',
-'2016-05',
-'2016-06');
-
-
-
-
-UPDATE Adhoc.VouchWork SET SFY="SFY 2016-2017"
-WHERE Month IN (
-'2016-07',
-'2016-08',
-'2016-09',
-'2016-10',
-'2016-11',
-'2016-12',
-'2017-01',
-'2017-02',
-'2017-03',
-'2017-04',
-'2017-05',
-'2017-06');
-
-
-
-UPDATE Adhoc.VouchWork SET SFY="SFY 2017-2018"
-WHERE Month IN (
-'2017-07',
-'2017-08',
-'2017-09',
-'2017-10',
-'2017-11',
-'2017-12',
-'2018-01',
-'2018-02',
-'2018-03',
-'2018-04',
-'2018-05',
-'2018-06');
-
-UPDATE Adhoc.VouchWork SET SFY="SFY 2018-2019"
-WHERE Month IN (
-'2018-07',
-'2018-08',
-'2018-09',
-'2018-10',
-'2018-11',
-'2018-12',
-'2019-01',
-'2019-02',
-'2019-03',
-'2019-04',
-'2019-05',
-'2019-06');
-
-UPDATE Adhoc.VouchWork SET SFY="SFY 2019-2020"
-WHERE Month IN (
-'2019-07',
-'2019-08',
-'2019-09',
-'2019-10',
-'2019-11',
-'2019-12',
-'2020-01',
-'2020-02',
-'2020-03',
-'2020-04',
-'2020-05',
-'2020-06');
-
-UPDATE Adhoc.VouchWork SET SFY="SFY 2020-2021"
-WHERE Month IN (
-'2020-07',
-'2020-08',
-'2020-09',
-'2020-10',
-'2020-11',
-'2020-12',
-'2021-01',
-'2021-02',
-'2021-03',
-'2021-04',
-'2021-05',
-'2021-06');
-
+UPDATE Adhoc.VouchWork vw, lookup.sfy lu SET vw.SFY=lu.SFY WHERE vw.MONTH=lu.MONTH;
 
 SELECt SFY,Month,count(*) from Adhoc.VouchWork group by SFY,Month;
 
-SELECT * from Adhoc.VouchWork;
+ALTER TABLE Adhoc.VouchWork 
+ADD Name varchar(122),
+ADD DeptID varchar(12),
+ADD Department varchar(45);
+
+UPDATE Adhoc.VouchWork SET NAME=Concat(Last_Name,", ",First_Name);
+
+
+UPDATE Adhoc.VouchWork SET DeptID=Null, Department=Null;
+
+UPDATE Adhoc.VouchWork vw, lookup.active_emp lu
+SET vw.DeptID=lu.Department_Code,
+    vw.Department=lu.Department
+WHERE vw.UFID=lu.Employee_ID;    
+
+
+
+
+UPDATE Adhoc.VouchWork vw, lookup.Employees lu
+SET vw.DeptID=lu.Department_Code,
+    vw.Department=lu.Department
+WHERE vw.UFID=lu.Employee_ID
+AND vw.DeptID IS NULL
+;
+
+UPDATE Adhoc.VouchWork vw, lookup.ufids lu
+SET vw.DeptID=lu.UF_DEPT,
+    vw.Department=lu.UF_DEPT_NM
+WHERE vw.UFID=lu.UF_UFID
+AND vw.DeptID IS NULL
+AND UF_DEPT_NM<>"00000000";  
+
+
+UPDATE Adhoc.VouchWork vw
+SET vw.DeptID='Unknown',
+    vw.Department='Unknown'
+WHERE vw.DeptID=' ' OR vw.DeptID IS NULL;  
+
+ALTER TABLE Adhoc.VouchWork ADD College varchar(45);
+
+
+UPDATE Adhoc.VouchWork SET College=NULL;
+
+UPDATE Adhoc.VouchWork vw, lookup.depts lu
+SET vw.College=lu.College
+WHERE vw.DeptID=lu.DEPTID;
+
+UPDATE Adhoc.VouchWork vw
+SET vw.College="Unknown"
+WHERE vw.DeptID="Unknown";
+
+
+UPDATE Adhoc.VouchWork vw
+SET vw.Department='Student',
+    vw.College='Student'
+WHERE vw.DeptID="ST010000";
+
+
+ALTER TABLE Adhoc.VouchWork Add SrvName varchar(45);
+
+UPDATE Adhoc.VouchWork SET SrvName='BERD' WHERE Service='BERD';
+UPDATE Adhoc.VouchWork SET SrvName='HealthStreet' WHERE Service='HLTHST';
+UPDATE Adhoc.VouchWork SET SrvName='CTS-IT' WHERE Service='CTS_IT';
+UPDATE Adhoc.VouchWork SET SrvName='IDR' WHERE Service='IDR';
+UPDATE Adhoc.VouchWork SET SrvName='RedCap' WHERE Service='REDCAP';
+UPDATE Adhoc.VouchWork SET SrvName='Recruitment Center' WHERE Service='RECRUIT';
+UPDATE Adhoc.VouchWork SET SrvName='Regulatory Assistance' WHERE Service='REG';
+UPDATE Adhoc.VouchWork SET SrvName='Stem Cell' WHERE Service='iPSC';
+UPDATE Adhoc.VouchWork SET SrvName='Other' WHERE Service='OTHERS';
+UPDATE Adhoc.VouchWork SET SrvName='Clinical Trials.GOV' WHERE Service='CLINICAL TRIALS.GOV';
+UPDATE Adhoc.VouchWork SET SrvName='Communications' WHERE Service='Communication Research';
+UPDATE Adhoc.VouchWork SET SrvName='Quality Assurance' WHERE Service='QA';
+UPDATE Adhoc.VouchWork SET SrvName='Research Admin and Compliance ' WHERE Service='RAC';
+UPDATE Adhoc.VouchWork SET SrvName='BioRepository' WHERE Service='BIOREPOSITORY';
+UPDATE Adhoc.VouchWork SET SrvName='Human Imaging' WHERE Service='HUMAN IMAGING';
+
+
+
+
+
+select * from Adhoc.VouchWork;
+
+###############################################################
+###############################################################
+## CHART DATA
+
+DROP TABLE IF EXISTS Adhoc.VouchChart;
+create table Adhoc.VouchChart AS
+SELECT SFY, SUM(Amount) as Amount, COUNT(*) as nVOUCH
+FROM Adhoc.VouchWork
+GROUP BY SFY;
+
+DROP TABLE IF EXISTS Adhoc.VouchChart;
+create table Adhoc.VouchChart AS
+SELECT SrvName, SUM(Amount) as Amount, COUNT(*) as nVOUCH
+FROM Adhoc.VouchWork
+GROUP BY SrvName;
+
+
+DROP TABLE IF EXISTS Adhoc.VouchChart;
+create table Adhoc.VouchChart AS
+SELECT College, SUM(Amount) as Amount, COUNT(*) as nVOUCH
+FROM Adhoc.VouchWork
+GROUP BY College;
+
+
+DROP TABLE IF EXISTS Adhoc.VouchChart;
+create table Adhoc.VouchChart AS
+Select 	Name,
+		max(Department) as Department,
+        SUM(Amount) as Amount, 
+        COUNT(*) as nVOUCH, 
+        count(Distinct Service) as NDiffSvc,
+        Min(Date_Issued) as FirstVoucher,
+        max(Date_Issued) as LastVoucher 
+FROM Adhoc.VouchWork
+WHERE NAME<>""
+GROUP BY Name
+ORDER BY nVOUCH DESC;
+
+
+desc Adhoc.VouchWork;
