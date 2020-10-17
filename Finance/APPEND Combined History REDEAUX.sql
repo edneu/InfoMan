@@ -1,20 +1,25 @@
+desc Adhoc.combined_hist_rept;
+
 
 select * from Adhoc.trans2date;  
 SELECT count(*) from Adhoc.trans2date;  
 SELECT YEar(Journal_Date),count(*),min(Journal_Date), max(Journal_Date),sum(Posted_Amount) from Adhoc.trans2date group by Year(Journal_Date);
 desc Adhoc.trans2date;
 
-
-
+select "Combined Hist" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from Adhoc.combined_hist_rept
+UNION ALL
+select "New Monthly File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from Adhoc.trans_20201001;
 
 ###DELETE FROM Adhoc.combined_hist_rept where Journal_Date is Null;
 
 ### MASTER IS Adhoc.combined_hist_rept
 ;
-SELECT count(*) from Adhoc.trans_02020901;
-desc Adhoc.trans_02020901; 
+SELECT count(*) from Adhoc.secim20201001;
+select * from Adhoc.secim20201001;
+select * from 
+desc Adhoc.secim20201001; 
 
-ALter Table Adhoc.trans_02020901 CHANGE combined_hist_rept_id newtranshist_id int(11);
+ALter Table Adhoc.secim20201001 CHANGE trans_20201001_id newtranshist_id int(11);
 ###################################################################################################
 ###################################################################################################
 ### LOAD FROM EXCEL SPREADHEET
@@ -35,7 +40,7 @@ ALter Table Adhoc.trans_02020901 CHANGE combined_hist_rept_id newtranshist_id in
 
 ## drop table if exists loaddata.newtranshist;
 create table loaddata.newtranshist AS
-select * from Adhoc.trans_02020901; 
+select * from Adhoc.secim20201001; 
 
 
 
@@ -60,7 +65,8 @@ Alter table loaddata.newtranshist
 ##  Alter table loaddata.newtranshist ADD Accounting_Period int(11);
 ## UPDATE loaddata.newtranshist SET FISCAL_YEAR=2020;
 
-
+##ALTER TABLE Adhoc.combined_hist_rept ADD TransMonth varchar(7);
+##UPDATE Adhoc.combined_hist_rept SET TransMonth=concat(YEAR(Journal_Date),"-",LPAD(MONTH(Journal_Date),2,"0")) ;
 ################################
 ##CTSI Transaction Details Fiscal Year End_FY21
 
@@ -244,7 +250,7 @@ WHERE nth.DupKEY =lu.DupKEY;
 select DupFlag,count(*) from  loaddata.newtranshist group by DupFlag;
 
 
-
+select * from loaddata.newtranshist where DupFlag=0;
 
 
 select count(*) from Adhoc.combined_hist_rept_NEW;
@@ -256,6 +262,7 @@ select count(*) from Adhoc.combined_hist_rept_NEW;
 select "MASTER FILE ID" As Measure, min(combined_hist_rept_id) As MinID, max(combined_hist_rept_id) As MaxID FROM Adhoc.combined_hist_rept
 UNION ALL 
 select "NEW FILE ID" As Measure, min(newtranshist_id) As MinID, max(newtranshist_id) As MaxID FROM loaddata.newtranshist;
+
 
 
 ALTER TABLE loaddata.newtranshist ADD newtranshist_id int(20);
@@ -283,6 +290,7 @@ select
 	TransMonth,
     DeptID,
 	Alt_Dept_ID,
+    ##DeptID_Desc,
 	Fund_Code,
 	Program_Code,
 	Source_of_Funds_Code,
@@ -308,6 +316,7 @@ SELECT
 	TransMonth,
     DeptID,
 	Alt_Dept_ID,
+    ##DeptID_Desc,
 	Fund_Code,
 	Program_Code,
 	Source_of_Funds_Code,
@@ -325,7 +334,15 @@ SELECT
     Grant_Year,
 	CTSI_Fiscal_Year,
 	Posted_Amount
-from loaddata.newtranshist WHERE DupFlag=0;
+from loaddata.newtranshist 
+WHERE DupFlag=0;
+
+
+
+
+
+
+
 
 
 SELECT "Previous Combined File"  as Measure, COUNT(*) as N from Adhoc.combined_hist_rept
@@ -343,6 +360,7 @@ SELECT "New Combined File Total"  as Measure, COUNT(*) as N from Adhoc.combined_
 
 desc Adhoc.combined_hist_rept;
 desc Adhoc.combined_hist_rept_NEW;
+SELECT * from Adhoc.combined_hist_rept_NEW;
 ##################################################################################################################
 SET SQL_SAFE_UPDATES = 0;
 UPDATE Adhoc.combined_hist_rept_NEW SET CTSI_Fiscal_Year=2000 WHERE Journal_Date BETWEEN str_to_date('07,01,2000', '%m,%d,%Y') AND  str_to_date('06,30,2001','%m,%d,%Y');
@@ -386,40 +404,14 @@ select CTSI_Fiscal_Year,min(Journal_Date),max(Journal_Date),count(*) from Adhoc.
 ##################################################################################################################
 ##### BACKUP AND RENAME
 /*
-CREATE TABLE Adhoc.comb_hist_report20200818BU AS
+CREATE TABLE Adhoc.comb_hist_report20201006BU AS
 SELECT * from Adhoc.combined_hist_rept;
 
 drop table if exists Adhoc.combined_hist_rept;
-Create table Adhoc.combined_hist_rept AS 
-SELECT * from Adhoc.combined_hist_rept_NEW;
 
 
 */
 /*
-
-	newtranshist_id AS combined_hist_rept_id,
-	xTransaction_Detail,
-	xDeptID,
-	xAlt_Dept_ID,
-	+++"" AS DeptID_Desc,
-	xFund_Code,
-	xProgram_Code,
-	xSource_of_Funds_Code,
-	xFlex_Code,
-	xProject_Code,
-	X"" AS Project_Descr,
-	xERP_Account_Level_4,
-	xAccount_Code,
-	xDoc_Desc,
-	xDoc_Detail,
-	xEncumbrance_Description,
-	xJournal_ID,
-	xJournal_Date,
-	xFiscal_Year,
-	xGrant_Year,
-	xCTSI_Fiscal_Year,
-	xAccounting_Period,
-	xPosted_Amount
 
 
 DROP TABLE IF EXISTS Adhoc.combined_hist_rept;
@@ -427,7 +419,8 @@ CREATE TABLE Adhoc.combined_hist_rept AS
 SELECT 	combined_hist_rept_id,
 		Alt_Dept_ID,
         CTSI_Fiscal_Year,
-        DeptID_Desc,
+        TransMonth,
+        ##DeptID_Desc,
         Grant_Year,
         Transaction_Detail,
         DeptID,
@@ -436,7 +429,7 @@ SELECT 	combined_hist_rept_id,
         Source_of_Funds_Code,
         Flex_Code,
         Project_Code,
-        Project_Descr,
+        ##Project_Descr,
         ERP_Account_Level_4,
         Account_Code,
         Doc_Desc,

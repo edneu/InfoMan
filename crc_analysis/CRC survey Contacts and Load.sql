@@ -97,6 +97,7 @@ select * from crc.SurvContact;
 ###########################################################################################################
 ######### LOAD RESULTS 
 ## UPDATE crc.crcsurvmaster with SurveyResults
+##select * from crc.crcsurvmaster ;
 
 DROP TABLE IF EXISTS crc.SurveyRslt;
 CREATE TABLE crc.SurveyRslt AS

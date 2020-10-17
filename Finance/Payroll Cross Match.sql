@@ -3,7 +3,7 @@
 
 DROP TABLE IF EXISTS work.pymatch ;
 Create table work.pymatch AS
-Select * from work.payrollmatchsept;
+Select * from work.payrollmatchoct;
 
 
 select distinct Source from  work.pymatch;
@@ -42,7 +42,7 @@ SET ASSIST=0,
 UPDATE work.pyxmatch pm, work.pymatch lu SET ASSIST=1 WHERE pm.UFID=lu.UFID AND lu.Source="ASSIST";
 UPDATE work.pyxmatch pm, work.pymatch lu SET CTSI=1 WHERE pm.UFID=lu.UFID AND lu.Source="CTSI";
 UPDATE work.pyxmatch pm, work.pymatch lu SET SECIM=1 WHERE pm.UFID=lu.UFID AND lu.Source="SECIM";
-UPDATE work.pyxmatch pm, work.pymatch lu SET MD_PHD=1 WHERE pm.UFID=lu.UFID AND lu.Source="MD-PHD";
+UPDATE work.pyxmatch pm, work.pymatch lu SET MD_PHD=1 WHERE pm.UFID=lu.UFID AND lu.Source="MD_PHD";
 UPDATE work.pyxmatch pm, work.pymatch lu SET OCR=1 WHERE pm.UFID=lu.UFID AND lu.Source="OCR";
 UPDATE work.pyxmatch pm, work.pymatch lu SET CERHB=1 WHERE pm.UFID=lu.UFID AND lu.Source="CERHB";
 UPDATE work.pyxmatch SET On_Payroll= CTSI+SECIM+MD_PHD+OCR+CERHB;
