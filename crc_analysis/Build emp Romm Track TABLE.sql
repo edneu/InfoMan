@@ -182,75 +182,6 @@ Select * FROM ctsi_webcamp_adhoc.visitcore where VisitID IN (SELECT DISTINCT Vis
 #######################################################################################
 #######################################################################################
 #######################################################################################
-
-
-UPDATE ctsi_webcamp_adhoc.visitcore vc, ctsi_webcamp_pr.coreservice lu
-SET vc.CoreServiceID=lu.UNIQUEFIELD,
-	vc.LabTestID=lu.LabTest
-WHERE vc.VisitType="OutPatient"
-AND vc.VisitID=lu.opvisit;
-
-UPDATE ctsi_webcamp_adhoc.visitcore vc, ctsi_webcamp_pr.coreservice lu
-SET vc.CoreServiceID=lu.UNIQUEFIELD,
-	vc.LabTestID=lu.LabTest
-WHERE vc.VisitType="Inpatient"
-AND vc.VisitID=lu.ADMISSIO;
-
-UPDATE ctsi_webcamp_adhoc.visitcore vc, ctsi_webcamp_pr.coreservice lu
-SET vc.CoreServiceID=lu.UNIQUEFIELD,
-	vc.LabTestID=lu.LabTest
-WHERE vc.VisitType="SwingBed"
-AND vc.VisitID=lu.SBADMISSIO;
-
-## May need to be Join
-## Update Yeilds 
-UPDATE ctsi_webcamp_adhoc.visitcore vc, ctsi_webcamp_pr.coreservice_personprovider lu
-SET vc.ProvPerson=lu.PERSON
-AND vc.CoreServiceID=lu.CORESERVICE;
-
-drop  table if exists ctsi_webcamp_adhoc.temp1;
-create table ctsi_webcamp_adhoc.temp1 as 
-Select vc.VisitType, vc.VisitID, lu.PERSON, vc.CoreServiceID
-FROM ctsi_webcamp_adhoc.visitcore vc
-LEFT OUTER join ctsi_webcamp_pr.coreservice_personprovider lu
-ON vc.CoreServiceID=lu.CORESERVICE;
-
-
-############################################################
-select * from ctsi_webcamp_adhoc.visitcore;
-#############################################################
-
-SELECT * from ctsi_webcamp_adhoc.temp1 where Person is not null;
-SELECT count(*) from ctsi_webcamp_adhoc.temp1 where Person is null;
-
-select count(distinct CoreServiceID) from ctsi_webcamp_adhoc.visitcore;
-select count(distinct CoreService) from ctsi_webcamp_pr.coreservice_personprovider;
-
-
-SELECT * from ctsi_webcamp_pr.coreservice_personprovider
-WHERE CORESERVICE IN (SELECT DISTINCT CoreServiceID FROM ctsi_webcamp_adhoc.visitcore);
-
-SELECT count(DISTINCT CoreServiceID) FROM ctsi_webcamp_adhoc.visitcore;
-
-
-####
-select * from ctsi_webcamp_adhoc.f1;
-select * from ctsi_webcamp_adhoc.f2;
-
-Select f1.Key1, f1.Attrib1, F2.Attrib2
-FROM ctsi_webcamp_adhoc.f1 f1
-LEFT JOIN ctsi_webcamp_adhoc.f2 f2
-ON f1.Key1=f2.Key2;
-
-
-SELECT * from ctsi_webcamp_adhoc.visitcore;
-
-select count(*) from ctsi_webcamp_pr.lab;
-CORESERVICE.LAB=LAB.UNIQUEFIELD
-
-##########################################
-
-##########################################################
 ### BUILD ROOM LOOKUP
 DROP TABLE IF EXISTS ctsi_webcamp_adhoc.RoomLookup; 
 CREATE TABLE ctsi_webcamp_adhoc.RoomLookup As
@@ -281,3 +212,29 @@ WHERE rl.RoomID=lu.UNIQUEFIELD;
 SELECT * from ctsi_webcamp_adhoc.RoomLookup; 
 
 SELECT count(*) from ctsi_webcamp_adhoc.RoomLookup; 
+#######################################################################################
+#######################################################################################
+#######################################################################################
+#######################################################################################
+#######################################################################################
+#######################################################################################
+
+
+select * from ctsi_webcamp_adhoc.visitcore;
+SELECT * from ctsi_webcamp_adhoc.CoreSvcLU 
+SELECT * from ctsi_webcamp_adhoc.RoomLookup; 
+
+SELECT "visitcore" AS FileName,Count(*) as nREC from ctsi_webcamp_adhoc.visitcore
+UNION ALL
+SELECT "CoreSvcLU" AS FileName,Count(*) as nREC from ctsi_webcamp_adhoc.CoreSvcLU
+UNION ALL
+SELECT "RoomLookup" AS FileName,Count(*) as nREC from ctsi_webcamp_adhoc.RoomLookup;
+
+
+#######################################################################################
+#######################################################################################
+#######################################################################################
+#######################################################################################
+#######################################################################################
+#######################################################################################
+
