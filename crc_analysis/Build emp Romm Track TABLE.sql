@@ -221,7 +221,7 @@ SELECT count(*) from ctsi_webcamp_adhoc.RoomLookup;
 
 
 select * from ctsi_webcamp_adhoc.visitcore;
-SELECT * from ctsi_webcamp_adhoc.CoreSvcLU 
+SELECT * from ctsi_webcamp_adhoc.CoreSvcLU ;
 SELECT * from ctsi_webcamp_adhoc.RoomLookup; 
 
 SELECT "visitcore" AS FileName,Count(*) as nREC from ctsi_webcamp_adhoc.visitcore
