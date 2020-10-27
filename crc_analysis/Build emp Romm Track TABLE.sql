@@ -16,7 +16,8 @@ Select 	"OutPatient" AS VisitType,
         STATUS AS VisitStatus,
         PROTOCOL AS ProtocolID,
         PERSON as PIPersonID, 
-        BED as BedID
+        BED as BedID,
+        PATIENT AS PatientID
 from ctsi_webcamp_pr.opvisit
 WHERE STATUS=2 
 UNION ALL
@@ -29,7 +30,8 @@ Select 	"Inpatient" AS VisitType,
         STATUS AS VisitStatus,
         PROTOCOL AS ProtocolID,
         PERSON as PIPersonID, 
-        BED as BedID
+        BED as BedID,
+        PATIENT AS PatientID
 from ctsi_webcamp_pr.admissio
 UNION ALL
 Select 	"SwingBed" AS VisitType,
@@ -41,8 +43,9 @@ Select 	"SwingBed" AS VisitType,
         STATUS AS VisitStatus,
         PROTOCOL AS ProtocolID,
         trim(PERSON) as PIPersonID, 
-        BED as BedID
-from ctsi_webcamp_pr.admissio;
+        BED as BedID,
+        PATIENT AS PatientID
+from ctsi_webcamp_pr.sbadmissio;
 
 
 SET SQL_SAFE_UPDATES = 0;
@@ -57,12 +60,19 @@ AND vc.PIPersonID IS NULL;
 ALTER TABLE ctsi_webcamp_adhoc.visitcore
 ADD PI_NAME varchar(55),
 ADD Title varchar(255),
-ADD CRCNumber varchar(25);
+ADD CRCNumber varchar(25),
+ADD PatientName varchar(45);
 
 
 UPDATE ctsi_webcamp_adhoc.visitcore vc, ctsi_webcamp_pr.person lu
 SET vc.PI_NAME=CONCAT(lu.LASTNAME,", ",lu.FIRSTNAME)
 WHERE vc.PIPersonID=lu.UNIQUEFIELD;
+
+
+UPDATE ctsi_webcamp_adhoc.visitcore vc, ctsi_webcamp_pr.patient lu
+SET vc.PatientName=CONCAT(lu.LASTNAME,", ",lu.FIRSTNAME)
+WHERE vc.PatientID=lu.UNIQUEFIELD;
+
 
 UPDATE ctsi_webcamp_adhoc.visitcore vc, ctsi_webcamp_pr.protocol lu
 SET vc.Title=lu.LONGTITLE,
@@ -70,7 +80,9 @@ SET vc.Title=lu.LONGTITLE,
 WHERE vc.ProtocolID=lu.UNIQUEFIELD;
 		
 ## DATE FILTER
-DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE Visitdate<=str_to_date('07,01,2017','%m,%d,%Y')    ;
+
+DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE VisitStatus<>2;
+DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE Visitdate<str_to_date('01,01,2016','%m,%d,%Y')    ;
     
 #Select * FROM ctsi_webcamp_adhoc.visitcore;        
 #######################################################################################
@@ -80,8 +92,8 @@ DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE Visitdate<=str_to_date('07,01,20
 ## CREATE CORE SERVICE LOOKUP Multiple Records per VISIT
 
 
-DROP TABLE IF EXISTS ctsi_webcamp_adhoc.CoreSvcLU;
-Create table  ctsi_webcamp_adhoc.CoreSvcLU AS
+DROP TABLE IF EXISTS ctsi_webcamp_adhoc.CoreSvcLU1;
+Create table  ctsi_webcamp_adhoc.CoreSvcLU1 AS
 SELECT "OutPatient" AS VisitType,
 	    OPVISIT AS VisitID,
         UNIQUEFIELD AS CoreSvcID,
@@ -127,13 +139,36 @@ SELECT "SwingBed" AS VisitType,
 FROM ctsi_webcamp_pr.coreservice
 WHERE SBADMISSIO in (SELECT VisitID FROM ctsi_webcamp_adhoc.visitcore WHERE VisitType="SwingBed");
 
+DROP TABLE IF EXISTS ctsi_webcamp_adhoc.CoreSvcLU;
+Create table  ctsi_webcamp_adhoc.CoreSvcLU AS
+SELECT cs.VisitType,
+	cs.VisitID,
+	cs.CoreSvcID,
+	cs.CoreSvcProtocolID,
+	cs.CoreSvcVisitDate,
+	cs.CoreSvcQuant,
+	cs.CoreSvcStartTIme,
+	cs.CoreSvcEndTIme,
+	cs.CoreSvcVistLen,
+	cs.CoreSvcStatus,
+	cs.LabID,
+	cs.LabTestID,
+	pp.PERSON AS ProvPersonID
+from ctsi_webcamp_adhoc.CoreSvcLU1 cs 
+LEFT JOIN ctsi_webcamp_pr.coreservice_personprovider pp
+ON cs.CoreSvcID = pp.CORESERVICE;
+
+
+
+
+
+
 
 ALTER TABLE ctsi_webcamp_adhoc.CoreSvcLU
 ADD VisitFacility varchar(45),
 ADD Service varchar(100),
 ADD SvcUnitCost float,
 ADD Amount float,
-ADD ProvPersonID bigint(20),
 ADD ProvPersonName varchar(100),
 ADD ProtoSpecRate int(1);
 
@@ -148,10 +183,6 @@ WHERE cs.LabID=lu.UNIQUEFIELD;
 UPDATE ctsi_webcamp_adhoc.CoreSvcLU cs, ctsi_webcamp_pr.labtest lu
 SET cs.Service =lu.LABTEST
 WHERE cs.LabTestID=lu.UNIQUEFIELD;
-
-UPDATE ctsi_webcamp_adhoc.CoreSvcLU cs, ctsi_webcamp_pr.coreservice_personprovider lu
-SET cs.ProvPersonID =lu.PERSON
-WHERE cs.CoreSvcID=lu.CORESERVICE;
 
 UPDATE ctsi_webcamp_adhoc.CoreSvcLU cs, ctsi_webcamp_pr.person lu
 SET cs.ProvPersonName =CONCAT(trim(LASTNAME),", ",TRIM(FIRSTNAME))
@@ -179,6 +210,7 @@ SET cs.SvcUnitCost=ar.RATESPEC,
 WHERE cs.CoreSvcProtocolID=ar.PROTOCOL
   AND cs.LabTestID=ar.LABTEST;
 
+DELETE FROM ctsi_webcamp_adhoc.CoreSvcLU WHERE CoreSvcStatus<>2;
 
 SELECT * from ctsi_webcamp_adhoc.CoreSvcLU;
 #######################################################################################
@@ -241,6 +273,8 @@ SELECT
            vc.VisitEndTIme,
            vc.VisitLength,
            vc.VisitStatus,
+           vc.PatientID,
+           vc.PatientName,
            vc.ProtocolID,
            vc.PIPersonID,
            vc.PI_NAME,
@@ -275,6 +309,8 @@ SELECT
 			vr.VisitEndTIme,
 			vr.VisitLength,
             vr.VisitStatus,
+            vr.PatientID,
+            vr.PatientName,
 			vr.ProtocolID,
 			vr.PIPersonID,
 			vr.PI_NAME,
@@ -316,7 +352,7 @@ SELECT * from ctsi_webcamp_adhoc.VisitRoomCore;
 #######################################################################################    
 #######################################################################################
 ## Verify
-
+/*
 select * from ctsi_webcamp_adhoc.visitcore;
 SELECT * from ctsi_webcamp_adhoc.CoreSvcLU ;
 SELECT * from ctsi_webcamp_adhoc.RoomLookup;
@@ -340,26 +376,45 @@ DESC ctsi_webcamp_adhoc.RoomLookup;
 DESC ctsi_webcamp_adhoc.VisitRoom;
 DESC ctsi_webcamp_adhoc.CoreSvcLU;
 DESC ctsi_webcamp_adhoc.VisitRoomCore;
-
+*/
 
 DROP TABLE If exists ctsi_webcamp_adhoc.VCRSummary;
 CREATE TABLE ctsi_webcamp_adhoc.VCRSummary AS
 SELECT Year(VisitDate) As CalYear,
+       Count(*) as nRecs,
 	   count(distinct VisitID) as nVISITS,
        Count(distinct ProtocolID) as nProtocols,
        SUM(VisitLength)/60 as VisitLengthHr,
 	   Count(distinct PIPersonID) as nPIs,
        Count(distinct Service) as nService,
-       SUM(Amount) as TotalAmt
+       SUM(Amount) as TotalAmt,
+       SUM( IF ( ProvPersonID is null, 1, 0 ) ) as nNULLProvID
 From ctsi_webcamp_adhoc.VisitRoomCore
 GROUP BY CalYear
 Order by CalYear;
 
+
+#DELETE FROM ctsi_webcamp_adhoc.VisitRoomCore WHERE Visitdate<str_to_date('01,01,2017','%m,%d,%Y')    ;
 #######################################################################################
 #######################################################################################    
 #######################################################################################
 #######################################################################################    
 #######################################################################################
+
+SELECT VisitType
+VisitID,
+CoreSvcVisitDate,
+CoreSvcStartTIme,
+CoreSvcEndTIme,
+CoreSvcVistLen,
+ProvPersonName,
+Service,
+CoreSvcQuant,
+SvcUnitCost,
+Amount
+From ctsi_webcamp_adhoc.VisitRoomCore
+;
+
 
 #######################################################################################
 #######################################################################################    
@@ -373,47 +428,83 @@ Order by CalYear;
 #######################################################################################    
 #######################################################################################
 
+drop table if exists ctsi_webcamp_adhoc.temp;
+Create table ctsi_webcamp_adhoc.temp AS
+SELECT VISITID,COUNT(DISTINCT CoreSvcID) as nCORESVC, COUNT(*) AS n
+FROM ctsi_webcamp_adhoc.VisitRoomCore
+GROUP BY VisitID;
+
+SELECT * from ctsi_webcamp_adhoc.VisitRoomCore
+WHERE VISITID IN (SELECT VISITID from ctsi_webcamp_adhoc.temp WHERE nCORESVC<>n);
 
 
+SELECT * from ctsi_webcamp_adhoc.temp WHERE nCORESVC<>n;
+
+################################
+
+'visitcore'
+
+drop table if exists ctsi_webcamp_adhoc.temp2;
+Create table ctsi_webcamp_adhoc.temp2 AS
+SELECT VISITID,COUNT(*) AS n
+FROM ctsi_webcamp_adhoc.visitcore
+GROUP BY VISITID;
+
+SELECT * from ctsi_webcamp_adhoc.temp2 WHERE n>1;
+
+SELECT * FROM ctsi_webcamp_adhoc.visitcore
+WHERE VISITID IN (SELECT DISTINCT VISITID from ctsi_webcamp_adhoc.temp2 WHERE n>1);
+
+
+select VisitType, count(*) from ctsi_webcamp_adhoc.visitcore group by VisitType;
 
 ######################################################
-######################################################
-######### ADD COSTS  SCRATCH
 
-/*
-######### ADD NON-PROTOCL SPECIFIC COST DATA 
-UPDATE 	ctsi_webcamp_adhoc.OPVCS op, 
-		ctsi_webcamp_pr.labtestcost lu
-SET op.Amount=lu.DEFAULTCOST
-WHERE op.LABTEST=lu.LABTEST
-  AND (op.VISITDATE>=lu.STARTDATE or lu.STARTDATE IS NULL)
-  AND (op.VISITDATE<=lu.ENDDATE OR lu.ENDDATE IS NULL);
 
-######### UPDATE PROTOCOL SPECIFIC Service Costs
-UPDATE 	ctsi_webcamp_adhoc.OPVCS op
-SET ProtoSpecRate=0;
+Select Year(Visitdate), Room, Count(*)
+FROm ctsi_webcamp_adhoc.VisitRoomCore
+GROUP BY Year(Visitdate), Room;
 
-UPDATE 	ctsi_webcamp_adhoc.OPVCS op,
-		ctsi_webcamp_pr.approvedresource ar
-SET op.AMOUNT=ar.RATESPEC,
-    op.ProtoSpecRate=1
-WHERE op.ProtoID=ar.PROTOCOL
-  AND op.LABTEST=ar.LABTEST;
-  #AND op.AMOUNT IS NULL;   
 
-######### PRICE ZERO COST SERVICES NOT FOUND IN LABTEST COST
-UPDATE ctsi_webcamp_adhoc.OPVCS
-       SET Amount=0
-WHERE LABTEST IN (154, 220, 143);
+Select Room, Count(*)
+FROm ctsi_webcamp_adhoc.VisitRoomCore
+GROUP BY Room;
+
+Select *
+FROm ctsi_webcamp_adhoc.VisitRoomCore
+WHERE Year(Visitdate)<>YEar(CoreSvcVisitDate);
+
+
+3788	8	9
+3926	7	8
+3927	7	8
+
+CORE SERVICE STATUS
+
+0 or null=not entered
+ 1=Scheduled
+ 2=Completed
+ 3=Begun
+ 4=No-show
+ 5=Request cancelled
+ 6=Requested
+ 7=Request denied
+ 8=Stopped prematurely
+ 9=Re-scheduling requested
+ 9=Re-scheduling requested
  
-######### UPDATE ALL TOTAL AMOUNT
-UPDATE ctsi_webcamp_adhoc.OPVCS op
-SET op.TotAmt=op.AMOUNT*op.SvcQuant;
-
-select LabTestID, Service, count(*) from ctsi_webcamp_adhoc.VisitRoomCore
-WHERE LabTestID NOT IN (SELECT DISTINCT LABTEST from ctsi_webcamp_pr.labtestcost)
-GROUP BY LabTestID, Service;
-
-
-select * from ctsi_webcamp_adhoc.OPVCS;
-*/
+ 
+ OPVISIT STATUS
+0 or null=not entered
+ 1=Scheduled
+ 2=Completed
+ 3=Begun
+ 4=No-show
+ 5=Request cancelled
+ 6=Requested
+ 7=Request denied
+ 8=Stopped prematurely
+ 9=Re-scheduling requested
+ 9=Re-scheduling requested
+ 
+ 
