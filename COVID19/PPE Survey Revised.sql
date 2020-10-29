@@ -168,9 +168,93 @@ FROM work.ppesurvey ;
 ALTER TABLE  work.ppesurvey1
 	ADD RegSelfProjFmt varchar(40),
 	ADD FundTypeFmt varchar(40),
-	ADD Fedfundfmt varchar(5);
+	ADD Fedfundfmt varchar(5),
+
+	ADD ReqLastNameFmt varchar(45),
+	ADD ReqFirstNameFmt varchar(45),
+	ADD ReqDeptIDFmt  varchar(12),
+	ADD ReqDeptNameFmt  varchar(45),
+	ADD PIFirstNameFmt  varchar(45),
+	ADD PILastNameFmt  varchar(45),
+	ADD PIDeptIDFmt  varchar(12),
+	ADD PIDetpNameFmt varchar(45);
+        
 
 
+## FIX UFIDS
+ALTER TABLE work.ppesurvey1 MODIFY COLUMN ReqUFID varchar(12) Null,
+			                MODIFY COLUMN PIUFID varchar(12) Null;
+
+UPDATE work.ppesurvey1 SET ReqUFID=NULL WHERE ReqUFID IN (""," ","0",0); 
+UPDATE work.ppesurvey1 SET ReqUFID=REPLACE(UFID,"-",""); 
+UPDATE work.ppesurvey1 SET ReqUFID=REPLACE(UFID," ","");
+UPDATE work.ppesurvey1 SET ReqUFID=LPAD(UFID,8,"0");
+
+UPDATE work.ppesurvey1 SET PIUFID=NULL WHERE PIUFID IN (""," ","0",0); 
+UPDATE work.ppesurvey1 SET PIUFID=REPLACE(UFID,"-",""); 
+UPDATE work.ppesurvey1 SET PIUFID=REPLACE(UFID," ","");
+UPDATE work.ppesurvey1 SET PIUFID=LPAD(UFID,8,"0");
+
+
+### Create UFID LOOKUP TABLE
+
+DROP TABLE IF EXISTS work.PPEallUFIDs;
+Create table work.PPEallUFIDs AS
+SELECT DISTINCT ReqUFID AS UFID from work.ppesurvey1
+WHERE ReqUFID IS NOT NULL
+UNION ALL
+SELECT DISTINCT PIUFID AS UFID from work.ppesurvey1
+WHERE PIUFID IS NOT NULL;
+
+
+DROP TABLE IF EXISTS work.PPEUfidLookup;
+Create table work.PPEUfidLookup AS
+SELECT UF_UFID AS UFID,
+	   UF_LAST_NM AS LastName,
+       UF_FIRST_NM AS FirstName,
+       UF_DEPT AS DeptID,
+       UF_DEPT_NM AS DeptName
+FROM lookup.ufids
+WHERE UF_UFID IN (SELECT DISTINCT UFID FROM work.PPEallUFIDs);
+
+
+UPDATE work.PPEUfidLookup pp, lookup.Employees lu
+SET pp.DeptID=lu.Department_Code,
+	pp.DeptName=lu.Department
+WHERE pp.UFID=lu.Employee_ID;    
+
+
+###########################################################################
+###########################################################################
+####UPDATE USER SUPPLIED VALUES
+UPDATE work.ppesurvey1 pp, ork.PPEUfidLookup lu
+SET pp.ReqLastNameFmt=lu.LastName ,
+	pp.ReqFirstNameFmt=lu.FirstName,
+	pp.ReqDeptIDFmt=lu.DeptID,
+	pp.ReqDeptNameFmt=lu.DeptName
+WHERE pp.ReqUFID=lu.UFID;
+
+UPDATE work.ppesurvey1 pp, ork.PPEUfidLookup lu
+SET pp.PINameFmt=lu.LastName ,
+	pp.PIFirstNameFmt=lu.FirstName,
+	pp.PIDeptIDFmt=lu.DeptID,
+	pp.PiDeptNameFmt=lu.DeptName
+WHERE pp.PIUFID=lu.UFID;
+
+## Ned code to put oold values in FMT vlaues if they dont exist
+UPDATE work.ppesurvey1 SET ReqLastNameFmt=ReqLastName WHERE ReqLastNameFmt IN ("",Null," ");
+UPDATE work.ppesurvey1 SET ReqFirstNameFmt=ReqFirstName WHERE ReqFIrstNameFmt IN ("",Null," ");
+UPDATE work.ppesurvey1 SET ReqDeptIDFmt=ReqDeptID WHERE ReqDeptIDFmt IN ("",Null," ");
+UPDATE work.ppesurvey1 SET ReqDeptNameFmt=ReqDeptName WHERE ReqDeptNameFmt IN ("",Null," ");
+
+UPDATE work.ppesurvey1 SET PILastNameFmt=PILastName WHERE PILastNameFmt IN ("",Null," ");
+UPDATE work.ppesurvey1 SET PIFirstNameFmt=PIFirstName WHERE PIFIrstNameFmt IN ("",Null," ");
+
+     
+
+###########################################################################
+#### LABEL RECORDS
+###########################################################################
 SET SQL_SAFE_UPDATES = 0;
 
 UPDATE work.ppesurvey1
@@ -207,20 +291,22 @@ Create table work.ppesurveyOUT as
 SELECT  redcap_record_id,
         redcap_survey_identifier,
         SurveyDate,
-        ReqLastName,
-        ReqFirstName,
+        ReqLastNameFmt,
+        ReqFirstNameFmt,
         ReqUFID,
-        ReqDept,
-        ReqEmail,
+        ReqDeptFmt,
+        ReqEmailFmt,
         ReqPhone,
-        RegSelfProjFmt as RegSelfProj,
+        RegSelfProjFmt as ReqSelfProj,
         IsProj,
-        PIFirstName,
-        PiLastName,
+        PIFirstNameFmt,
+        PILastNameFmt,
         PIUFID,
+        PIDeptIDFmt,
+        PIDeptNameFmt,
         FundTypeFmt AS FundType,
         Fedfundfmt AS Fedfund,
-        OnCOreUFNum,
+        OnCoreUFNum,
         n95mask,
         nclothmask,
         nsurgmask,
@@ -233,8 +319,12 @@ SELECT  redcap_record_id,
 FROM work.ppesurvey1
 WHERE KeepRec=1;        
 
+
+
+     
+
 ###############################################################################
 ############### EOF  ##########################################################
 ###############################################################################
 
-
+desc work.ppesurveyOUT;
