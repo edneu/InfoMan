@@ -3,8 +3,7 @@
 
 DROP TABLE IF EXISTS work.pymatch ;
 Create table work.pymatch AS
-Select * from work.payrollmatchoct;
-
+Select * from work.payrollmatchnov;
 
 select distinct Source from  work.pymatch;
 

@@ -6,7 +6,7 @@ SELECT count(*) from Adhoc.trans2date;
 SELECT YEar(Journal_Date),count(*),min(Journal_Date), max(Journal_Date),sum(Posted_Amount) from Adhoc.trans2date group by Year(Journal_Date);
 desc Adhoc.trans2date;
 
-select "Combined Hist" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from Adhoc.combined_hist_rept
+select "Combined Hist" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from Adhoc.combined_hist_rept;
 UNION ALL
 select "New Monthly File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from Adhoc.trans_20201001;
 
@@ -38,9 +38,85 @@ ALter Table Adhoc.secim20201001 CHANGE trans_20201001_id newtranshist_id int(11)
 #create table loaddata.newtranshist AS
 #select * from Adhoc.trans2date; 
 
+
+### Adhoc.trans20201103
+### Adhoc.secim20201103
+
+
+select "Combined Hist" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from Adhoc.combined_hist_rept
+UNION ALL
+select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from Adhoc.trans20201103
+UNION ALL
+select "New SECIM File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from Adhoc.secim20201103;
+
+
+
+#################
+#################
+### MANAGE DUPLICATE RECORDS BETWEEN NEW TRANSATIONS AND SECIM
+
+
+ALTER TABLE Adhoc.trans20201103 CHANGE trans20201103_id ID int(11);
+ALTER TABLE Adhoc.secim20201103 CHANGE secim20201103_id ID int(11);
+
+desc Adhoc.trans20201103;
+desc Adhoc.secim20201103;
+
+UPDATE Adhoc.secim20201103 set Accounting_Period=NULL;
+
+drop table if exists Adhoc.test;
+Create table Adhoc.test as
+SELECT * from Adhoc.trans20201103
+UNION ALL
+SELECT * from Adhoc.secim20201103;
+
+ALTER TABLE Adhoc.test 	ADD UnDupFlag int(1),
+						ADD	DupKEY varchar(4000);
+
+select * from Adhoc.test;
+
+UPDATE Adhoc.test
+SET DupKEY=TRIM(CONCAT(
+		Trim(Transaction_Detail),
+		Trim(DeptID),
+		Trim(Fund_Code),
+		Trim(Program_Code),
+		Trim(Source_of_Funds_Code),
+		Trim(Flex_Code),
+		Trim(Project_Code),
+		Trim(ERP_Account_Level_4),
+		Trim(Account_Code),
+		Trim(Journal_ID),
+		Trim(Journal_Date),
+		Trim(round(Posted_Amount,2)))
+);
+
+SELECT count(*),COUNT(DISTINCT DupKEY) from Adhoc.test;
+
+Drop table if Exists Adhoc.temp;
+create table Adhoc.temp as
+SELECT DUPKEY,MIn(ID) as UNDUPID ,COUNT(*) nRec from Adhoc.test GROUP BY DUPKEY;
+
+
+UPDATE Adhoc.test SET UnDupFlag=0;
+
+UPDATE Adhoc.test SET UnDupFlag=1
+WHERE ID IN (SELECT DISTINCT UNDUPID from Adhoc.temp);
+
+DELETE FROM Adhoc.test Where UnDupFlag=1;
+
+ALTER TABLE Adhoc.test 
+DROP UnDupFlag, 
+DROP DupKEY;
+
+#############################################################################
+#############################################################################
+#############################################################################
+## use Ahhoc.test
+
 ## drop table if exists loaddata.newtranshist;
 create table loaddata.newtranshist AS
-select * from Adhoc.secim20201001; 
+select * from Adhoc.test; 
 
 
 
