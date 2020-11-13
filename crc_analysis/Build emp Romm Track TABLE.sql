@@ -3,8 +3,8 @@
 #######################################################################################
 #######################################################################################
 ## CREATE VISITCORE TABLE 1 Records Per Visit Outpatient, Inpatient, and Scatterbed.
-
-
+#######################################################################################
+#######################################################################################
 DROP TABLE IF EXISTS ctsi_webcamp_adhoc.visitcore; 
 CREATE TABLE ctsi_webcamp_adhoc.visitcore 
 Select 	"OutPatient" AS VisitType,
@@ -80,18 +80,20 @@ SET vc.Title=lu.LONGTITLE,
 WHERE vc.ProtocolID=lu.UNIQUEFIELD;
 		
 ## DATE FILTER
-
+## Only Completed Visits
 DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE VisitStatus<>2;
-DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE Visitdate<str_to_date('01,01,2016','%m,%d,%Y')    ;
+## DATE FILTERS
+DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE Visitdate<str_to_date('01,01,2016','%m,%d,%Y');  
 DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE Visitdate>CURDATE();     
-#Select * FROM ctsi_webcamp_adhoc.visitcore;        
-#######################################################################################
-#######################################################################################
+#Select * FROM ctsi_webcamp_adhoc.visitcore;  
+      
+
+
 #######################################################################################
 #######################################################################################
 ## CREATE CORE SERVICE LOOKUP Multiple Records per VISIT
-
-
+#######################################################################################
+#######################################################################################
 DROP TABLE IF EXISTS ctsi_webcamp_adhoc.CoreSvcLU1;
 Create table  ctsi_webcamp_adhoc.CoreSvcLU1 AS
 SELECT "OutPatient" AS VisitType,
@@ -164,10 +166,6 @@ ON cs.CoreSvcID = pp.CORESERVICE;
 
 
 
-
-
-
-
 ALTER TABLE ctsi_webcamp_adhoc.CoreSvcLU
 ADD VisitFacility varchar(45),
 ADD Service varchar(100),
@@ -214,18 +212,18 @@ SET cs.SvcUnitCost=ar.RATESPEC,
 WHERE cs.CoreSvcProtocolID=ar.PROTOCOL
   AND cs.LabTestID=ar.LABTEST;
 
+# KEEP ONLY THE COMPLETE VISITS
 DELETE FROM ctsi_webcamp_adhoc.CoreSvcLU WHERE CoreSvcStatus<>2;
 
-SELECT * from ctsi_webcamp_adhoc.CoreSvcLU;
+#SELECT * from ctsi_webcamp_adhoc.CoreSvcLU;
 
 
-#######################################################################################
-#######################################################################################
-#######################################################################################
-#######################################################################################
+
 #######################################################################################
 #######################################################################################
 ### BUILD ROOM LOOKUP
+#######################################################################################
+#######################################################################################
 DROP TABLE IF EXISTS ctsi_webcamp_adhoc.RoomLookup; 
 CREATE TABLE ctsi_webcamp_adhoc.RoomLookup As
 SELECT VisitType,
@@ -252,17 +250,13 @@ UPDATE ctsi_webcamp_adhoc.RoomLookup rl, ctsi_webcamp_pr.room lu
 SET rl.Room=lu.room
 WHERE rl.RoomID=lu.UNIQUEFIELD;
 
-SELECT * from ctsi_webcamp_adhoc.RoomLookup; 
+##SELECT * from ctsi_webcamp_adhoc.RoomLookup; 
 
 
 
 #######################################################################################
 #######################################################################################
-#######################################################################################
-#######################################################################################
-
-#######################################################################################
-#######################################################################################
+## CREATE Intermediate table of VISITS and Room 
 #######################################################################################
 #######################################################################################
 
@@ -300,9 +294,10 @@ FROM ctsi_webcamp_adhoc.visitcore vc
     
   
 #######################################################################################
-
 #######################################################################################
-#######################################################################################   
+## CREATE Final Table Visits-Room-CoreServices
+#######################################################################################
+####################################################################################### 
 
 CREATE INDEX vrvi ON ctsi_webcamp_adhoc.VisitRoom (VisitID);
 CREATE INDEX csvi ON ctsi_webcamp_adhoc.CoreSvcLU (VisitID);
@@ -351,70 +346,29 @@ LEFT JOIN ctsi_webcamp_adhoc.CoreSvcLU cr
 ON vr.VisitType=cr.VisitType
 AND vr.VisitID=cr.VisitID;
 
-## 5 VISIT RECORDS WITH NO CORE SERVICE RECORD
+## Remove VISIT RECORDS WITH NO CORE SERVICE RECORD
 DELETE FROM ctsi_webcamp_adhoc.VisitRoomCore where CoreSvcID is null;
 
-SELECT "Total Records" AS DescMeasure, COUNT(*) As Measure from ctsi_webcamp_adhoc.VisitRoomCore
-UNION ALL 
-SELECT "No Provider" AS DescMeasure, COUNT(*) As Measure from ctsi_webcamp_adhoc.VisitRoomCore WHERE ProvPersonID IS NULL;
 
 
-SELECT ProvPersonID,ProvPersonName, Count(*) from ctsi_webcamp_adhoc.VisitRoomCore group by ProvPersonID,ProvPersonName; 
+###
 
-### MISSING PERSON PROVIDERS
-SELECT YEar(Visitdate), COUNT(*) As Measure from ctsi_webcamp_adhoc.VisitRoomCore WHERE ProvPersonID IS NULL group by YEar(Visitdate);
-
-SELECT PI_NAME,COUNT(*) as nREC,SUM(case when ProvPersonID IS NULL then 1 else 0 end) as nMissProv FROM ctsi_webcamp_adhoc.VisitRoomCore group by PI_NAME;
-SELECT Service,COUNT(*) as nREC,SUM(case when ProvPersonID IS NULL then 1 else 0 end) as nMissProv FROM ctsi_webcamp_adhoc.VisitRoomCore group by Service;
-
-
-
-/*
-SELECT * from ctsi_webcamp_adhoc.VisitRoomCore;
-SELECT VisitType,CoreSvcRelatedTo,count(*) from ctsi_webcamp_adhoc.VisitRoomCore group by VisitType,CoreSvcRelatedTo;  
-
-
-SELECT * from ctsi_webcamp_adhoc.VisitRoomCore where CoreSvcRelatedTo is null;
-SELECT * from ctsi_webcamp_adhoc.VisitRoomCore where CoreSvcID is null;
-*/
 #######################################################################################
-
-SELECT 
-concat(YEAR(CoreSvcVisitDate),"-",LPAD(MONTH(CoreSvcVisitDate),2,"0")) AS MONTH,
-COUNT(DISTINCT VISITID) As nVISIT,
-COUNT(DISTINCT PatientID) nUndupPatients,
-(sum(VisitLength))/60 AS VisitHours
-#(sum(VisitLength)/60)/(COUNT(DISTINCT PatientID)) As HoursPerPatient,
-#(sum(VisitLength)/60)/(COUNT(DISTINCT VISITID)) As HoursPerVisit
-
-FROM ctsi_webcamp_adhoc.VisitRoomCore
-WHERE YEAR(CoreSvcVisitDate) IN (2018,2019,2020)
-GROUP BY concat(YEAR(CoreSvcVisitDate),"-",LPAD(MONTH(CoreSvcVisitDate),2,"0"));
-
-
-SELECT VisitDate,CoreSvcVisitDate from ctsi_webcamp_adhoc.VisitRoomCore
-WHERE VisitDate<>CoreSvcVisitDate;
-
-
-
-SELECT VisitDate,CoreSvcVisitDate, datediff(VisitDate,CoreSvcVisitDate) from ctsi_webcamp_adhoc.VisitRoomCore
-WHERE VisitDate<>CoreSvcVisitDate;
-
+#######################################################################################
+## END OF FILE CREATION
+#######################################################################################
+#######################################################################################
+#######################################################################################
+#######################################################################################
 
 
 #######################################################################################
-#######################################################################################    
 #######################################################################################
-#######################################################################################    
+### TABLE ANALYTICS 
 #######################################################################################
-## Verify
-/*
-select * from ctsi_webcamp_adhoc.visitcore;
-SELECT * from ctsi_webcamp_adhoc.CoreSvcLU ;
-SELECT * from ctsi_webcamp_adhoc.RoomLookup;
-SELECT * from ctsi_webcamp_adhoc.VisitRoomCore;
- 
 
+
+### Component File Record Counts
 SELECT "visitcore" AS FileName,Count(*) as nREC, COUNT(DISTINCT VisitID) AS nVisits from ctsi_webcamp_adhoc.visitcore
 UNION ALL
 SELECT "CoreSvcLU" AS FileName,Count(*) as nREC, COUNT(DISTINCT VisitID) AS nVisits from ctsi_webcamp_adhoc.CoreSvcLU
@@ -425,14 +379,98 @@ SELECT "VisitRoom" AS FileName,Count(*) as nREC, COUNT(DISTINCT VisitID) AS nVis
 UNION ALL
 SELECT "VisitRoomCore" AS FileName,Count(*) as nREC, COUNT(DISTINCT VisitID) AS nVisits from ctsi_webcamp_adhoc.VisitRoomCore;
 
-
-
+### Component File Record Structure
+/*
 DESC ctsi_webcamp_adhoc.visitcore;
 DESC ctsi_webcamp_adhoc.RoomLookup;
 DESC ctsi_webcamp_adhoc.VisitRoom;
 DESC ctsi_webcamp_adhoc.CoreSvcLU;
 DESC ctsi_webcamp_adhoc.VisitRoomCore;
+
+### Component File Record View
+select * from ctsi_webcamp_adhoc.visitcore;
+SELECT * from ctsi_webcamp_adhoc.CoreSvcLU ;
+SELECT * from ctsi_webcamp_adhoc.RoomLookup;
+SELECT * from ctsi_webcamp_adhoc.VisitRoomCore;
+
 */
+
+### Analytic File Metrics
+SELECT "Total Records" AS DescMeasure, COUNT(*) As Measure from ctsi_webcamp_adhoc.VisitRoomCore
+UNION ALL
+SELECT "Number of Visits" AS DescMeasure, COUNT(DISTINCT VisitID) As Measure from ctsi_webcamp_adhoc.VisitRoomCore
+UNION ALL
+SELECT "Number of CoreSvcVisits" AS DescMeasure, COUNT(DISTINCT CoreSvcID) As Measure from ctsi_webcamp_adhoc.VisitRoomCore
+UNION ALL
+SELECT "Number of Protocols" AS DescMeasure, COUNT(DISTINCT ProtocolID) As Measure from ctsi_webcamp_adhoc.VisitRoomCore
+UNION ALL
+SELECT "Visits with no Protocol" AS DescMeasure, COUNT(*) As Measure from ctsi_webcamp_adhoc.VisitRoomCore WHERE ProtocolID IS NULL
+UNION ALL
+SELECT "Visits with no CRCID" AS DescMeasure, COUNT(*) As Measure from ctsi_webcamp_adhoc.VisitRoomCore WHERE CRCNumber IS NULL
+UNION ALL
+SELECT "Number of PIs" AS DescMeasure, COUNT(DISTINCT PIPersonID) As Measure from ctsi_webcamp_adhoc.VisitRoomCore
+UNION ALL
+SELECT "No PI" AS DescMeasure, COUNT(*) As Measure from ctsi_webcamp_adhoc.VisitRoomCore WHERE PIPersonID IS NULL
+UNION ALL
+SELECT "No Provider" AS DescMeasure, COUNT(*) As Measure from ctsi_webcamp_adhoc.VisitRoomCore WHERE ProvPersonID IS NULL
+UNION ALL
+SELECT "Visits With Provider" AS DescMeasure, COUNT(Distinct VisitID) As Measure from ctsi_webcamp_adhoc.VisitRoomCore WHERE ProvPersonID IS NOT NULL
+UNION ALL
+SELECT "No Patient" AS DescMeasure, COUNT(*) As Measure from ctsi_webcamp_adhoc.VisitRoomCore WHERE PatientID IS NULL
+UNION ALL
+SELECT "No Room" AS DescMeasure, COUNT(*) As Measure from ctsi_webcamp_adhoc.VisitRoomCore WHERE Room IS NULL
+UNION ALL
+SELECT "Vistdate <> CoreSvcVisitDate" AS DescMeasure, COUNT(*) As Measure from ctsi_webcamp_adhoc.VisitRoomCore WHERE VisitDate<>CoreSvcVisitDate;
+;
+
+##$ Analytic File Date Ranges
+SELECT "First Visit Date" AS DescMeasure, min(VisitDate) As Measure from ctsi_webcamp_adhoc.VisitRoomCore
+UNION ALL
+SELECT "Last Visit Date" AS DescMeasure, max(VisitDate) As Measure from ctsi_webcamp_adhoc.VisitRoomCore
+UNION ALL
+SELECT "First CoreSvc Date" AS DescMeasure, min(CoreSvcVisitDate) As Measure from ctsi_webcamp_adhoc.VisitRoomCore
+UNION ALL
+SELECT "Last CoreSvc Date" AS DescMeasure, max(CoreSvcVisitDate) As Measure from ctsi_webcamp_adhoc.VisitRoomCore;
+
+#######################################################################################
+#######################################################################################
+##### Diagnostics
+
+SELECT ProvPersonID,ProvPersonName, Count(*) from ctsi_webcamp_adhoc.VisitRoomCore group by ProvPersonID,ProvPersonName; 
+
+### MISSING PERSON PROVIDERS
+SELECT ProvPersonID,ProvPersonName, Count(*) from ctsi_webcamp_adhoc.VisitRoomCore group by ProvPersonID,ProvPersonName; 
+SELECT YEar(Visitdate), COUNT(*) As Measure from ctsi_webcamp_adhoc.VisitRoomCore WHERE ProvPersonID IS NULL group by YEar(Visitdate);
+
+SELECT PI_NAME,COUNT(*) as nREC,SUM(case when ProvPersonID IS NULL then 1 else 0 end) as nMissProv FROM ctsi_webcamp_adhoc.VisitRoomCore group by PI_NAME;
+SELECT Service,COUNT(*) as nREC,SUM(case when ProvPersonID IS NULL then 1 else 0 end) as nMissProv FROM ctsi_webcamp_adhoc.VisitRoomCore group by Service;
+
+
+SELECT * from ctsi_webcamp_adhoc.VisitRoomCore;
+SELECT VisitType,CoreSvcRelatedTo,count(*) from ctsi_webcamp_adhoc.VisitRoomCore group by VisitType,CoreSvcRelatedTo;  
+
+
+SELECT * from ctsi_webcamp_adhoc.VisitRoomCore where CoreSvcRelatedTo is null;
+SELECT * from ctsi_webcamp_adhoc.VisitRoomCore where CoreSvcID is null;
+
+#######################################################################################
+#######################################################################################
+### CREATE SUMMARY TABLES 
+#######################################################################################
+#######################################################################################
+### Monthly Summary
+SELECT 
+concat(YEAR(CoreSvcVisitDate),"-",LPAD(MONTH(CoreSvcVisitDate),2,"0")) AS MONTH,
+COUNT(DISTINCT VISITID) As nVISIT,
+COUNT(DISTINCT PatientID) nUndupPatients,
+(sum(VisitLength))/60 AS VisitHours
+FROM ctsi_webcamp_adhoc.VisitRoomCore
+WHERE YEAR(CoreSvcVisitDate) IN (2018,2019,2020)
+GROUP BY concat(YEAR(CoreSvcVisitDate),"-",LPAD(MONTH(CoreSvcVisitDate),2,"0"));
+
+#######################################################################################
+#######################################################################################
+### Calendar Year Summary 
 
 DROP TABLE If exists ctsi_webcamp_adhoc.VCRSummary;
 CREATE TABLE ctsi_webcamp_adhoc.VCRSummary AS
@@ -450,14 +488,12 @@ From ctsi_webcamp_adhoc.VisitRoomCore
 GROUP BY CalYear
 Order by CalYear;
 
+#######################################################################################
+#######################################################################################
+## Raw Listings
 
-#DELETE FROM ctsi_webcamp_adhoc.VisitRoomCore WHERE Visitdate<str_to_date('01,01,2017','%m,%d,%Y')    ;
+select * from ctsi_webcamp_adhoc.VisitRoomCore;
 #######################################################################################
-#######################################################################################    
-#######################################################################################
-#######################################################################################    
-#######################################################################################
-
 SELECT VisitType
 VisitID,
 CoreSvcVisitDate,
@@ -473,68 +509,32 @@ From ctsi_webcamp_adhoc.VisitRoomCore
 ;
 
 
-#######################################################################################
-#######################################################################################    
-#######################################################################################
-#######################################################################################    
-#######################################################################################
 
 #######################################################################################
 #######################################################################################    
 #######################################################################################
 #######################################################################################    
 #######################################################################################
+#######################################################################################
+#######################################################################################    
+#######################################################################################
+#######################################################################################    
+#######################################################################################
+######################################################################################
+#######################################################################################    
+#######################################################################################
+#######################################################################################    
+#######################################################################################
+#######################################################################################
+#######################################################################################    
 
-drop table if exists ctsi_webcamp_adhoc.temp;
-Create table ctsi_webcamp_adhoc.temp AS
-SELECT VISITID,COUNT(DISTINCT CoreSvcID) as nCORESVC, COUNT(*) AS n
-FROM ctsi_webcamp_adhoc.VisitRoomCore
-GROUP BY VisitID;
 
-SELECT * from ctsi_webcamp_adhoc.VisitRoomCore
-WHERE VISITID IN (SELECT VISITID from ctsi_webcamp_adhoc.temp WHERE nCORESVC<>n);
-
-
-SELECT * from ctsi_webcamp_adhoc.temp WHERE nCORESVC<>n;
-
+#######################################################################################
+#######################################################################################    
+#######################################################################################
 ################################
+### SUNDRY REFERENCE 
 
-'visitcore'
-
-drop table if exists ctsi_webcamp_adhoc.temp2;
-Create table ctsi_webcamp_adhoc.temp2 AS
-SELECT VISITID,COUNT(*) AS n
-FROM ctsi_webcamp_adhoc.visitcore
-GROUP BY VISITID;
-
-SELECT * from ctsi_webcamp_adhoc.temp2 WHERE n>1;
-
-SELECT * FROM ctsi_webcamp_adhoc.visitcore
-WHERE VISITID IN (SELECT DISTINCT VISITID from ctsi_webcamp_adhoc.temp2 WHERE n>1);
-
-
-select VisitType, count(*) from ctsi_webcamp_adhoc.visitcore group by VisitType;
-
-######################################################
-
-
-Select Year(Visitdate), Room, Count(*)
-FROm ctsi_webcamp_adhoc.VisitRoomCore
-GROUP BY Year(Visitdate), Room;
-
-
-Select Room, Count(*)
-FROm ctsi_webcamp_adhoc.VisitRoomCore
-GROUP BY Room;
-
-Select *
-FROm ctsi_webcamp_adhoc.VisitRoomCore
-WHERE Year(Visitdate)<>YEar(CoreSvcVisitDate);
-
-
-3788	8	9
-3926	7	8
-3927	7	8
 
 CORE SERVICE STATUS
 
@@ -575,10 +575,13 @@ What is this service related to (visit, admission, recognized protocol, or other
  6=Non-CTSA or non-GCRC protocol
  7=CTSC/GCRC protocol
  
- 
- 
- ##############################################################################
- ###########  SUmmary from MATTS List
+#######################################################################################    
+#######################################################################################
+#######################################################################################
+#######################################################################################    
+### ADHOC  
+##############################################################################
+###########  Summary from MATTS List
  DROP TABLE if EXISTS ctsi_webcamp_adhoc.crc_study_summ ;
  create table ctsi_webcamp_adhoc.crc_study_summ AS
   select	Span,
@@ -645,5 +648,6 @@ WHERE ss.CRCID=lu.CRCID;
 
 SELECT * from ctsi_webcamp_adhoc.crc_study_summ ;
 
-
- 
+###########  END Summary from MATTS List
+#######################################################################################    
+#######################################################################################

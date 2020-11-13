@@ -124,6 +124,9 @@ WHERE LABTEST IN (154, 220, 143);
 UPDATE ctsi_webcamp_adhoc.OPVCS op
 SET op.TotAmt=op.AMOUNT*op.SvcQuant;
 
+
+select * from ctsi_webcamp_adhoc.OPVCS;
+
 ###########################################################################################################
 ###########################################################################################################
 #### Create Summary Table for reporting

@@ -64,7 +64,7 @@ desc Adhoc.secim20201103;
 
 UPDATE Adhoc.secim20201103 set Accounting_Period=NULL;
 
-drop table if exists Adhoc.test;
+drop table if exists Adhoc.NewAdd;
 Create table Adhoc.test as
 SELECT * from Adhoc.trans20201103
 UNION ALL
@@ -73,9 +73,11 @@ SELECT * from Adhoc.secim20201103;
 ALTER TABLE Adhoc.test 	ADD UnDupFlag int(1),
 						ADD	DupKEY varchar(4000);
 
-select * from Adhoc.test;
+select * from Adhoc.NewAdd;
 
-UPDATE Adhoc.test
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE Adhoc.NewAdd
 SET DupKEY=TRIM(CONCAT(
 		Trim(Transaction_Detail),
 		Trim(DeptID),
@@ -91,21 +93,24 @@ SET DupKEY=TRIM(CONCAT(
 		Trim(round(Posted_Amount,2)))
 );
 
-SELECT count(*),COUNT(DISTINCT DupKEY) from Adhoc.test;
+SELECT count(*),COUNT(DISTINCT DupKEY) from Adhoc.NewAdd;
 
 Drop table if Exists Adhoc.temp;
 create table Adhoc.temp as
 SELECT DUPKEY,MIn(ID) as UNDUPID ,COUNT(*) nRec from Adhoc.test GROUP BY DUPKEY;
 
 
-UPDATE Adhoc.test SET UnDupFlag=0;
+UPDATE Adhoc.NewAdd SET UnDupFlag=0;
 
-UPDATE Adhoc.test SET UnDupFlag=1
+UPDATE Adhoc.NewAdd SET UnDupFlag=1
 WHERE ID IN (SELECT DISTINCT UNDUPID from Adhoc.temp);
 
-DELETE FROM Adhoc.test Where UnDupFlag=1;
+SELECT UnDupFlag,count(*) from Adhoc.test group by UnDupFlag;
 
-ALTER TABLE Adhoc.test 
+
+DELETE FROM Adhoc.NewAdd Where UnDupFlag=0;
+
+ALTER TABLE Adhoc.NewAdd
 DROP UnDupFlag, 
 DROP DupKEY;
 
@@ -114,9 +119,9 @@ DROP DupKEY;
 #############################################################################
 ## use Ahhoc.test
 
-## drop table if exists loaddata.newtranshist;
+#drop table if exists loaddata.newtranshist;
 create table loaddata.newtranshist AS
-select * from Adhoc.test; 
+select * from Adhoc.NewAdd; 
 
 
 
@@ -335,9 +340,6 @@ select count(*) from Adhoc.combined_hist_rept_NEW;
 
 
 
-select "MASTER FILE ID" As Measure, min(combined_hist_rept_id) As MinID, max(combined_hist_rept_id) As MaxID FROM Adhoc.combined_hist_rept
-UNION ALL 
-select "NEW FILE ID" As Measure, min(newtranshist_id) As MinID, max(newtranshist_id) As MaxID FROM loaddata.newtranshist;
 
 
 
@@ -347,7 +349,7 @@ ALTER TABLE loaddata.newtranshist ADD newtranshist_id int(20);
       UPDATE loaddata.newtranshist SET newtranshist_id = 0 ;
       SELECT @i:=(SELECT max(combined_hist_rept_id) from  Adhoc.combined_hist_rept);
       UPDATE loaddata.newtranshist SET newtranshist_id = @i:=@i+1;
-     SET SQL_SAFE_UPDATES = 1;
+     #SET SQL_SAFE_UPDATES = 1;
 
 select "MASTER FILE ID" As Measure, min(combined_hist_rept_id) As MinID, max(combined_hist_rept_id) As MaxID FROM Adhoc.combined_hist_rept
 UNION ALL 
@@ -480,11 +482,12 @@ select CTSI_Fiscal_Year,min(Journal_Date),max(Journal_Date),count(*) from Adhoc.
 ##################################################################################################################
 ##### BACKUP AND RENAME
 /*
-CREATE TABLE Adhoc.comb_hist_report20201006BU AS
+CREATE TABLE Adhoc.comb_hist_report20201109BU AS
 SELECT * from Adhoc.combined_hist_rept;
 
 drop table if exists Adhoc.combined_hist_rept;
 
+select count(*) from Adhoc.comb_hist_report20201109BU;
 
 */
 /*
