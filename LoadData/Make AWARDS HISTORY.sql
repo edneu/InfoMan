@@ -94,7 +94,7 @@ SET GLOBAL local_infile = 1;
 
 
 
-load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory20200913.csv" 
+load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory20201110.csv" 
 into table loaddata.awards_history 
 fields terminated by '|'
 lines terminated by '\n'
@@ -194,7 +194,6 @@ SET SQL_SAFE_UPDATES = 0;
 
 
 
-SET SQL_SAFE_UPDATES = 1;
 ## select * from loaddata.awards_history;
 
 
@@ -327,28 +326,36 @@ UPDATE loaddata.awards_history ah SET Roster2019=1 Where Year(FUNDS_ACTIVATED)=2
 
 SET sql_mode = '';
 SET SQL_SAFE_UPDATES = 0;
-create table loaddata.backupAwardsHistory20200605 AS SELECT * from lookup.awards_history;
+create table loaddata.backupAwardsHistory20201110 AS SELECT * from lookup.awards_history;
 
 
 select distinct (CLK_AWD_PRJ_END_DT) from loaddata.awards_history;
 select distinct CLK_AWD_OVERALL_END_DATE from loaddata.awards_history;
-Select distinct EXCEPTION FROM loaddata.awards_history;
+Select distinct EXCEPTION,count(*)  FROM loaddata.awards_history group by Exception;
+
+
 
 DELETE FROM loaddata.awards_history
-WHERE EXCEPTION NOT IN (
-'EXCLUDE-BYPASS',
+WHERE EXCEPTION IN (
+
+ ' ""Heterogeneity and Impact of Rotavirus Vaccination in Asia"""',
+ ' Master Services Agreement and Statement of Work ' ,
+ ' US Alpha-1 	Medical Advisory Board ',
+'2019'	,
+'Best Managment Practices Program and Research',
+'2020','EXCLUDE-BYPASS',
 'EXCLUDE-CARRYOVER',
 'EXCLUDE-CORE',
 'EXCLUDE-NOT AUTH',
 'EXCLUDE-REBUDGET',
 'EXCLUDE-TEMP',
 'EXCLUDE-UF',
-'EXCLUDE-UFRF',
-''
-);
+'EXCLUDE-UFRF');
+;
 
 
 select * from loaddata.awards_history;
+select count(*)  from loaddata.awards_history;
 
 select * from loaddata.awards_history  Where CLK_AWD_PRJ_END_DT='Research Developmental'
 OR 'CLK_AWD_ALLOC_END_DT'='Research Developmental' ;
@@ -357,16 +364,7 @@ select distinct CLK_AWD_OVERALL_END_DATE from loaddata.awards_history;
 
 Select distinct EXCEPTION FROM loaddata.awards_history;
 
-select * from loaddata.awards_history;
-SET SQL_SAFE_UPDATES = 0;
-delete from loaddata.awards_history where Exception=' \"\"Heterogeneity and Impact of Rotavirus Vaccination in Asia\"\"\"';
-delete from loaddata.awards_history where awards_history_id=1;  ## REmove Headers
-SET SQL_SAFE_UPDATES = 1;
 
-select * from lookup.awards_history where awards_history_id IN
-(select awards_history_id from lookup.awards_history WHERE EXCEPTION<>"" AND SUBSTR(EXCEPTION,1,2)<>"EX");
-
-select awards_history_id from lookup.awards_history WHERE EXCEPTION<>"" AND SUBSTR(EXCEPTION,1,2)<>"EX";
 /*
 drop table if exists lookup.awards_history;
 create table lookup.awards_history AS

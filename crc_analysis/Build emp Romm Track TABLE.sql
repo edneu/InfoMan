@@ -651,3 +651,36 @@ SELECT * from ctsi_webcamp_adhoc.crc_study_summ ;
 ###########  END Summary from MATTS List
 #######################################################################################    
 #######################################################################################
+DROP TABLE IF EXISTS ctsi_webcamp_adhoc.VistProvHrs ;
+create table ctsi_webcamp_adhoc.VistProvHrs As
+SELECT ProvPersonName,
+       concat(YEAR(CoreSvcVisitDate),"-",LPAD(MONTH(CoreSvcVisitDate),2,"0")) AS MONTH,
+       VisitID,
+       max(CoreSvcVistLen) as VisitPatic
+from  ctsi_webcamp_adhoc.visitroomcore
+WHERE ProvPersonName IS NOT NULL
+AND SERVICE NOT IN ('DIET: Regular meal (JJ,Subway)','CTRB:  Outpatient visit (budgeted)')
+GROUP BY  	ProvPersonName,
+			concat(YEAR(CoreSvcVisitDate),"-",LPAD(MONTH(CoreSvcVisitDate),2,"0")),
+            VisitID;       
+
+
+
+SELECT ProvPersonName,
+       MONTH,
+       COUNT(VisitID) AS  nVisits,
+       COUNT(DISTINCT VisitID) AS  nUdVisits,
+       SUM(VisitPatic)/60 AS VisitParticHrs
+FROM ctsi_webcamp_adhoc.VistProvHrs 
+GROUP BY  	ProvPersonName,
+			Month ;    
+	   	
+        
+SELECT * from ctsi_webcamp_adhoc.visitroomcore
+WHERE concat(YEAR(CoreSvcVisitDate),"-",LPAD(MONTH(CoreSvcVisitDate),2,"0"))="2017-03"
+AND ProvPersonName='Mathew, Tomy';   
+
+
+'Browning, Marilyn'     
+
+AND SERVICE NOT IN ('DIET: Regular meal (JJ,Subway)','CTRB:  Outpatient visit (budgeted)')

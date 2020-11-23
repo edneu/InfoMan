@@ -1,11 +1,11 @@
 #### PARSE PUBMED SUMMARY OUTPUT
 ##
 ## drop table work.from_pubmed;
-DROP table work.pubmed_raw;
+drop table work.pubmed_raw;
 
 
 
-## CREATE TABLE work.pubmed_raw AS select * from work.pubmedraw;
+## CREATE TABLE work.pubmed_raw AS select * from work.rppr_raw;
 
 ############################################
 ##########  ADD COLUMNS TO RAW PUBMED OUTPUT
@@ -21,7 +21,8 @@ SET SQL_SAFE_UPDATES = 0;
 
 ## REMOVE LEADING NUMBER FROM PUBMED OUTPUT
 UPDATE work.pubmed_raw
-SET Citation=SUBSTR(Raw, LOCATE(":",RAW)+2, CHAR_LENGTH(Raw)-(LOCATE(":",RAW)+2));
+#SET Citation=SUBSTR(Raw, LOCATE(":",RAW)+2, CHAR_LENGTH(Raw)-(LOCATE(":",RAW)+2));
+SET Citation=trim(RAW);
 
 ## EXTRACT PMID
 UPDATE work.pubmed_raw
@@ -46,10 +47,13 @@ SET SQL_SAFE_UPDATES = 1;
 ##### MAKE Pubmed Output file
 DROP TABLE IF EXISTS work.PubmedOUT;
 create table work.PubmedOUT as
-select PMID,PMCID,Citation from 
+select 
+PMID,PMCID,Citation from 
 work.pubmed_raw
 order by PMID;
 
+
+create table Adhoc.ULKLTLPub2020 AS
 select * from work.PubmedOUT ;
 /*
 ##############################
