@@ -39,15 +39,15 @@ ALter Table Adhoc.secim20201001 CHANGE trans_20201001_id newtranshist_id int(11)
 #select * from Adhoc.trans2date; 
 
 
-### Adhoc.trans20201103
-### Adhoc.secim20201103
+### Adhoc.trans20201201
+### Adhoc.secim20201201
 
 
 select "Combined Hist" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from Adhoc.combined_hist_rept
 UNION ALL
-select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from Adhoc.trans20201103
+select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from Adhoc.trans20201201
 UNION ALL
-select "New SECIM File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from Adhoc.secim20201103;
+select "New SECIM File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from Adhoc.secim20201201;
 
 
 
@@ -56,21 +56,21 @@ select "New SECIM File" as tablename, min(Journal_date) as FromDate, Max(Journal
 ### MANAGE DUPLICATE RECORDS BETWEEN NEW TRANSATIONS AND SECIM
 
 
-ALTER TABLE Adhoc.trans20201103 CHANGE trans20201103_id ID int(11);
-ALTER TABLE Adhoc.secim20201103 CHANGE secim20201103_id ID int(11);
+ALTER TABLE Adhoc.trans20201201 CHANGE trans20201201_id ID int(11);
+ALTER TABLE Adhoc.secim20201201 CHANGE secim20201201_id ID int(11);
 
-desc Adhoc.trans20201103;
-desc Adhoc.secim20201103;
+desc Adhoc.trans20201201;
+desc Adhoc.secim20201201;
 
-UPDATE Adhoc.secim20201103 set Accounting_Period=NULL;
+
 
 drop table if exists Adhoc.NewAdd;
-Create table Adhoc.test as
-SELECT * from Adhoc.trans20201103
+Create table Adhoc.NewAdd as
+SELECT * from Adhoc.trans20201201
 UNION ALL
-SELECT * from Adhoc.secim20201103;
+SELECT * from Adhoc.secim20201201;
 
-ALTER TABLE Adhoc.test 	ADD UnDupFlag int(1),
+ALTER TABLE Adhoc.NewAdd 	ADD UnDupFlag int(1),
 						ADD	DupKEY varchar(4000);
 
 select * from Adhoc.NewAdd;
@@ -97,7 +97,7 @@ SELECT count(*),COUNT(DISTINCT DupKEY) from Adhoc.NewAdd;
 
 Drop table if Exists Adhoc.temp;
 create table Adhoc.temp as
-SELECT DUPKEY,MIn(ID) as UNDUPID ,COUNT(*) nRec from Adhoc.test GROUP BY DUPKEY;
+SELECT DUPKEY,MIn(ID) as UNDUPID ,COUNT(*) nRec from Adhoc.NewAdd GROUP BY DUPKEY;
 
 
 UPDATE Adhoc.NewAdd SET UnDupFlag=0;
@@ -105,7 +105,7 @@ UPDATE Adhoc.NewAdd SET UnDupFlag=0;
 UPDATE Adhoc.NewAdd SET UnDupFlag=1
 WHERE ID IN (SELECT DISTINCT UNDUPID from Adhoc.temp);
 
-SELECT UnDupFlag,count(*) from Adhoc.test group by UnDupFlag;
+SELECT UnDupFlag,count(*) from Adhoc.NewAdd group by UnDupFlag;
 
 
 DELETE FROM Adhoc.NewAdd Where UnDupFlag=0;
@@ -275,7 +275,6 @@ SET  DupKEY=TRIM(CONCAT(
 		Trim(Flex_Code),
 		Trim(Project_Code),
 		Trim(ERP_Account_Level_4),
-		Trim(Account_Code),
 		Trim(Journal_ID),
 		Trim(Journal_Date),
 		Trim(round(Posted_Amount,2)))
@@ -293,7 +292,6 @@ SET DupKEY=TRIM(CONCAT(
 		Trim(Flex_Code),
 		Trim(Project_Code),
 		Trim(ERP_Account_Level_4),
-		Trim(Account_Code),
 		Trim(Journal_ID),
 		Trim(Journal_Date),
 		Trim(round(Posted_Amount,2)))
@@ -482,7 +480,7 @@ select CTSI_Fiscal_Year,min(Journal_Date),max(Journal_Date),count(*) from Adhoc.
 ##################################################################################################################
 ##### BACKUP AND RENAME
 /*
-CREATE TABLE Adhoc.comb_hist_report20201109BU AS
+CREATE TABLE Adhoc.comb_hist_report20201201BU AS
 SELECT * from Adhoc.combined_hist_rept;
 
 drop table if exists Adhoc.combined_hist_rept;

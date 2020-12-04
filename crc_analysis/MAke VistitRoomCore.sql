@@ -9,7 +9,8 @@ DROP TABLE IF EXISTS ctsi_webcamp_adhoc.visitcore;
 CREATE TABLE ctsi_webcamp_adhoc.visitcore 
 Select 	"OutPatient" AS VisitType,
 		UNIQUEFIELD AS VisitID,
-        VISITDATE AS VisitDate,
+        VISITDATE AS VisitStartDate,
+        VISITDATE AS VisitEndDate,
         STR_TO_DATE(concat(trim(TIMEIN),"m"), '%h:%i %p') AS VisitStartTIme,
         STR_TO_DATE(concat(trim(TIMEOUT),"m"), '%h:%i %p') AS VisitEndTIme,
         TIME_TO_SEC(TimeDiff(STR_TO_DATE(concat(trim(TIMEOUT),"m"), '%h:%i %p'),STR_TO_DATE(concat(trim(TIMEIN),"m"), '%h:%i %p')))/60 AS VisitLength,
@@ -23,7 +24,8 @@ WHERE STATUS=2
 UNION ALL
 Select 	"Inpatient" AS VisitType,
 		UNIQUEFIELD AS VisitID,
-        ADMITDATE AS VisitDate,
+        ADMITDATE AS VisitStartDate,
+        ADMITDATE AS VisitEndDate,
         STR_TO_DATE(concat(trim(TIMEIN),"m"), '%h:%i %p') AS VisitStartTIme,
         STR_TO_DATE(concat(trim(TIMEOUT),"m"), '%h:%i %p') AS VisitEndTIme,
         TIME_TO_SEC(TimeDiff(STR_TO_DATE(concat(trim(TIMEOUT),"m"), '%h:%i %p'),STR_TO_DATE(concat(trim(TIMEIN),"m"), '%h:%i %p')))/60 AS VisitLength,
@@ -36,7 +38,8 @@ from ctsi_webcamp_pr.admissio
 UNION ALL
 Select 	"ScatterBed" AS VisitType,
 		UNIQUEFIELD AS VisitID,
-        ADMITDATE AS VisitDate,
+        ADMITDATE AS VisitStartDate,
+        ADMITDATE AS VisitEndDate,
         STR_TO_DATE(concat(trim(TIMEIN),"m"), '%h:%i %p') AS VisitStartTIme,
         STR_TO_DATE(concat(trim(TIMEOUT),"m"), '%h:%i %p') AS VisitEndTIme,
         TIME_TO_SEC(TimeDiff(STR_TO_DATE(concat(trim(TIMEOUT),"m"), '%h:%i %p'),STR_TO_DATE(concat(trim(TIMEIN),"m"), '%h:%i %p')))/60 AS VisitLength,
@@ -48,8 +51,14 @@ Select 	"ScatterBed" AS VisitType,
 from ctsi_webcamp_pr.sbadmissio;
 
 
+
 SET SQL_SAFE_UPDATES = 0;
 
+UPDATE ctsi_webcamp_adhoc.visitcore 
+   SET VisitEndDate=DATE_ADD(VisitEndDate, INTERVAL 1 DAY)
+WHERE VisitLength<0
+  AND VisitStartDate=VisitEndDate;
+   
 
 UPDATE ctsi_webcamp_adhoc.visitcore vc, ctsi_webcamp_pr.protocol lu
 SET vc.PIPersonID=lu.PERSON
@@ -61,7 +70,11 @@ ALTER TABLE ctsi_webcamp_adhoc.visitcore
 ADD PI_NAME varchar(55),
 ADD Title varchar(255),
 ADD CRCNumber varchar(25),
-ADD PatientName varchar(45);
+ADD PatientName varchar(45),
+ADD VisitStart datetime,
+ADD VisitEnd datetime,
+ADD VisitLenMin decimal(30,2);
+
 
 
 UPDATE ctsi_webcamp_adhoc.visitcore vc, ctsi_webcamp_pr.person lu
@@ -78,14 +91,50 @@ UPDATE ctsi_webcamp_adhoc.visitcore vc, ctsi_webcamp_pr.protocol lu
 SET vc.Title=lu.LONGTITLE,
 	vc.CRCNumber=lu.Protocol
 WHERE vc.ProtocolID=lu.UNIQUEFIELD;
+
+
+UPDATE ctsi_webcamp_adhoc.visitcore
+SET VisitStart=ADDTIME(CONVERT(VisitStartDate, DATETIME), VisitStartTIme),
+	VisitEnd=ADDTIME(CONVERT(VisitEndDate, DATETIME), VisitEndTIme);
+
+UPDATE ctsi_webcamp_adhoc.visitcore
+SET VisitLenMin=TIMESTAMPDIFF(MINUTE,VisitStart,VisitEnd);
+   
+
+
+select VisitStart,VisitEnd,TIMESTAMPDIFF(MINUTE,VisitStart,VisitEnd)
+FROM ctsi_webcamp_adhoc.visitcore;
+
+SELECT * from ctsi_webcamp_adhoc.visitcore;
+desc ctsi_webcamp_adhoc.visitcore;
 		
 ## DATE FILTER
 ## Only Completed Visits
 DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE VisitStatus<>2;
 ## DATE FILTERS
-DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE Visitdate<str_to_date('01,01,2016','%m,%d,%Y');  
-DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE Visitdate>CURDATE();     
+DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE VisitStart<str_to_date('01,01,2016','%m,%d,%Y');  
+DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE VisitStart>CURDATE();     
 #Select * FROM ctsi_webcamp_adhoc.visitcore;  
+
+
+DROP TABLE IF EXISTS ctsi_webcamp_adhoc.visits; 
+CREATE TABLE ctsi_webcamp_adhoc.visits
+SELECT 	VisitType,
+		VisitID,
+        CRCNumber,
+        VisitStart,
+        VisitEnd,
+        VisitLenMin,
+        VisitStatus,
+        ProtocolID,
+        PIPersonID,
+        BedID,
+        PatientID,
+        PatientName,
+        PI_NAME,
+        Title
+FROM ctsi_webcamp_adhoc.visitcore ;        
+        
       
 
 
@@ -100,7 +149,8 @@ SELECT "OutPatient" AS VisitType,
 	    OPVISIT AS VisitID,
         UNIQUEFIELD AS CoreSvcID,
         PROTOCOL AS CoreSvcProtocolID,
-        STARTDATE as CoreSvcVisitDate,
+        STARTDATE as CoreSvcStartDate,
+        STARTDATE as CoreSvcEndDate,
         QUANTITY_OF_SERVICE AS CoreSvcQuant,
         STR_TO_DATE(concat(trim(TIMEIN),"m"), '%h:%i %p') AS CoreSvcStartTIme,
         STR_TO_DATE(concat(trim(TIMEOUT),"m"), '%h:%i %p') AS CoreSvcEndTIme,
@@ -110,13 +160,14 @@ SELECT "OutPatient" AS VisitType,
         LAB AS LabID,
         LABTEST AS LabTestID
 FROM ctsi_webcamp_pr.coreservice
-WHERE OPVISIT in (SELECT VisitID FROM ctsi_webcamp_adhoc.visitcore WHERE VisitType="OutPatient")
+WHERE OPVISIT in (SELECT VisitID FROM ctsi_webcamp_adhoc.visits WHERE VisitType="OutPatient")
 UNION ALL
 SELECT "Inpatient" AS VisitType,
 		ADMISSIO AS VisitID,
         UNIQUEFIELD AS CoreSvcID,
         PROTOCOL AS CoreSvcProtocolID,
-        STARTDATE as CoreSvcVisitDate,
+        STARTDATE as CoreSvcStartDate,
+        STARTDATE as CoreSvcEndDate,
         QUANTITY_OF_SERVICE AS CoreSvcQuant,
         STR_TO_DATE(concat(trim(TIMEIN),"m"), '%h:%i %p') AS CoreSvcStartTIme,
         STR_TO_DATE(concat(trim(TIMEOUT),"m"), '%h:%i %p') AS CoreSvcEndTIme,
@@ -126,13 +177,14 @@ SELECT "Inpatient" AS VisitType,
         LAB AS LabID,
         LABTEST AS LabTestID
 FROM ctsi_webcamp_pr.coreservice
-WHERE ADMISSIO in (SELECT VisitID FROM ctsi_webcamp_adhoc.visitcore WHERE VisitType="Inpatient")
+WHERE ADMISSIO in (SELECT VisitID FROM ctsi_webcamp_adhoc.visits WHERE VisitType="Inpatient")
 UNION ALL
 SELECT "ScatterBed" AS VisitType,
 		SBADMISSIO AS VisitID,
         UNIQUEFIELD AS CoreSvcID,
         PROTOCOL AS CoreSvcProtocolID,
-        STARTDATE as CoreSvcVisitDate,
+        STARTDATE as CoreSvcStartDate,
+        STARTDATE as CoreSvcEndDate,
         QUANTITY_OF_SERVICE AS CoreSvcQuant,
         STR_TO_DATE(concat(trim(TIMEIN),"m"), '%h:%i %p') AS CoreSvcStartTIme,
         STR_TO_DATE(concat(trim(TIMEOUT),"m"), '%h:%i %p') AS CoreSvcEndTIme,
@@ -142,7 +194,29 @@ SELECT "ScatterBed" AS VisitType,
         LAB AS LabID,
         LABTEST AS LabTestID
 FROM ctsi_webcamp_pr.coreservice
-WHERE SBADMISSIO in (SELECT VisitID FROM ctsi_webcamp_adhoc.visitcore WHERE VisitType="ScatterBed");
+WHERE SBADMISSIO in (SELECT VisitID FROM ctsi_webcamp_adhoc.visits WHERE VisitType="ScatterBed");
+
+
+ALTER TABLE ctsi_webcamp_adhoc.CoreSvcLU1
+ADD CoreSvcStart datetime,
+ADD CoreSvcEnd datetime,
+ADD CoreSvcLenDurMin decimal(30,2);
+
+
+UPDATE ctsi_webcamp_adhoc.CoreSvcLU1 
+   SET CoreSvcEndDate=DATE_ADD(CoreSvcEndDate, INTERVAL 1 DAY)
+WHERE CoreSvcVistLen<0
+  AND CoreSvcStartDate=CoreSvcEndDate;
+
+
+
+UPDATE ctsi_webcamp_adhoc.CoreSvcLU1
+SET CoreSvcStart=ADDTIME(CONVERT(CoreSvcStartDate, DATETIME), CoreSvcStartTime),
+	CoreSvcEnd=ADDTIME(CONVERT(CoreSvcEndDate, DATETIME), CoreSvcEndTime);
+
+UPDATE ctsi_webcamp_adhoc.CoreSvcLU1
+SET CoreSvcLenDurMin=TIMESTAMPDIFF(MINUTE,CoreSvcStart,CoreSvcEnd);
+
 
 DROP TABLE IF EXISTS ctsi_webcamp_adhoc.CoreSvcLU;
 Create table  ctsi_webcamp_adhoc.CoreSvcLU AS
@@ -150,11 +224,10 @@ SELECT cs.VisitType,
 	cs.VisitID,
 	cs.CoreSvcID,
 	cs.CoreSvcProtocolID,
-	cs.CoreSvcVisitDate,
+	cs.CoreSvcStart,
+    cs.CoreSvcEnd,
+    cs.CoreSvcLenDurMin,
 	cs.CoreSvcQuant,
-	cs.CoreSvcStartTIme,
-	cs.CoreSvcEndTIme,
-	cs.CoreSvcVistLen,
 	cs.CoreSvcStatus,
     cs.CoreSvcRelatedTo,
 	cs.LabID,
@@ -197,8 +270,8 @@ UPDATE 	ctsi_webcamp_adhoc.CoreSvcLU cs,
 SET cs.SvcUnitCost=lu.DEFAULTCOST,
     cs.AMOUNT=lu.DEFAULTCOST*cs.CoreSvcQuant
 WHERE cs.LabTestID=lu.LABTEST
-  AND (cs.CoreSvcVisitDate>=lu.STARTDATE or lu.STARTDATE IS NULL)
-  AND (cs.CoreSvcVisitDate<=lu.ENDDATE OR lu.ENDDATE IS NULL);
+  AND (cs.CoreSvcStart>=lu.STARTDATE or lu.STARTDATE IS NULL)
+  AND (cs.CoreSvcEnd<=lu.ENDDATE OR lu.ENDDATE IS NULL);
   
 
 UPDATE 	ctsi_webcamp_adhoc.CoreSvcLU
@@ -217,7 +290,7 @@ DELETE FROM ctsi_webcamp_adhoc.CoreSvcLU WHERE CoreSvcStatus<>2;
 
 #SELECT * from ctsi_webcamp_adhoc.CoreSvcLU;
 
-
+#desc ctsi_webcamp_adhoc.CoreSvcLU;
 
 #######################################################################################
 #######################################################################################
@@ -229,7 +302,7 @@ CREATE TABLE ctsi_webcamp_adhoc.RoomLookup As
 SELECT VisitType,
 	   VisitID,
        BedID
- FROM ctsi_webcamp_adhoc.visitcore
+ FROM ctsi_webcamp_adhoc.visits
 GROUP BY VisitType,
 	     VisitID,
          BedID;
@@ -261,7 +334,7 @@ WHERE rl.RoomID=lu.UNIQUEFIELD;
 #######################################################################################
 
 
-CREATE INDEX vcvi ON ctsi_webcamp_adhoc.visitcore (VisitID);
+CREATE INDEX vcvi ON ctsi_webcamp_adhoc.visits (VisitID);
 CREATE INDEX rlvi ON ctsi_webcamp_adhoc.RoomLookup (VisitID);
 
 DROP TABLE IF EXISTS ctsi_webcamp_adhoc.VisitRoom; 
@@ -269,11 +342,9 @@ CREATE TABLE ctsi_webcamp_adhoc.VisitRoom As
 SELECT 
            vc.VisitType,
            vc.VisitID,	
-           vc.VisitDate,
-           vc.VisitStartTIme,
-           vc.VisitEndTIme,
-           vc.VisitLength,
-           
+           vc.VisitStart,
+		   vc.VisitEnd,
+		   vc.VisitLenMin,
            vc.VisitStatus,
            vc.PatientID,
            vc.PatientName,
@@ -286,7 +357,7 @@ SELECT
            rl.Bed,
            rl.RoomID,
            rl.Room
-FROM ctsi_webcamp_adhoc.visitcore vc
+FROM ctsi_webcamp_adhoc.visits vc
 	LEFT JOIN ctsi_webcamp_adhoc.RoomLookup rl
     ON vc.VisitType=rl.VisitType
     AND vc.VisitID=rl.VisitID;
@@ -306,42 +377,38 @@ CREATE INDEX csvi ON ctsi_webcamp_adhoc.CoreSvcLU (VisitID);
 DROP TABLE IF EXISTS ctsi_webcamp_adhoc.VisitRoomCore; 
 CREATE TABLE ctsi_webcamp_adhoc.VisitRoomCore As
 SELECT 
-			vr.VisitType,
-			vr.VisitID,	
-			vr.VisitDate,
-			vr.VisitStartTIme,
-			vr.VisitEndTIme,
-			vr.VisitLength,
-            vr.VisitStatus,
-            vr.PatientID,
-            vr.PatientName,
-			vr.ProtocolID,
-			vr.PIPersonID,
-			vr.PI_NAME,
-			vr.Title,
-			vr.CRCNumber,
-			vr.Bed,
-			vr.RoomID,
-			vr.Room,
-			cr.CoreSvcID,
-			cr.CoreSvcProtocolID,
-			cr.CoreSvcVisitDate AS CoreSvcStartDate,
-            cr.CoreSvcVisitDate AS CoreSvcEndDate,
-			cr.CoreSvcStartTime,
-			cr.CoreSvcEndTIme,
-			cr.CoreSvcVistLen,
-			cr.CoreSvcStatus,
-            cr.CoreSvcRelatedTo,
-            cr.LabID,
-		    cr.LabTestID,
-            cr.VisitFacility,
-			cr.Service,
-            cr.ProtoSpecRate,
-            cr.SvcUnitCost,
-            cr.CoreSvcQuant,
-            cr.Amount,
-			cr.ProvPersonID,
-			cr.ProvPersonName
+	       vr.VisitType,
+           vr.VisitID,	
+           vr.VisitStart,
+		   vr.VisitEnd,
+		   vr.VisitLenMin,
+           vr.VisitStatus,
+           vr.PatientID,
+           vr.PatientName,
+           vr.ProtocolID,
+           vr.PIPersonID,
+           vr.PI_NAME,
+           vr.Title,
+           vr.CRCNumber,
+           vr.RoomID,
+           vr.Room,
+          cr.CoreSvcID,
+          cr.CoreSvcProtocolID,
+          cr.CoreSvcStart,
+          cr.CoreSvcEnd,
+          cr.CoreSvcLenDurMin,
+          cr.CoreSvcQuant,
+          cr.CoreSvcStatus,
+          cr.CoreSvcRelatedTo,
+          cr.LabID,
+          cr.LabTestID,
+          cr.ProvPersonID,
+          cr.VisitFacility,
+          cr.Service,
+          cr.SvcUnitCost,
+          cr.Amount,
+          cr.ProvPersonName,
+          cr.ProtoSpecRate
 FROM ctsi_webcamp_adhoc.VisitRoom vr
 LEFT JOIN ctsi_webcamp_adhoc.CoreSvcLU cr
 ON vr.VisitType=cr.VisitType
@@ -350,13 +417,6 @@ AND vr.VisitID=cr.VisitID;
 ## Remove VISIT RECORDS WITH NO CORE SERVICE RECORD
 DELETE FROM ctsi_webcamp_adhoc.VisitRoomCore where CoreSvcID is null;
 
-SET SQL_SAFE_UPDATES = 0;
-
-UPDATE ctsi_webcamp_adhoc.VisitRoomCore
-SET CoreSvcEndDate  =DATE_ADD(CoreSvcStartDate , INTERVAL 1 DAY)
-WHERE CoreSvcVistLen<0;
-
-###
 
 #######################################################################################
 #######################################################################################
@@ -374,7 +434,7 @@ WHERE CoreSvcVistLen<0;
 
 
 ### Component File Record Counts
-SELECT "visitcore" AS FileName,Count(*) as nREC, COUNT(DISTINCT VisitID) AS nVisits from ctsi_webcamp_adhoc.visitcore
+SELECT "visits" AS FileName,Count(*) as nREC, COUNT(DISTINCT VisitID) AS nVisits from ctsi_webcamp_adhoc.visits
 UNION ALL
 SELECT "CoreSvcLU" AS FileName,Count(*) as nREC, COUNT(DISTINCT VisitID) AS nVisits from ctsi_webcamp_adhoc.CoreSvcLU
 UNION ALL
@@ -425,17 +485,17 @@ SELECT "No Patient" AS DescMeasure, COUNT(*) As Measure from ctsi_webcamp_adhoc.
 UNION ALL
 SELECT "No Room" AS DescMeasure, COUNT(*) As Measure from ctsi_webcamp_adhoc.VisitRoomCore WHERE Room IS NULL
 UNION ALL
-SELECT "Vistdate <> CoreSvcVisitDate" AS DescMeasure, COUNT(*) As Measure from ctsi_webcamp_adhoc.VisitRoomCore WHERE VisitDate<>CoreSvcVisitDate;
+SELECT "VisitStart <> CoreSvcStart" AS DescMeasure, COUNT(*) As Measure from ctsi_webcamp_adhoc.VisitRoomCore WHERE VisitStart<>CoreSvcStart;
 ;
 
 ##$ Analytic File Date Ranges
-SELECT "First Visit Date" AS DescMeasure, min(VisitDate) As Measure from ctsi_webcamp_adhoc.VisitRoomCore
+SELECT "First Visit Date" AS DescMeasure, min(VisitStart) As Measure from ctsi_webcamp_adhoc.VisitRoomCore
 UNION ALL
-SELECT "Last Visit Date" AS DescMeasure, max(VisitDate) As Measure from ctsi_webcamp_adhoc.VisitRoomCore
+SELECT "Last Visit Date" AS DescMeasure, max(VisitEnd) As Measure from ctsi_webcamp_adhoc.VisitRoomCore
 UNION ALL
-SELECT "First CoreSvc Date" AS DescMeasure, min(CoreSvcVisitDate) As Measure from ctsi_webcamp_adhoc.VisitRoomCore
+SELECT "First CoreSvc Date" AS DescMeasure, min(CoreSvcStart) As Measure from ctsi_webcamp_adhoc.VisitRoomCore
 UNION ALL
-SELECT "Last CoreSvc Date" AS DescMeasure, max(CoreSvcVisitDate) As Measure from ctsi_webcamp_adhoc.VisitRoomCore;
+SELECT "Last CoreSvc Date" AS DescMeasure, max(CoreSvcEnd) As Measure from ctsi_webcamp_adhoc.VisitRoomCore;
 
 #######################################################################################
 #######################################################################################

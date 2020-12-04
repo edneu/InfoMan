@@ -245,7 +245,8 @@ select * from loaddata.awards_history;
 
 
 ALTER TABLE loaddata.awards_history
-ADD AcademicUnit varchar(45);
+	ADD AcademicUnit varchar(45),
+	ADD MONTH VARCHAR(8);
 
 SET SQL_SAFE_UPDATES = 0;
 
@@ -253,6 +254,8 @@ UPDATE loaddata.awards_history ah, lookup.academic_units lu
        SET ah.AcademicUnit=lu.AcademicUnit
        WHERE ah.CLK_AWD_PI_COLLEGE=lu.College;
 
+UPDATE loaddata.awards_history  
+SET MONTH=concat(YEAR(FUNDS_ACTIVATED),"-",LPAD(MONTH(FUNDS_ACTIVATED),2,"0")) ;
 
 ##select distinct CLK_AWD_PI_COLLEGE from loaddata.awards_history where AcademicUnit IS NULL;
 ##select AcademicUnit,count(*) from loaddata.awards_history group by AcademicUnit;
@@ -380,3 +383,14 @@ Select * from loaddata.awards_history where CLK_AWD_PRJ_END_DT IN (SELECT MAX(CL
 */
 
 SELECT Year,Roster,COunt(*) from lookup.roster group by Year,Roster;
+
+
+
+SET SQL_SAFE_UPDATES = 0;
+ALter table lookup.awards_history ADD MONTH VARCHAR(8);
+UPDATE lookup.awards_history  SET MONTH=concat(YEAR(FUNDS_ACTIVATED),"-",LPAD(MONTH(FUNDS_ACTIVATED),2,"0")) ;
+
+ALter table lookup.awards_history ADD SFY_FMT VARCHAR(10);
+
+
+SELECT 

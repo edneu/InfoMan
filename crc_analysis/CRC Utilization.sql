@@ -141,6 +141,24 @@ Count(Distinct Month)
 from crc.crc_occ_fy_2017_2020
 group by Bed;
 
+
+#
+SELECT 
+MONTH,
+BED AS ROOM,
+SUM(Hours_Used) AS Hours_Used, 
+Sum(Avail_Hours) as Avail_Hours,
+Sum(Avail_Hours)-SUM(Hours_Used) AS UnusedHours,
+SUM(Hours_Used)/Sum(Avail_Hours) AS URate,
+(Sum(Avail_Hours)-SUM(Hours_Used))/Sum(Avail_Hours) as PCTnotUsed
+from crc.crc_occ_fy_2017_2020
+group by Month, Bed;
+
+DROP TABLE IF EXISTS work.Temp1;
+create table work.Temp1 AS
+select Bed
+FROM crc.crc_month_room_occ
+GROUP BY Bed; 
 #
 SELECT 
 Month,

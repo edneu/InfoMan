@@ -30,7 +30,7 @@ EXECUTE.
 ***SAVE TRANSLATE OUTFILE='P:\My Documents\My Documents\LoadData\COVID-19 UFirst Proposal Detail 20200708.xlsx'
 SAVE TRANSLATE OUTFILE='P:\My Documents\My Documents\LoadData\COVID-19 UFirst Proposal Detail 20200708.xlsx'
 
-SAVE TRANSLATE OUTFILE='V:\Projects\EdNeu\COVID 19 Task Force\COVID-19 UFirst Proposal Detail 20201119.xlsx'
+SAVE TRANSLATE OUTFILE='V:\Projects\EdNeu\COVID 19 Task Force\COVID-19 UFirst Proposal Detail 20201202.xlsx'
   /TYPE=XLS
   /VERSION=12
   /MAP
