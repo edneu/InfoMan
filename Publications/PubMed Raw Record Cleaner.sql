@@ -21,8 +21,8 @@ SET SQL_SAFE_UPDATES = 0;
 
 ## REMOVE LEADING NUMBER FROM PUBMED OUTPUT
 UPDATE work.pubmed_raw
-#SET Citation=SUBSTR(Raw, LOCATE(":",RAW)+2, CHAR_LENGTH(Raw)-(LOCATE(":",RAW)+2));
-SET Citation=trim(RAW);
+SET Citation=SUBSTR(Raw, LOCATE(":",RAW)+2, CHAR_LENGTH(Raw)-(LOCATE(":",RAW)+2));
+#SET Citation=trim(RAW);
 
 ## EXTRACT PMID
 UPDATE work.pubmed_raw
@@ -53,8 +53,33 @@ work.pubmed_raw
 order by PMID;
 
 
+
+DROP TABLE IF EXISTS work.FSU_COVID_PUBS;
+create table work.FSU_COVID_PUBS as
+SELECT "FSU" AS Affiliation,
+        PMID,
+        PMCID,
+        CITATION 
+ FROM work.PubmedOUT
+WHERE LOCATE("COVID",CITATION)<>0;
+
+
+
+/*
+DROP TABLE IF EXISTS work.UF_COVID_PUBS;
+create table work.UF_COVID_PUBS as
+SELECT "UF " AS Affiliation,
+        PMID,
+        PMCID,
+        CITATION 
+ FROM work.PubmedOUT
+WHERE LOCATE("COVID",CITATION)<>0;
+
+
 create table Adhoc.ULKLTLPub2020 AS
 select * from work.PubmedOUT ;
+*/
+
 /*
 ##############################
 ### UPDATE Pub_CORE
