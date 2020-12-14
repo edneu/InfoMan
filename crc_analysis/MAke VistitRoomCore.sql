@@ -70,7 +70,10 @@ ADD CRCNumber varchar(25),
 ADD PatientName varchar(45),
 ADD VisitStart datetime,
 ADD VisitEnd datetime,
-ADD VisitLenMin decimal(30,2);
+ADD VisitLenMin decimal(30,2),
+ADD Month Varchar(12),
+ADD SFY varchar(25),
+ADD Quarter varchar(12);
 
 
 
@@ -100,7 +103,6 @@ SET VisitStart=CONVERT(VisitStartDate, DATETIME),
 	VisitEnd=CONVERT(VisitEndDate, DATETIME)
 ;
 
-select * from ctsi_webcamp_adhoc.visitcore where VisitID='34948';
 
 UPDATE ctsi_webcamp_adhoc.visitcore
 SET VisitStart=ADDTIME(CONVERT(VisitStartDate, DATETIME), VisitStartTIme)
@@ -110,13 +112,6 @@ WHERE VisitStartTime is Not Null;
 UPDATE ctsi_webcamp_adhoc.visitcore
 SET VisitEnd=ADDTIME(CONVERT(VisitEndDate, DATETIME), VisitEndTIme)
 WHERE VisitEndTIme IS NOT NULL;
-
-
-
-
-
-
-
 
 
 UPDATE ctsi_webcamp_adhoc.visitcore
@@ -129,6 +124,16 @@ WHERE VisitLenMin<0;
 
 UPDATE ctsi_webcamp_adhoc.visitcore
 SET VisitLenMin=TIMESTAMPDIFF(MINUTE,VisitStart,VisitEnd);
+
+
+UPDATE ctsi_webcamp_adhoc.visitcore
+SET MONTH=concat(Year(VisitStart),"-",lpad(month(VisitStart),2,"0")); 
+
+UPDATE ctsi_webcamp_adhoc.visitcore vt, ctsi_webcamp_adhoc.sfy_classify lu
+SET vt.SFY=lu.SFY,
+	vt.Quarter=lu.Quarter
+WHERE vt.Month=lu.Month;    
+
 
 /*
 select VisitStart,VisitEnd,TIMESTAMPDIFF(MINUTE,VisitStart,VisitEnd)
@@ -152,7 +157,10 @@ DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE VisitStart>CURDATE();
 
 DROP TABLE IF EXISTS ctsi_webcamp_adhoc.visits; 
 CREATE TABLE ctsi_webcamp_adhoc.visits
-SELECT 	VisitType,
+SELECT 	Month,
+        SFY,
+        Quarter,
+        VisitType,
 		VisitID,
         CRCNumber,
         VisitStart,
@@ -374,7 +382,9 @@ CREATE INDEX rlvi ON ctsi_webcamp_adhoc.RoomLookup (VisitID);
 
 DROP TABLE IF EXISTS ctsi_webcamp_adhoc.VisitRoom; 
 CREATE TABLE ctsi_webcamp_adhoc.VisitRoom As
-SELECT 
+SELECT     vc.Month,
+           vc.SFY, 
+           vc.Quarter, 
            vc.VisitType,
            vc.VisitID,	
            vc.VisitStart,
@@ -397,8 +407,7 @@ FROM ctsi_webcamp_adhoc.visits vc
     ON vc.VisitType=rl.VisitType
     AND vc.VisitID=rl.VisitID;
     
-    
-  
+
 #######################################################################################
 #######################################################################################
 ## CREATE Final Table Visits-Room-CoreServices
@@ -413,7 +422,10 @@ DROP TABLE IF EXISTS ctsi_webcamp_adhoc.VisitRoomCore;
 CREATE TABLE ctsi_webcamp_adhoc.VisitRoomCore As
 SELECT 
 	       vr.VisitType,
-           vr.VisitID,	
+           vr.VisitID,
+           vr.Month,
+           vr.SFY,
+           vr.Quarter,
            vr.VisitStart,
 		   vr.VisitEnd,
 		   vr.VisitLenMin,

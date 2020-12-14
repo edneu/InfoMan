@@ -34,6 +34,11 @@ GROUP BY Month;
 
 
 
+SELECT * from lookup.ufids where UF_UFID="06031259";
+
+
+
+
 
 
 
