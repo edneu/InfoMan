@@ -3,21 +3,6 @@
 select * from ctsi_webcamp_adhoc.VisitRoomCore;
 
 
-Alter table ctsi_webcamp_adhoc.VisitRoomCore
-ADD Month varchar(7),
-ADD SFY varchar(14);
-
-UPDATE ctsi_webcamp_adhoc.VisitRoomCore
-SET MONTH=concat(Year(VisitStart),"-",lpad(month(VisitStart),2,"0"));
-
-#CREATE INDEX sfymon ON ctsi_webcamp_adhoc.sfy (Month);
-
-UPDATE ctsi_webcamp_adhoc.VisitRoomCore vrc, ctsi_webcamp_adhoc.sfy lu
-SET vrc.SFY=lu.SFY
-WHERE vrc.MONTH=lu.MONTH;
-
-
-
 
 #############################################################################################
 #############################################################################################

@@ -2,11 +2,11 @@ Select Year,count(*) as N,COunt(distinct Person_Key) as Undup
 from lookup.roster 
 group by Year;
 
-
+DESC brian.rosterwrk_clean;
 
 create table work.rosterstr as 
 Select * from  loaddata.q42019_roster  limit 10;
-
+desc loaddata.q42019_roster;
 desc lookup.roster;
 
 
@@ -38,7 +38,7 @@ desc loaddata.q42019_roster;
 #######################################################################################################
 DROP TABLE IF EXISTS loaddata.roster;
 CREATE TABLE loaddata.roster
-SELECT 'q42019_roster_id' AS rosterid,
+SELECT rosterwrk_clean_id AS rosterid,
        Space(1) AS Roster_Key,
        Year AS Year,
        " " AS STD_PROGRAM,
@@ -73,8 +73,9 @@ SELECT 'q42019_roster_id' AS rosterid,
        space(255) as Display_College,
        " " AS ctsi_year,
        " " AS CTSA_Award,
-       " " AS UserClass
-from loaddata.q42019_roster;
+       " " AS UserClass,
+       " " as ReportRole
+from brian.rosterwrk_clean;
 
 
 
@@ -105,7 +106,7 @@ SET DepartmentID=lpad(DepartmentID,8,"0")
 WHERE DepartmentID IS NOT NULL
    OR DepartmentID <>"";
 
-SET SQL_SAFE_UPDATES = 1;
+
 
 ## Check Validity of UFID / Name Pairings
      DROP TABLE IF EXISTS work.VerifyRosterNames;
@@ -134,7 +135,7 @@ SET SQL_SAFE_UPDATES = 1;
      SET vn.EmpName=lu.Name
      WHERE vn.UFID=lu.Employee_ID;
 
-     SET SQL_SAFE_UPDATES = 1;
+     SET SQL_SAFE_UPDATES = 0;
 
      select * from  work.VerifyRosterNames ORDER BY UFID;
      
@@ -168,14 +169,16 @@ select Affiliation,count(*) from work.roster_additions group by Affiliation;
 ####################################################################
 ##### UPDATE YEAR
      UPDATE work.roster_additions
-     SET Year=2019;
+     SET Year=2020;
 
 
 
 ####################################################################
 ## ASSIGN ROSTER IDs WHEN ALL RECORDS ADDED
 
-update work.roster_additions SET rosterid=999999;
+##update work.roster_additions SET rosterid=999999;
+
+select * from work.roster_additions;
 
 Alter table work.roster_additions modify Rosterid int(11);
 
@@ -276,31 +279,38 @@ AND ra.College="";
      WHERE Title not in (select distinct Title from lookup.roster_faculty_classify);
 
 
+     SELECT Distinct Title 
+     from work.roster_additions
+     WHERE Title not in (select distinct Title from lookup.roster_faculty_classify);
+
 select distinct FacType from work.roster_additions;
 select distinct Faculty from work.roster_additions;
 select distinct FacultyType from work.roster_additions;
+
+select * from lookup.Employees where Employee_id='69663436';
+
+
+
+select distinct FacultyType from lookup.roster;
 
 select * from work.roster_additions where FacultyType is null;
 
 drop table if exists work.temp;
 create table work.temp AS
 SELECT * from work.roster_additions
-WHERE rosterid in (41267,
-41269,
-41291,
-41332,
-41333,
-41334,
-41385);
+WHERE rosterid in (44031,
+44888,
+45952,
+48310,
+49788);
 
 DELETE FROM work.roster_additions WHERE
- rosterid in (41267,
-41269,
-41291,
-41332,
-41333,
-41334,
-41385);
+ rosterid in (44031,
+44888,
+45952,
+48310,
+49788);
+
 
 
 
@@ -354,7 +364,12 @@ UPDATE work.roster_additions SET  FacType = 'N/A' where FacType is Null;
 ###############################################################################
 
 /*
-create table loaddata.rosterBU20200515 AS select * from lookup.roster;
+create table loaddata.rosterBU20201217 AS select * from lookup.roster;
+
+DESC lookup.roster;
+DESC work.roster_additions;
+
+ALTER TABLE work.roster_additions ADD ReportRole varchar(45);
 
 
 DROP TABLE IF EXISTS loaddata.newroster;
@@ -384,7 +399,7 @@ select max(rosterid) from loaddata.newroster;
 /*
 
 drop table if exists loaddata.rosterq32019BU; 
-create table loaddata.rosterq32019BU as select * from lookup.roster;
+create table loaddata.roster20201217BU as select * from lookup.roster;
 
 drop table lookup.roster; 
 create table lookup.roster as
@@ -399,5 +414,5 @@ from lookup.roster
 group by Year;
 
 
-
+select reportrole, count(*) from lookup.roster group by reportrole;
 
