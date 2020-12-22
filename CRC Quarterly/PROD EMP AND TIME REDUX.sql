@@ -28,32 +28,17 @@ UNION ALL
 select "visitroomcore" as Filename, count(*) as nRecs, min(VisitStart) as MinDate, max(VisitStart) as MaxDate from visitroomcore;
 
 
-
-########################### DIAG
-SELECT concat(YEAR(Accounting_Date),"-",LPAD(MONTH(Accounting_Date),2,"0")) AS Month,
-       SUM(`Salary_+_Fringe`) AS SALFRNG
-FROM crc_pay_v1 group by Month;       
-
-
-SELECT concat(YEAR(Accounting_Date),"-",LPAD(MONTH(Accounting_Date),2,"0")) AS Month,
-       SUM(`Salary_+_Fringe`) AS SALFRNG
-FROM cost_dist 
-group by Month; 
-
-select * from timerept;
-##################################
 ##############################################################################
 ##############################################################################
 ##############################################################################
 ##############################################################################
 ##############################################################################
-##### BUILD EmpTimeSal #######################################################
+##### BUILD TimeMonthSummary #######################################################
 ##############################################################################
 
 ALTER TABLE timerept
 ADD Month varchar(7),
-ADD SvcMon varchar(2),
-ADD SvcYear varchar(4),
+ADD Quarter varchar(12),
 ADD SFY varchar(15),
 ADD WorkTime decimal (65,30),
 ADD NonWorkTime decimal (65,30),
@@ -61,7 +46,8 @@ ADD OPS_WorkTime decimal (65,30),
 ADD Teams_WorkTime decimal (65,30),
 ADD FTE_OPS decimal (12,2),
 ADD FTE_Teams decimal (12,2),
-ADD SalPlanType varchar(5);
+ADD SalPlanType varchar(5),
+ADD Nurse int(1);
 
 
 
@@ -69,9 +55,11 @@ SET SQL_SAFE_UPDATES = 0;
 
 UPDATE timerept SET Employee_ID=lPAD(Employee_ID,8,"0");
 UPDATE timerept SET MONTH=concat(YEAR(Date_Used),"-",LPAD(MONTH(Date_Used),2,"0")) ;
-UPDATE timerept SET SvcMon = substr(Month,6,2);
-UPDATE timerept SET SvcYear = substr(Month,1,4);
-UPDATE timerept tr, lookup.sfy_classify lu SET tr.SFY=lu.SFY WHERE tr.MONTH=lu.MONTH;
+UPDATE timerept tr, lookup.sfy_classify lu 
+	SET  tr.Quarter=lu.Quarter,
+		 tr.SFY=lu.SFY
+		WHERE tr.MONTH=lu.MONTH;
+
 
 UPDATE timerept SET SalPlanType="OPS" WHERE Salary_Admin_Plan LIKE "%OPS%";
 UPDATE timerept SET SalPlanType="OPS" WHERE Salary_Admin_Plan LIKE "%Stu Ast%";
@@ -83,7 +71,8 @@ UPDATE timerept SET WorkTime = 0,
 						OPS_WorkTime=0, 
                         Teams_WorkTime=0,
                         FTE_OPS=0,
-                        FTE_Teams=0;
+                        FTE_Teams=0,
+                        Nurse=0;
 ### Total WorkTime (hours)
 
 
@@ -113,7 +102,12 @@ SET Teams_WorkTime = Quantity
 WHERE Time_Reporting_Code_Code IN (SELECT DISTINCT Time_Reporting_Code_Code 
 									from timecode_lookup 
                                     WHERE Work_Classification="Work Hours")
-AND SalPlanType="Teams";                                   ;                                    
+AND SalPlanType="Teams";         
+
+### UPDATE NUrse Indicator
+UPDATE timerept tr, person_classify lu
+SET tr.Nurse=lu.Nursing
+WHERE tr.Employee_ID=lu.UFID;                                    
 
 
 ####################################################################
@@ -145,6 +139,7 @@ UPDATE fte_lookup SET SalPlanType="OPS" WHERE Salary_Plan LIKE "%OPS%";
 UPDATE fte_lookup SET SalPlanType="OPS" WHERE Salary_Plan LIKE "%Stu Ast%";
 UPDATE fte_lookup SET SalPlanType="Teams" WHERE Salary_Plan LIKE "%TEAMS%";
 
+##select * from fte_lookup;
 
 ####################################################################
 ## Populate FTE_OPS and FTE_Teams Fields
@@ -161,6 +156,8 @@ SET tr.FTE_Teams=lu.FTE
 WHERE tr.Employee_ID=lu.Employee_ID
   AND lu.SalPlanType="Teams";
 
+
+##select * from timerept;
 ####################################################################
 ### CREATE MOnth Person Summary to Append to Shands Personnel Table 
 ####################################################################
@@ -168,9 +165,11 @@ drop table if exists UFtimeMonSumm;
 Create table UFtimeMonSumm AS
 SELECT 	"UFHealth" as Employer,
         tr.SFY,
+        tr.Quarter,
         tr.Month,
-		lPAD(tr.Employee_ID,8,"0") AS Employee_ID,
+        lPAD(tr.Employee_ID,8,"0") AS Employee_ID,
         tr.Name,
+        max(Nurse) as Nurse,
         round(SUM(tr.Quantity),2) AS TotalHours,
         round(SUM(tr.WorkTime),2) AS WorkedHours,
         round(SUM(tr.NonWorkTime),2) AS NonWorkedHours,
@@ -182,7 +181,9 @@ SELECT 	"UFHealth" as Employer,
 from timerept tr 
 LEFT JOIN avail_hours ah
 ON tr.Month=ah.Month
-GROUP BY "UFHealth",tr.SFY,tr.Month,tr.Employee_ID,tr.Name;
+GROUP BY "UFHealth",tr.SFY,Quarter, tr.Month,tr.Employee_ID,tr.Name;
+
+ALTER TABLE  UFtimeMonSumm MODIFY Employee_ID varchar(12);
 
 /*
 ### VERIFY
@@ -197,13 +198,17 @@ SELECT * from UFtimeMonSumm WHERE EMPLOYEE_ID LIKE '96991999' ;
 ## SHANDS
 ####################################################################
 
+drop table if exists shandstime;
+Create table shandstime AS
+select * from shands_shifts;
+
 
 ## Create indentical structure to UF Data
 ALTER TABLE shandstime
 ADD Month varchar(7),    			#
-ADD SvcMon varchar(2),   			#
-ADD SvcYear varchar(4),				#
+ADD Quarter varchar(12),   			#
 ADD SFY varchar(15),				#
+ADD Nurse int(1),
 ADD WorkTime decimal (65,30),		#	
 ADD NonWorkTime decimal (65,30),	#
 ADD OPS_WorkTime decimal (65,30),	#
@@ -212,16 +217,18 @@ ADD FTE_OPS decimal (12,2),			#
 ADD FTE_Teams decimal (12,2),	
 ADD SalPlanType varchar(5),
 ADD ShandsPersID varchar(12);
-######################################################HEREH
 
 SET SQL_SAFE_UPDATES = 0;
 
 UPDATE shandstime SET MONTH=concat(YEAR(Apply_Date),"-",LPAD(MONTH(Apply_Date),2,"0")) ;
-UPDATE shandstime SET SvcMon = substr(Month,6,2);
-UPDATE shandstime SET SvcYear = substr(Month,1,4);
-UPDATE shandstime st, lookup.sfy lu SET st.SFY=lu.SFY WHERE st.MONTH=lu.MONTH;
+UPDATE shandstime st, lookup.sfy_classify lu 
+	SET  st.Quarter=lu.Quarter,
+		 st.SFY=lu.SFY
+		WHERE st.MONTH=lu.MONTH;
 
-UPDATE shandstime SET WorkTime=0, Teams_WorkTime=0;
+
+
+UPDATE shandstime SET WorkTime=0, Teams_WorkTime=0, Nurse=1;
 
 UPDATE shandstime SET WorkTime=TIME_TO_SEC(timediff(Shift_End_Time_,Shift_Start_Time_))/3600;
 UPDATE shandstime SET Teams_WorkTime=TIME_TO_SEC(timediff(Shift_End_Time_,Shift_Start_Time_))/3600;
@@ -247,9 +254,11 @@ drop table if exists ShandstimeMonSumm;
 Create table ShandstimeMonSumm AS
 SELECT 	"Shands" as Employer,
         tr.SFY,
+        tr.Quarter,
         tr.Month,
 		ShandsPersID AS Employee_ID,
         tr.Name,
+        tr.Nurse,
         round(SUM(tr.WorkTime),2) AS TotalHours,
         round(SUM(tr.WorkTime),2) AS WorkedHours,
         round(SUM(tr.NonWorkTime),2) AS NonWorkedHours,
@@ -261,28 +270,25 @@ SELECT 	"Shands" as Employer,
 from shandstime tr 
 LEFT JOIN avail_hours ah
 ON tr.Month=ah.Month
-GROUP BY "Shands",tr.SFY,tr.Month,tr.ShandsPersID,tr.Name;
+GROUP BY "Shands",tr.SFY,tr.Quarter,tr.Month,tr.ShandsPersID,tr.Name;
 
 
 ###############################################################################
 ########## COMBINE TABLES UF and Shands Monthly summary by Person
 ###############################################################################
-drop table if exists TimeMonSumm;
+DROP TABLE IF EXISTS TimeMonSumm;
 Create table TimeMonSumm AS
 SELECT * from UFtimeMonSumm
 UNION ALL 
 SELECT * from ShandstimeMonSumm;
 
+Alter Table TimeMonSumm
+	ADD OPS_FTE_ADJ_Avail decimal(65,10),
+	ADD Teams_FTE_ADJ_Avail decimal(65,10);
 
-SELECT Month,
-	  SUM(Teams_WorkedHours) AS TeamsWorked,
-      SUM(NonWorkedHours) as NonWorkedHours,
-      SUM(OPS_WorkedHours) as OPSWorked,
-      count(distinct Employee_ID) as nEMP 
-      from TimeMonSumm
-      group by month;
-
-################################################
+UPDATE TimeMonSumm
+SET OPS_FTE_ADJ_Avail=FTE_OPS*Avail_hours,
+	Teams_FTE_ADJ_Avail=FTE_Teams*Avail_hours;
 
 ###############################################################################
 #### Make Employee List
@@ -304,7 +310,7 @@ order by Name;
 
 ALTER TABLE emplist ADD Title Varchar(45);
 
-UPDATE emplist SET	Employee_ID=lPAD(Employee_ID,8,"0");
+
 UPDATE emplist el, lookup.Employees lu
 SET	el.Title=lu.Job_Code
 WHERE el.Employee_ID=lu.Employee_ID;
@@ -315,18 +321,26 @@ WHERE Employer="Shands"
 AND Title IS Null;
 
 
-##select * from emplist;
+
+
+##select * from emplist;##############################################################################
+##############################################################################
+##############################################################################
+##############################################################################
+##############################################################################
+##############################################################################
 ##############################################################################
 ##############################################################################
 #### COST DISTIB
 ##############################################################################
 
+
 ## cost_dist is work file
 
 ALTER TABLE cost_dist
+ADD Employer varchar(7),
 ADD Month varchar(7),
-ADD SvcMon varchar(2),
-ADD SvcYear varchar(4),
+ADD Quarter varchar(12),
 ADD SFY varchar(15),
 ADD CRC_Activities decimal (65,11),
 ADD CRC_Other_Activities decimal (65,11),
@@ -342,29 +356,31 @@ ADD CRC_CTSI_Funded decimal (65,11);
 
 SET SQL_SAFE_UPDATES = 0;
 
+UPDATE cost_dist SET Employer="UF";
 UPDATE cost_dist SET CRC_Activities=0, CRC_CTSI_Funded=0 , CRC_Other_Activities=0 ;
 
 UPDATE cost_dist SET MONTH=concat(YEAR(Accounting_Date),"-",LPAD(MONTH(Accounting_Date),2,"0")) ;
-UPDATE cost_dist SET SvcMon = substr(Month,6,2);
-UPDATE cost_dist SET SvcYear = substr(Month,1,4);
+UPDATE cost_dist cd, lookup.sfy_classify lu 
+		SET cd.SFY=lu.SFY,
+			cd.Quarter=lu.Quarter
+        WHERE cd.MONTH=lu.MONTH;
+
+
 UPDATE cost_dist SET  CRC_Activities=`Salary_+_Fringe` WHERE DeptID="29680300" and Fund_Code="149";
 UPDATE cost_dist SET  CRC_CTSI_Funded= `Salary_+_Fringe` WHERE DeptID LIKE "2968%" AND CRC_Activities =0;
 UPDATE cost_dist SET  CRC_Other_Activities=`Salary_+_Fringe` WHERE CRC_Activities=0 AND CRC_CTSI_Funded =0;  
-UPDATE cost_dist cd, lookup.sfy_classify lu SET cd.SFY=lu.SFY WHERE cd.MONTH=lu.MONTH;
 
-################################################DIAGNOSTIC
-SELECT Month,
-       SUM(`Salary_+_Fringe`) AS SALFRNG
-FROM cost_dist 
-group by Month;
-#####################################################################
 
+#######################################################################################
+#######################################################################################
 #######################################################################################
 #### Create Monthly summary by Person of Categorized Salary Data
 #######################################################################################
+#######################################################################################
 drop table if exists empsallu;
 create table empsallu AS
-SELECT Month,
+SELECT Employer,
+       Month,
        Person_ID AS Employee_ID,
        max(Name_) AS Emp_Name,
        sum(CRC_Activities) as CRC_Activities,
@@ -374,12 +390,78 @@ SELECT Month,
 from cost_dist   
 group by Month, Person_ID  ;  
 
+
 ################################################DIAGNOSTIC
 SELECT Month,
        SUM(Total) AS SALFRNG
 FROM empsallu 
 group by Month;
-#####################################################################
+#######################################################################################
+###ADD SHANDS TO THE COST DISTIBUTION
+###  Rewite to control for no TIme Matches
+DROP TABLE IF EXISTS ShandsPay;
+CREATE TABLE ShandsPay AS
+SELECT Employer,
+       Month,
+       Employee_ID,
+       max(Name) as Emp_Name,
+       sum(WorkedHours) as WorkedHours
+FROM TimeMonSumm       
+WHERE Employer="Shands"
+GROUP BY Employer,
+       Month,
+       Employee_ID;
+
+
+SET SQL_SAFE_UPDATES = 0;
+ALTER TABLE ShandsPay
+	ADD CRC_Activities decimal(65,11),
+	ADD CRC_Other_Activities decimal(65,11),
+	ADD CRC_CTSI_Funded decimal(65,11),
+	ADD Total decimal(65,11);
+
+
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE ShandsPay ts, shands_salary lu
+SET    ts.CRC_Activities=lu.Hourly*ts.WorkedHours,
+       ts.CRC_CTSI_Funded=0,
+       ts.CRC_Other_Activities=0,
+       ts.Total=lu.Hourly*ts.WorkedHours
+WHERE ts.Employee_ID=lu.Employee_ID
+AND ts.Employer="Shands";
+
+
+select * from ShandsPay;
+##########################################################################################
+##########################################################################################
+#####COMBINE UF AND SHANDS PAY DATA
+
+DROP TABLE IF EXISTS AllPay;
+CREATE TABLE AllPay As
+SELECT Employer,
+       Month,
+       Employee_ID,
+       Emp_Name,
+       CRC_Activities,
+       CRC_Other_Activities,
+       CRC_CTSI_Funded,
+       Total
+FROM ShandsPay 
+UNION ALL
+SELECT Employer,
+       Month,
+       Employee_ID,
+       Emp_Name,
+       CRC_Activities,
+       CRC_Other_Activities,
+       CRC_CTSI_Funded,
+       Total
+FROM empsallu ;      
+
+
+SELECT Month,SUm(Total) as Totl from AllPay GROUP BY Month;
+SELECT Month,SUm(Total) as Totl from ShandsPay GROUP BY Month;
 
 #######################################################################################
 #######################################################################################
@@ -409,7 +491,7 @@ SELECT ts.Employer,
        lu.CRC_Other_Activities,
        lu.Total AS TotalSalFRng
 FROM TimeMonSumm ts 
-	 left join empsallu lu 
+	 left join  AllPay lu 
      on ts.Month=lu.Month AND ts.Employee_ID=lu.Employee_ID;
 
 
@@ -417,7 +499,7 @@ FROM TimeMonSumm ts
 ##############################################################  RECONCILATION  ################   
 
 ## People on Payroll but not on Time Accounting...
-
+/*
 SELECT Month,
        Sum(Total) as SalFrngNOTIME
 FROM empsallu
@@ -446,25 +528,7 @@ SELECT Employee_ID, NAME, count(*) as nRECS from TimeMonSumm WHERE Employee_ID n
 
 ##############################################################  RECONCILATION  ################ 
 #######################################################################################     
-### ADD Shands Salary 
-#######################################################################################
-SET SQL_SAFE_UPDATES = 0;
 
-UPDATE EmpTimeSal ts, shands_salary lu
-SET    ts.CRC_Activities=lu.Hourly*ts.WorkedHours,
-       ts.OPS_FTE_ADJ_Avail=0,
-       ts.Teams_FTE_ADJ_Avail=lu.FTE*ts.Avail_hours,
-       ts.CRC_CTSI_Funded=0,
-       ts.CRC_Other_Activities=0,
-       ts.TotalSalFRng=lu.Hourly*ts.WorkedHours,
-       ts.FTE_OPS=0,
-       ts.FTE_Teams=lu.FTE
-WHERE ts.Employee_ID=lu.Employee_ID
-AND ts.Employer="Shands";
-
-###SELECT MONTH,TotalSalFRng from EmpTimeSal where Employer="Shands" group by Month;
-
- 
 #######################################################################################
 ### CLEAN UP Nulls for Salary Categegory Allocations  
 #######################################################################################

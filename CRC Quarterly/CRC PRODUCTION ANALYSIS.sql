@@ -10,12 +10,34 @@ SET sql_mode = '';
 ###########  VisitRoomCore - Result of "Make VistitRoomCore.sql"
 ###########  crc_time  - CRC Employee time records Current Version: 1/1/2018-9/30/2020 
 ###########  crc_pay_v1  - CRC EMployee payroll records v1 = 7/12/2018 - 12/10/2020
+
 #######################################################################################
 ##########################  Classification Tables  ####################################
 ###########  avail_hours - the available work hours and CRC facity hours by month in format YYYY-MM
 ###########  person_classify  - Defines person roles for report filtering
 ###########  date_classify  Table conting the SFY and SF Quarter values for a month formatted as YYYY-MM
 #######################################################################################
+#######################################################################################
+####Tables for Reporting
+### VisitRoomCare Utilization by Room
+### TimeMonSumm  CRC Hours Shands and UF
+### AllPay Shands and UF MOnthly Payroll Summary
+### EmpTimeSal - Combines Time reporting and Pay - Do not use Incomplete time reporting See reconsile Worksheet.
+################################################################################################################
+#### Date Ranges #############################################################
+
+select "timerept" as Filename, count(*) as nRecs, min(Date_Used) as MinDate, max(Date_Used) as MaxDate from timerept
+UNION ALL
+select "shandstime" as Filename, count(*) as nRecs, min(Shift_Start_Time_) as MinDate, max(Shift_Start_Time_) as MaxDate from shandstime
+UNION ALL
+select "cost_dist" as Filename, count(*) as nRecs, min(Accounting_Date) as MinDate, max(Accounting_Date) as MaxDate from cost_dist
+UNION ALL
+select "visitroomcore" as Filename, count(*) as nRecs, min(VisitStart) as MinDate, max(VisitStart) as MaxDate from visitroomcore
+UNION ALL
+select "EmpTimeSal" as Filename, count(*) as nRecs, min(Month) as MinDate, max(Month) as MaxDate from EmpTimeSal;
+
+
+
 #######################################################################################
 #######################################################################################
 #### CREATE WORK TABLES
@@ -176,10 +198,20 @@ Where PrsnAdjHours IS NULL;
 #########################################################################################
 #########################################################################################
 
+select * from PR_ROOM_UTIL;
 
-
-
-
+DROP TABLE UTIL_BY_ROOM_Quarter;
+Create table UTIL_BY_ROOM_Quarter AS
+SELECT Quarter,
+	   ROOM,
+       SUM(HoursUsed) AS HoursUsed,
+       SUM(CRC_Avail_Hours) HoursAvail,
+       (SUM(HoursUsed)/SUM(CRC_Avail_Hours))*100 As UtilRate,
+       SUM(PrsnAdjHours) as PrsnAdjHours
+ FROM PR_ROOM_UTIL
+ WHERE Quarter="Q1 20-21"
+ GROUP BY 	Quarter,
+			ROOM;
 
 
     
@@ -189,38 +221,108 @@ Where PrsnAdjHours IS NULL;
 #########################################################################################
 ################################### Reporting  ##########################################
 #########################################################################################
-
+USE crc_quarterly;
+SET sql_mode = '';
 #########################################################################################
 #### Utilization by Room for a Quarter
 #########################################################################################
-SELECT 	Quarter,
-		Room,
-        Sum(HoursUsed) as HoursUsed,
-        SUM(PrsnAdjHours) AS PrsnAdjHours,
-        SUM(CRC_avail_hours) as AvailHours,
-        (Sum(HoursUsed)/SUM(CRC_avail_hours))* 100 AS RoomUtilRate,
-        (Sum(PrsnAdjHours)/SUM(CRC_avail_hours))* 100 AS PersonAdjUtilRate
-FROM 	PR_ROOM_UTIL
-WHERE Quarter="Q1 20-21"
-GROUP BY Quarter,
-		Room;
+
+## Create standard Available Hours
+DROP TABLE IF Exists QuarterAvail;
+Create table QuarterAvail as
+SELECT sf.Quarter,
+       SUM(ah.CRC_Avail_hours) AS AvailQuartHrs
+FROM lookup.sfy_classify sf RIGHT JOIN avail_hours ah
+ON sf.Month=ah.Month
+GROUP BY sf.quarter;
+
+
+DROP TABLE UTIL_BY_ROOM_Quarter;
+Create table UTIL_BY_ROOM_Quarter AS
+SELECT ru.Quarter,
+	   ROOM,
+       qa.AvailQuartHrs AS CRC_Avail_Hours,
+       SUM(HoursUsed) AS HoursUsed,
+       qa.AvailQuartHrs-SUM(HoursUsed) AS HoursUnused,
+       (SUM(HoursUsed)/qa.AvailQuartHrs) As UtilRate,
+       SUM(PrsnAdjHours) as PrsnAdjHours
+ FROM PR_ROOM_UTIL ru 
+		LEFT JOIN QuarterAvail qa 
+        on ru.Quarter=qa.Quarter
+ WHERE ru.Quarter="Q1 20-21"
+ GROUP BY 	ru.Quarter,
+			ROOM,
+            qa.AvailQuartHrs
+ ORDER BY SUM(HoursUsed) DESC   ;        
+ 
+
         
 ###########################################################################################
-#### Utilization by Room for a Month 
-####    for reconcilation with WEbcamp occupancy report.
-########################################################################################### 
-SELECT 	Month,
-		Room,
-        Sum(HoursUsed) as HoursUsed,
-        SUM(PrsnAdjHours) AS PrsnAdjHours,
-        SUM(CRC_avail_hours) as AvailHours,
-        (Sum(HoursUsed)/SUM(CRC_avail_hours))* 100 AS RoomUtilRate,
-        (Sum(PrsnAdjHours)/SUM(CRC_avail_hours))* 100 AS PersonAdjUtilRate
-FROM 	PR_ROOM_UTIL
-WHERE Month="2020-10"
-GROUP BY Month,
-		Room;
-        
+####Teans Hours and FSE adjusted Hours by Month  ##########################################
+#### Nurses ONLY ##########################################################################
+
+DROP TABLE IF EXISTS CRCTimeMonth;
+CREATE TABLE CRCTimeMonth AS
+SELECT MONTH,
+       SUM(HoursUsed) AS CRCHoursUsed,
+       SUM(CRC_Avail_Hours) CRCHoursAvail,
+       (SUM(HoursUsed)/SUM(CRC_Avail_Hours))*100 As UtilRate,
+       SUM(PrsnAdjHours) as CRCPrsnAdjHours
+ FROM PR_ROOM_UTIL
+WHERE Quarter in (	'Q2 19-20',
+					'Q3 19-20',
+					'Q4 19-20',
+					'Q1 20-21')
+ GROUP BY Month;
+
+
+Select * from TimeMonSumm;
+select distinct Quarter from TimeMonSumm;
+
+DROP TABLE IF EXISTS NurseTime;
+Create table NurseTime AS
+SELECT Month,
+       SUM(Teams_WorkedHours) AS TeamsWorkedHrs,
+       SUM(NonWorkedHours) AS NonWorkedHrs,
+       SUM(OPS_WorkedHours) as OPSWorkedHrs,
+       SUM(FTE_OPS) AS FTE_OPS,
+       SUM(FTE_Teams) AS FTE_TEAMS,
+       SUM(Avail_hours) as Avail_hours,
+       SUM(OPS_FTE_ADJ_Avail) AS OPS_FTE_ADJ_Avail,
+       SUM(Teams_FTE_ADJ_Avail) AS Teams_FTE_ADJ_Avail
+FROM TimeMonSumm
+WHERE Quarter in (	'Q2 19-20',
+					'Q3 19-20',
+					'Q4 19-20',
+					'Q1 20-21')
+AND Nurse=1
+GROUP BY MONTH;
+
+###########################################################################################
+#### ALL STAFF ONLY ##########################################################################
+DROP TABLE IF EXISTS AllTime;
+Create table AllTime AS
+SELECT Month,
+       SUM(Teams_WorkedHours) AS TeamsWorkedHrs,
+       SUM(NonWorkedHours) AS NonWorkedHrs,
+       SUM(OPS_WorkedHours) as OPSWorkedHrs,
+       SUM(FTE_OPS) AS FTE_OPS,
+       SUM(FTE_Teams) AS FTE_TEAMS,
+       SUM(Avail_hours) as Avail_hours,
+       SUM(OPS_FTE_ADJ_Avail) AS OPS_FTE_ADJ_Avail,
+       SUM(Teams_FTE_ADJ_Avail) AS Teams_FTE_ADJ_Avail
+FROM TimeMonSumm
+WHERE Quarter in (	'Q2 19-20',
+					'Q3 19-20',
+					'Q4 19-20',
+					'Q1 20-21')
+GROUP BY MONTH;
+###########################################################################################
+###########################################################################################
+###########################################################################################
+###########################################################################################
+###########################################################################################
+
 
 
 ###########################################################################################
@@ -229,7 +331,9 @@ GROUP BY Month,
 /*
 DROP TABLE IF EXISTS ProvContibSumm;
 DROP TABLE IF EXISTS ProvContib;
-DROP TABLE IF EXISTS PR_VISITMON;    
+DROP TABLE IF EXISTS PR_VISITMON; 
+DROP TABL EIF EXISTS EmpTimeSalTEMP;  
+DROP TABLE IF EXISTS CRCTimeMonth; 
 
 */        
             
