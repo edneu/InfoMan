@@ -19,10 +19,10 @@ SET sql_mode = '';
 #######################################################################################
 #######################################################################################
 ####Tables for Reporting
-### VisitRoomCare Utilization by Room
-### TimeMonSumm  CRC Hours Shands and UF
-### AllPay Shands and UF MOnthly Payroll Summary
-### EmpTimeSal - Combines Time reporting and Pay - Do not use Incomplete time reporting See reconsile Worksheet.
+### VisitRoomCare -Utilization by Room
+### TimeMonSumm  -CRC Hours Shands and UF
+### AllPay -Shands and UF MOnthly Payroll Summary
+### EmpTimeSal -Combines Time reporting and Pay - Do not use Incomplete time reporting See reconsile Worksheet.
 ################################################################################################################
 #### Date Ranges #############################################################
 
@@ -223,6 +223,7 @@ SELECT Quarter,
 #########################################################################################
 USE crc_quarterly;
 SET sql_mode = '';
+
 #########################################################################################
 #### Utilization by Room for a Quarter
 #########################################################################################
@@ -322,8 +323,56 @@ GROUP BY MONTH;
 ###########################################################################################
 ###########################################################################################
 ###########################################################################################
+## Payment Graph
+
+DROP TABLE IF Exists AllPayRept;
+CReate table AllPayRept AS
+SELECT * from AllPay;
+
+Alter table AllPayRept 	ADD Nurse int(1),
+						ADD Quarter varchar(12),
+                        ADD SFY varchar(25);
+
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE AllPayRept ap, person_classify lu
+SET ap.Nurse=lu.Nursing
+WHERE ap.Employee_ID=lu.UFID;
+
+Update AllPayRept ap, lookup.sfy_classify lu
+SET ap.Quarter=lu.Quarter,
+    ap.SFY=lu.SFY
+WHERE ap.Month=lu.Month;    
 
 
+Drop table if exists AllSalCatMon;
+Create Table AllSalCatMon AS
+SELECT Month,
+	SUM(CRC_Activities) as CRC_Activities,
+	SUM(CRC_Other_Activities) as CRC_Other_Activities,
+	SUM(CRC_CTSI_Funded) as CRC_CTSI_Funded,
+	SUM(Total) as Total
+FROM AllPayRept
+WHERE Quarter in (	'Q2 19-20',
+					'Q3 19-20',
+					'Q4 19-20',
+					'Q1 20-21')
+GROUP BY Month;
+
+Drop table if exists NurseSalCatMon;
+Create Table NurseSalCatMon AS
+SELECT Month,
+	SUM(CRC_Activities) as CRC_Activities,
+	SUM(CRC_Other_Activities) as CRC_Other_Activities,
+	SUM(CRC_CTSI_Funded) as CRC_CTSI_Funded,
+	SUM(Total) as Total
+FROM AllPayRept
+WHERE Quarter in (	'Q2 19-20',
+					'Q3 19-20',
+					'Q4 19-20',
+					'Q1 20-21')
+AND Nurse=1
+GROUP BY Month;
 
 ###########################################################################################
 ######################### CLEANUP  ########################################################
@@ -334,6 +383,8 @@ DROP TABLE IF EXISTS ProvContib;
 DROP TABLE IF EXISTS PR_VISITMON; 
 DROP TABL EIF EXISTS EmpTimeSalTEMP;  
 DROP TABLE IF EXISTS CRCTimeMonth; 
+DROP TABLE IF Exists AllPayRept;
 
 */        
             
+        
