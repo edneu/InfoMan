@@ -258,7 +258,7 @@ SELECT 	"Shands" as Employer,
         tr.Month,
 		ShandsPersID AS Employee_ID,
         tr.Name,
-        tr.Nurse,
+        max(tr.Nurse) as Nurse,
         round(SUM(tr.WorkTime),2) AS TotalHours,
         round(SUM(tr.WorkTime),2) AS WorkedHours,
         round(SUM(tr.NonWorkTime),2) AS NonWorkedHours,
@@ -388,7 +388,7 @@ SELECT Employer,
        sum(CRC_Other_Activities) as CRC_Other_Activities,
        sum(`Salary_+_Fringe`) as Total
 from cost_dist   
-group by Month, Person_ID  ;  
+group by Employer, Month, Person_ID  ;  
 
 
 ################################################DIAGNOSTIC
@@ -631,7 +631,15 @@ UNION ALL
 select "EmpTimeSal" as Filename, count(*) as nRecs, min(Month) as MinDate, max(Month) as MaxDate from EmpTimeSal;
 ##############################################################################
 
+/*
 
+
+SELECT Count(*) AS nStaffRecs,
+       SUM(On_Payroll) as On_Payroll,
+       SUM(In_Webcamp) as In_Webcamp,
+       SUM(OnTImeReport) as OnTImeReport
+from person_classify;       
+*/    
 
 
 ########################################  EOF  #################################################################
