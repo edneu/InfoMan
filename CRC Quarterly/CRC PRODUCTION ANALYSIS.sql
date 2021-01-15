@@ -4,6 +4,11 @@
 #######################################################################################
 USE crc_quarterly;
 SET sql_mode = '';
+
+
+create table visitroomcoreBU as select * from visitroomcore;
+drop table visitroomcore;
+create table visitroomcore as select * from new_visitroomcore;
 ############################   Required Files  ########################################
 #######################################################################################
 ##########################  DATA TABLES ###############################################
@@ -214,6 +219,20 @@ SELECT Quarter,
 			ROOM;
 
 
+DROP TABLE UTIL_BY_ROOM_MOnth;
+Create table UTIL_BY_ROOM_MOnth AS
+SELECT Month,
+	   ROOM,
+       SUM(HoursUsed) AS HoursUsed,
+       SUM(CRC_Avail_Hours) HoursAvail,
+       (SUM(HoursUsed)/SUM(CRC_Avail_Hours))*100 As UtilRate,
+       SUM(PrsnAdjHours) as PrsnAdjHours
+ FROM PR_ROOM_UTIL
+ WHERE Month in ('2020-11','2020-12')
+ GROUP BY 	MOnth,
+			ROOM
+ ORDER BY Room,Month;           
+
     
 #########################################################################################
 #########################################################################################
@@ -227,6 +246,26 @@ SET sql_mode = '';
 #########################################################################################
 #### Utilization by Room for a Quarter
 #########################################################################################
+## UTilization of all Romms by Selected months
+DROP TABLE UTIL_BY_ROOM_MOnth;
+Create table UTIL_BY_ROOM_MOnth AS
+SELECT Month,
+	   ROOM,
+       SUM(HoursUsed) AS HoursUsed,
+       SUM(CRC_Avail_Hours) HoursAvail,
+       (SUM(HoursUsed)/SUM(CRC_Avail_Hours))*100 As UtilRate,
+       SUM(PrsnAdjHours) as PrsnAdjHours
+ FROM PR_ROOM_UTIL
+ WHERE Month in ('2020-11','2020-12')
+ GROUP BY 	MOnth,
+			ROOM
+ ORDER BY Room,Month;  
+
+#########################################################################################
+#########################################################################################
+
+
+
 
 ## Create standard Available Hours
 DROP TABLE IF Exists QuarterAvail;
@@ -387,4 +426,19 @@ DROP TABLE IF Exists AllPayRept;
 
 */        
             
+        
+DROP TABLE IF EXISTS PR_VISITMON;
+create table PR_VISITMON AS
+SELECT 	MONTH,
+		SFY,
+        QUARTER,
+        VisitID,
+        max(ROOM) as Room,
+        max(VisitLenMin/60) AS VistDurHours
+from visitroomcore
+WHERE ROOM IN ('1245','1246')
+GROUP BY 	MONTH,
+			SFY,
+			QUARTER,
+			VisitID;        
         

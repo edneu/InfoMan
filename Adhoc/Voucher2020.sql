@@ -227,6 +227,10 @@ UPDATE Adhoc.VouchWork SET SrvName='Human Imaging' WHERE Service='HUMAN IMAGING'
 
 select * from Adhoc.VouchWork;
 
+create table finance.VoucherFY2020on AS
+SELECT * from Adhoc.VouchWork
+WHERE SFY IN ("SFY 2019-2020","SFY 2020-2021");
+
 ###############################################################
 ###############################################################
 ## CHART DATA

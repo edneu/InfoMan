@@ -11,22 +11,17 @@ DESC lookup.blueridge_medicine;
 DESC lookup.blueridge_institution;
 
 
+select max(blueridge_institution_id2)+1 from lookup.blueridge_institution;
+select Max(blueridge_medicine_id2)+1 from lookup.blueridge_medicine;
+
 select distinct Name from lookup.blueridge_institution where Name like "%Florida%";
 
 'UNIVERSITY OF FLORIDA'
-
 'FLORIDA STATE UNIVERSITY'
 
 select Year,Name,NIH_FUNDING,Rank,PublicInstRank,PublicRank from lookup.blueridge_institution where Name='UNIVERSITY OF FLORIDA';
 
 
-
-
-create table work.br_inst_mask as select * from lookup.blueridge_institution Limit 10;
-
-select max(blueridge_medicine_id2)+1 from lookup.blueridge_medicine;
-
-select max(blueridge_institution_id2)+1 from lookup.blueridge_institution;
 
 
 ## Backup Existing Files
@@ -128,10 +123,33 @@ UPDATE lookup.blueridge_medicine br, work.br_med_publicrank lu
      WHERE br.blueridge_medicine_id2=lu.blueridge_medicine_id2;   
 
 
-SELECT Year,Name,NIH_FUNDING,PublicRank
+SELECT Year,Rank,NIH_FUNDING,PublicRank
 FROM lookup.blueridge_institution
-WHERE Name="University of Florida"
+WHERE Name IN ('UNIVERSITY OF FLORIDA')
 ORDER BY YEAR;
+
+
+SELECT Year,Rank,Award,PublicRank
+FROM lookup.blueridge_medicine
+WHERE Name IN ('UNIVERSITY OF FLORIDA')
+ORDER BY YEAR;
+
+
+
+SELECT Year,Rank,NIH_FUNDING,PublicRank
+FROM lookup.blueridge_institution
+WHERE Name IN ('FLORIDA STATE UNIVERSITY')
+ORDER BY YEAR;
+
+
+SELECT Year,Rank,Award,PublicRank
+FROM lookup.blueridge_medicine
+WHERE Name IN ('FLORIDA STATE UNIVERSITY')
+ORDER BY YEAR;
+
+
+('UNIVERSITY OF FLORIDA','FLORIDA STATE UNIVERSITY')
+
 
 SELECT Year,Name,Award,Rank,PublicRank
 FROM lookup.blueridge_medicine
