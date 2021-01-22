@@ -100,7 +100,16 @@ select * from crc.SurvContact;
 
 DROP TABLE IF EXISTS crc.SurveyRslt;
 CREATE TABLE crc.SurveyRslt AS
-SELECT * FROM crc.SURVEYRESULTSTABLENAME;
+SELECT * FROM crc.surveyresultsfinallabeled;
+
+
+ALTER TABLE crc.crcsurvmaster
+	DROP StudyClosed,
+	DROP AprvSponsor,
+	DROP AprvOCRUFR,
+	DROP SeePartic,
+	DROP AtCRC,
+	DROP AntStart;
 
 
 ALTER TABLE crc.crcsurvmaster
@@ -109,21 +118,37 @@ ALTER TABLE crc.crcsurvmaster
 	ADD AprvOCRUFR VARCHAR(5),
 	ADD SeePartic VARCHAR(5),
 	ADD AtCRC VARCHAR(5),
-	ADD AntStart DATETIME;
+	ADD AntStart varchar(15);
 
-UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q3, sc.AprvSponsor=lu.Q4, sc.AprvOCRUFR=lu.Q5, sc.SeePartic=lu.Q6, sc.AtCRC=lu.Q7, sc.AntStart=lu.Q8  WHERE sc.Email=lu.Email AND sc.Span=1;
-UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q10, sc.AprvSponsor=lu.Q11, sc.AprvOCRUFR=lu.Q12, sc.SeePartic=lu.Q13, sc.AtCRC=lu.Q14, sc.AntStart=lu.Q15  WHERE sc.Email=lu.Email AND sc.Span=2;
-UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q17, sc.AprvSponsor=lu.Q18, sc.AprvOCRUFR=lu.Q19, sc.SeePartic=lu.Q20, sc.AtCRC=lu.Q21, sc.AntStart=lu.Q22  WHERE sc.Email=lu.Email AND sc.Span=3;
-UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q24, sc.AprvSponsor=lu.Q25, sc.AprvOCRUFR=lu.Q26, sc.SeePartic=lu.Q27, sc.AtCRC=lu.Q28, sc.AntStart=lu.Q29  WHERE sc.Email=lu.Email AND sc.Span=4;
-UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q31, sc.AprvSponsor=lu.Q32, sc.AprvOCRUFR=lu.Q33, sc.SeePartic=lu.Q34, sc.AtCRC=lu.Q35, sc.AntStart=lu.Q36  WHERE sc.Email=lu.Email AND sc.Span=5;
-UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q38, sc.AprvSponsor=lu.Q39, sc.AprvOCRUFR=lu.Q40, sc.SeePartic=lu.Q41, sc.AtCRC=lu.Q42, sc.AntStart=lu.Q43  WHERE sc.Email=lu.Email AND sc.Span=6;
-UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q45, sc.AprvSponsor=lu.Q46, sc.AprvOCRUFR=lu.Q47, sc.SeePartic=lu.Q48, sc.AtCRC=lu.Q49, sc.AntStart=lu.Q50  WHERE sc.Email=lu.Email AND sc.Span=7;
-UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q52, sc.AprvSponsor=lu.Q53, sc.AprvOCRUFR=lu.Q54, sc.SeePartic=lu.Q55, sc.AtCRC=lu.Q56, sc.AntStart=lu.Q57  WHERE sc.Email=lu.Email AND sc.Span=8;
-UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q59, sc.AprvSponsor=lu.Q60, sc.AprvOCRUFR=lu.Q61, sc.SeePartic=lu.Q62, sc.AtCRC=lu.Q63, sc.AntStart=lu.Q64  WHERE sc.Email=lu.Email AND sc.Span=9;
-UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q66, sc.AprvSponsor=lu.Q67, sc.AprvOCRUFR=lu.Q68, sc.SeePartic=lu.Q69, sc.AtCRC=lu.Q70, sc.AntStart=lu.Q71  WHERE sc.Email=lu.Email AND sc.Span=10;
-UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q73, sc.AprvSponsor=lu.Q74, sc.AprvOCRUFR=lu.Q75, sc.SeePartic=lu.Q76, sc.AtCRC=lu.Q77, sc.AntStart=lu.Q78  WHERE sc.Email=lu.Email AND sc.Span=11;
-UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q80, sc.AprvSponsor=lu.Q81, sc.AprvOCRUFR=lu.Q82, sc.SeePartic=lu.Q83, sc.AtCRC=lu.Q84, sc.AntStart=lu.Q85  WHERE sc.Email=lu.Email AND sc.Span=12;
-UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q87, sc.AprvSponsor=lu.Q88, sc.AprvOCRUFR=lu.Q89, sc.SeePartic=lu.Q90, sc.AtCRC=lu.Q91, sc.AntStart=lu.Q92  WHERE sc.Email=lu.Email AND sc.Span=13;
+UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q3, sc.AprvSponsor=lu.Q4, sc.AprvOCRUFR=lu.Q5, sc.SeePartic=lu.Q6, sc.AtCRC=lu.Q7, sc.AntStart=lu.Q8  WHERE sc.Email=lu.RecipientEmail AND sc.Span=1;
+UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q10, sc.AprvSponsor=lu.Q11, sc.AprvOCRUFR=lu.Q12, sc.SeePartic=lu.Q13, sc.AtCRC=lu.Q14, sc.AntStart=lu.Q15  WHERE sc.Email=lu.RecipientEmail AND sc.Span=2;
+UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q17, sc.AprvSponsor=lu.Q18, sc.AprvOCRUFR=lu.Q19, sc.SeePartic=lu.Q20, sc.AtCRC=lu.Q21, sc.AntStart=lu.Q22  WHERE sc.Email=lu.RecipientEmail AND sc.Span=3;
+UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q24, sc.AprvSponsor=lu.Q25, sc.AprvOCRUFR=lu.Q26, sc.SeePartic=lu.Q27, sc.AtCRC=lu.Q28, sc.AntStart=lu.Q29  WHERE sc.Email=lu.RecipientEmail AND sc.Span=4;
+UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q31, sc.AprvSponsor=lu.Q32, sc.AprvOCRUFR=lu.Q33, sc.SeePartic=lu.Q34, sc.AtCRC=lu.Q35, sc.AntStart=lu.Q36  WHERE sc.Email=lu.RecipientEmail AND sc.Span=5;
+UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q38, sc.AprvSponsor=lu.Q39, sc.AprvOCRUFR=lu.Q40, sc.SeePartic=lu.Q41, sc.AtCRC=lu.Q42, sc.AntStart=lu.Q43  WHERE sc.Email=lu.RecipientEmail AND sc.Span=6;
+UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q45, sc.AprvSponsor=lu.Q46, sc.AprvOCRUFR=lu.Q47, sc.SeePartic=lu.Q48, sc.AtCRC=lu.Q49, sc.AntStart=lu.Q50  WHERE sc.Email=lu.RecipientEmail AND sc.Span=7;
+UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q52, sc.AprvSponsor=lu.Q53, sc.AprvOCRUFR=lu.Q54, sc.SeePartic=lu.Q55, sc.AtCRC=lu.Q56, sc.AntStart=lu.Q57  WHERE sc.Email=lu.RecipientEmail AND sc.Span=8;
+UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q59, sc.AprvSponsor=lu.Q60, sc.AprvOCRUFR=lu.Q61, sc.SeePartic=lu.Q62, sc.AtCRC=lu.Q63, sc.AntStart=lu.Q64  WHERE sc.Email=lu.RecipientEmail AND sc.Span=9;
+UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q66, sc.AprvSponsor=lu.Q67, sc.AprvOCRUFR=lu.Q68, sc.SeePartic=lu.Q69, sc.AtCRC=lu.Q70, sc.AntStart=lu.Q71  WHERE sc.Email=lu.RecipientEmail AND sc.Span=10;
+UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q73, sc.AprvSponsor=lu.Q74, sc.AprvOCRUFR=lu.Q75, sc.SeePartic=lu.Q76, sc.AtCRC=lu.Q77, sc.AntStart=lu.Q78  WHERE sc.Email=lu.RecipientEmail AND sc.Span=11;
+UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q80, sc.AprvSponsor=lu.Q81, sc.AprvOCRUFR=lu.Q82, sc.SeePartic=lu.Q83, sc.AtCRC=lu.Q84, sc.AntStart=lu.Q85  WHERE sc.Email=lu.RecipientEmail AND sc.Span=12;
+UPDATE crc.crcsurvmaster sc, crc.SurveyRslt lu SET sc.StudyClosed=lu.Q87, sc.AprvSponsor=lu.Q88, sc.AprvOCRUFR=lu.Q89, sc.SeePartic=lu.Q90, sc.AtCRC=lu.Q91, sc.AntStart=lu.Q92  WHERE sc.Email=lu.RecipientEmail AND sc.Span=13;
 
 
+ALTER TABLE crc.crcsurvmaster
+ADD JK_Coordinator varchar(25),
+ADD JK_PI varchar(25),
+ADD JK_Closed varchar(25),
+ADD JK_Enrolling varchar(25),
+ADD JK_CRC_Staff_needed varchar(25),
+ADD JK_Telemed_Person varchar(25);
 
+
+UPDATE crc.crcsurvmaster sm, crc.king_supplement lu
+SET JK_Coordinator=lu.Coordinator,
+	JK_PI=lu.PI,
+	JK_Closed=lu.Closed  ,
+	JK_Enrolling=lu.Enrolling  ,
+	JK_CRC_Staff_needed=lu.CRC_Staff_needed  ,
+	JK_Telemed_Person=lu.Telemed_Person 
+WHERE sm.CRCID =lu.CRC_ID;
