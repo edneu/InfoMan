@@ -229,7 +229,7 @@ SET tw.DeptName=lu.DeptName,
 WHERE tw.DeptID=lu.DeptID
 AND tw.ReportCollege is NULL  ;  
 
-### FROMA MATTS NOTE 1-20-2021
+### FROM MATTS NOTE 1-20-2021
 UPDATE finance.transWORK SET ReportCollege='HSC Library' , DeptName='' WHERE ALT_DEPT_ID='29680246' AND Project_Code='P0122563' AND  Account_Code='734260' AND ReportCollege IS NULL;
 UPDATE finance.transWORK SET ReportCollege='HSC Library' , DeptName='' WHERE ALT_DEPT_ID='29680246' AND Project_Code='P0134283' AND  Account_Code='611110' AND ReportCollege IS NULL;
 UPDATE finance.transWORK SET ReportCollege='HSC Library' , DeptName='' WHERE ALT_DEPT_ID='29680246' AND Project_Code='P0134283' AND  Account_Code='611120' AND ReportCollege IS NULL;
@@ -271,6 +271,41 @@ UPDATE finance.transWORK SET ReportCollege='PHHP-COM' , DeptName='PHHP-COM EPIDE
 UPDATE finance.transWORK SET ReportCollege='Medicine' , DeptName='MD-HOP-GENERAL' WHERE ALT_DEPT_ID='29680521' AND Project_Code='P0186960' AND  Account_Code='611120' AND ReportCollege IS NULL;
 UPDATE finance.transWORK SET ReportCollege='Medicine' , DeptName='' WHERE ALT_DEPT_ID='29680521' AND Project_Code='P0186960' AND  Account_Code='621110' AND ReportCollege IS NULL;
 UPDATE finance.transWORK SET ReportCollege='Medicine' , DeptName='' WHERE ALT_DEPT_ID='29680521' AND Project_Code='P0186960' AND  Account_Code='621120' AND ReportCollege IS NULL;
+
+### MATT's REVIEW Determination 1-22-2021
+UPDATE finance.transWORK SET ReportCollege='OMIT-Matt Review' WHERE Alt_Dept_ID='11300000' AND Project_Code='-' AND Account_Code='813000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Liberal Arts and Sciences' WHERE Alt_Dept_ID='16120100' AND Project_Code='00114412' AND Account_Code='818000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680000' AND Project_Code='-' AND Account_Code='814000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680100' AND Project_Code='00082127' AND Account_Code='811005' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680100' AND Project_Code='00082127' AND Account_Code='818000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680100' AND Project_Code='00128031' AND Account_Code='818000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680100' AND Project_Code='00129698' AND Account_Code='818000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680100' AND Project_Code='P0035601' AND Account_Code='811005' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680100GCTSA' AND Project_Code='-' AND Account_Code='813000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680110' AND Project_Code='-' AND Account_Code='818000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680110' AND Project_Code='-' AND Account_Code='890000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680170' AND Project_Code='00127925' AND Account_Code='818000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680200' AND Project_Code='-' AND Account_Code='813000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680220' AND Project_Code='-' AND Account_Code='813000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680231' AND Project_Code='-' AND Account_Code='813000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680240' AND Project_Code='-' AND Account_Code='813000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680241' AND Project_Code='-' AND Account_Code='813000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680244' AND Project_Code='-' AND Account_Code='813000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680245' AND Project_Code='00128687' AND Account_Code='818000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680300' AND Project_Code='-' AND Account_Code='811005' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680300' AND Project_Code='-' AND Account_Code='813000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680300' AND Project_Code='-' AND Account_Code='818000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680300' AND Project_Code='00128184' AND Account_Code='818000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680300' AND Project_Code='P0068638' AND Account_Code='811005' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680301' AND Project_Code='-' AND Account_Code='813000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680400' AND Project_Code='-' AND Account_Code='811000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680400' AND Project_Code='-' AND Account_Code='813000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680400' AND Project_Code='-' AND Account_Code='830000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680400' AND Project_Code='-' AND Account_Code='831000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680504' AND Project_Code='-' AND Account_Code='813000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='OMIT-Matt Review' WHERE Alt_Dept_ID='29680506' AND Project_Code='00129201' AND Account_Code='818000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='PHHP-COM' WHERE Alt_Dept_ID='29680508' AND Project_Code='-' AND Account_Code='813000' AND ReportCollege='REVIEW - Matt';
+UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680512' AND Project_Code='-' AND Account_Code='813000' AND ReportCollege='REVIEW - Matt';
 
 
 
@@ -328,7 +363,38 @@ SELECT 	*
         from finance.transWORK
         WHERE ReportCollege ='REVIEW - Matt'
 ;
-      
+ 
+DROP TABLE IF EXISTS finance.reportNoCollDetail;
+Create table finance.reportNoCollDetail AS
+SELECT 	*
+        from finance.transWORK
+        WHERE ReportCollege IS NULL;
+; 
+ select Distinct ReportCollege from  finance.transWORK; 
+ 
+ 
+DROP TABLE IF EXISTS finance.reportMattReviewFull;
+Create table finance.reportMattReviewFull AS
+SELECT 	ALt_Dept_ID,
+		Project_Code,
+        Account_Code,
+        TypeFlag,
+        ReportCollege,
+        count(*) as N,
+        sum(Posted_Amount) as Total
+        from finance.transWORK WHERE ReportCollege ='REVIEW - Matt'
+GROUP BY ALt_Dept_ID,
+		Project_Code,
+        Account_Code,
+        TypeFlag,
+        ReportCollege;
+         
+ 
+ 
+ 
+ 
+ 
+ 
       
 DROP TABLE IF EXISTS finance.reportNullColl;
 Create table finance.reportNullColl AS
@@ -353,7 +419,7 @@ Create table finance.reportNullColl AS
 
 
 
-SELECT DEPTID,DeptName from lookup.depts WHERE DEPTID IN 
+SELECT DEPTID,Department as DeptName from lookup.deptlookup WHERE DEPTID IN 
 (SELECT 	Distinct DeptiD
         from finance.transWORK
         WHERE ReportCollege IS NULL);
