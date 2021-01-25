@@ -9,7 +9,11 @@
 ## UPDATE finance.hsc_map SET ReportCollege="Office of Research" WHERE DEPTID='11300000';
 
 ## DELETE from  finance.hsc_map where hsc_map_id IN (147,148,150,152,154);
-
+###########################################################################################################################
+###########################################################################################################################
+###########################################################################################################################
+###########################################################################################################################
+## Assigned report Colleges to Tranaction Files for SFY 2019-2020 and SFY 2020-2021
 
 DROP TABLE IF EXISTS finance.transWORK;
 Create table finance.transWORK
@@ -26,10 +30,6 @@ Alter Table finance.transWORK
 	ADD ReportCollege	varchar(45),
     ADD TypeFlag varchar(25);
     
-
-
-
-
 
 SET SQL_SAFE_UPDATES = 0;
 
@@ -73,7 +73,7 @@ UPDATE finance.transWORK tw, finance.TL_ProjMap lu
 SET tw.TypeFlag=lu.TypeFlag,
     tw.DeptName=lu.DeptName,
     tw.CollAbbr=lu.CollAbbr,
-    tw.College=lu.College,
+    tw.College=lu.ReportCollege,
     tw.ReportCollege=lu.ReportCollege
 WHERE tw.Project_Code=lu.Project_Code;
 
@@ -84,7 +84,14 @@ UPDATE finance.transWORK SET ReportCollege='OMIT - NIH TL Main OLD' WHERE Projec
 UPDATE finance.transWORK SET ReportCollege='OMIT - COM TL Main' WHERE Project_Code='P0134522';
 UPDATE finance.transWORK SET ReportCollege='OMIT - TL CTSI Main' WHERE Project_Code='P0035601';
 
-
+UPDATE finance.transWORK tw, finance.tl_depts lu
+SET tw.TypeFlag=lu.TypeFlag,
+    tw.DeptName=lu.DeptName,
+    tw.CollAbbr=lu.CollAbbr,
+    tw.College=lu.ReportCollege,
+    tw.ReportCollege=lu.ReportCollege
+WHERE tw.ALt_Dept_ID=lu.ALt_Dept_ID
+  AND tw.Account_Code=lu.Account_Code;
 
 
 
@@ -185,9 +192,6 @@ UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt
 UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt_Dept_ID='29680601' AND Project_Code='P0166289' AND Account_Code='611120' AND ReportCollege IS NULL;
 UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt_Dept_ID='29680601' AND Project_Code='P0166289' AND Account_Code='612110' AND ReportCollege IS NULL;
 UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt_Dept_ID='29680601' AND Project_Code='P0166289' AND Account_Code='612120' AND ReportCollege IS NULL;
-
-
-
 
 
 ###  Matts Expense Elimination  Redundant with PIvot Table
@@ -307,8 +311,8 @@ UPDATE finance.transWORK SET ReportCollege='OMIT-Matt Review' WHERE Alt_Dept_ID=
 UPDATE finance.transWORK SET ReportCollege='PHHP-COM' WHERE Alt_Dept_ID='29680508' AND Project_Code='-' AND Account_Code='813000' AND ReportCollege='REVIEW - Matt';
 UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='29680512' AND Project_Code='-' AND Account_Code='813000' AND ReportCollege='REVIEW - Matt';
 
-
-
+### TL Aduustment Net=0
+UPDATE finance.transWORK SET ReportCollege='OMIT - TL Adjustment' WHERE Alt_Dept_ID='29680600' AND Project_Code='-' AND Account_Code='799900' AND  Fund_Code='171' AND ReportCollege IS NULL;
 
 
 #########################################################################################################################################################
@@ -324,6 +328,154 @@ UPDATE finance.transWORK SET ReportCollege='Medicine' WHERE Alt_Dept_ID='2968051
 ################################################# CHECK
 SELECT ReportCollege, COUNT(*) as N  from finance.transWORK WHERE ReportCollege LIKE '%OMIT%' OR ReportCollege is Null GROUP BY  ReportCollege ;
 SELECT ReportCollege, COUNT(*) as N  from finance.transWORK WHERE ReportCollege NOT LIKE '%OMIT%' OR  ReportCollege is Null  GROUP BY  ReportCollege ;
+
+
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+############# Report COllege Summary by SFY 
+
+DROP TABLE IF EXISTS finance.SFYbyCOLL;
+create table finance.SFYbyCOLL AS
+SELECT SFY,ReportCollege,SUM(Posted_Amount) AS Amount
+from finance.transWORK
+WHERE ReportCollege NOT LIKE '%Omit%' OR ReportCollege IS Null
+GROUP BY SFY,ReportCollege
+ORDER BY SFY,ReportCollege;
+
+DROP TABLE IF Exists finance.CollSFYSumm ;
+Create table finance.CollSFYSumm AS
+SELECT Distinct ReportCollege from finance.SFYbyCOLL;
+
+Alter TABLE finance.CollSFYSumm 
+ADD SFY_2019_2020 decimal(65,10),
+ADD SFY_2020_2021 decimal(65,10);
+
+UPDATE finance.CollSFYSumm cs, finance.SFYbyCOLL lu
+SET cs.SFY_2019_2020=lu.Amount
+WHERE lu.SFY='SFY 2019-2020'
+AND cs.ReportCollege=lu.ReportCollege;
+
+
+UPDATE finance.CollSFYSumm cs, finance.SFYbyCOLL lu
+SET cs.SFY_2020_2021=lu.Amount
+WHERE lu.SFY='SFY 2020-2021'
+AND cs.ReportCollege=lu.ReportCollege;
+
+
+select * from finance.CollSFYSumm;
+
+
+###########################################################################################################
+###########################################################################################################
+### Classification Premustations
+
+DROP TABLE IF EXISTS finance.CollAssn;
+Create table finance.CollAssn AS
+SELECT 	 ReportCollege,
+		ALt_Dept_ID,
+		Project_Code,
+        Fund_Code,
+        Account_Code,
+        TypeFlag,
+        count(*) as N,
+        sum(Posted_Amount) as Total
+        from finance.transWORK WHERE ReportCollege NOT LIKE "OMIT%"
+GROUP BY 	ReportCollege,
+			ALt_Dept_ID,
+			Project_Code,
+			Fund_Code,
+            Account_Code,
+			TypeFlag;
+
+###########################################################################################################
+###########################################################################################################
+### Complete listing of Included records
+DROP TABLE IF EXISTS finance.DetailAssn;
+Create table finance.DetailAssn AS
+SELECT 	 *
+        from finance.transWORK WHERE ReportCollege NOT LIKE "OMIT%";
+
+###########################################################################################################
+### Classification Premustations fro Omitted Records
+
+DROP TABLE IF EXISTS finance.OmitTrans;
+Create table finance.OmitTrans AS
+SELECT 	 ReportCollege,
+		ALt_Dept_ID,
+		Project_Code,
+        Fund_Code,
+        Account_Code,
+        TypeFlag,
+        count(*) as N,
+        sum(Posted_Amount) as Total
+        from finance.transWORK WHERE ReportCollege  LIKE "OMIT%"
+GROUP BY 	ReportCollege,
+			ALt_Dept_ID,
+			Project_Code,
+			Fund_Code,
+            Account_Code,
+			TypeFlag;
+
+
+############################################################################################################
+############################################################################################################
+############################################################################################################
+############################################################################################################
+############################################################################################################
+############################################################################################################
+############################################################################################################
+############################################################################################################
+DROP TABLE IF EXISTS finance.reportDeptid;
+Create table finance.reportNullColl AS
+
+
+
+SELECT DEPTID,Department as DeptName from lookup.deptlookup WHERE DEPTID IN 
+(SELECT 	Distinct DeptiD
+        from finance.transWORK
+        WHERE ReportCollege IS NULL);
+;  
+
+
+## VERIFY ASSIGNEMNTS
+DROP TABLE IF EXISTS finance.VerifyHSCAssn;
+Create table finance.VerifyHSCAssn AS
+SELECT 	ReportCollege,
+		Alt_Dept_ID,
+		Fund_Code,
+        Account_Code,
+        Project_Code,
+        TypeFlag,
+        count(*) as N,
+        SUM(Posted_Amount) AS Amount
+from finance.transWORK 
+WHERE ReportCollege NOT LIKE '%Omit%' OR ReportCollege IS Null  
+GROUP BY ReportCollege,
+		 Alt_Dept_ID,
+	 	 Fund_Code,
+         Account_Code,
+         Project_Code,
+         TypeFlag
+ORDER BY ReportCollege,
+		 Alt_Dept_ID,
+	 	 Fund_Code,
+         Account_Code,
+         Project_Code,
+         TypeFlag;
+                 
+Alter table finance.VerifyHSCAssn
+ADD  Department Varchar(45),
+ADD  College varchar(45);
+      
+UPDATE finance.VerifyHSCAssn vh, lookup.deptlookup lu
+SET vh.Department=lu.Department,
+	vh.College=lu.College
+WHERE vh.Alt_Dept_ID=lu.DEPTID;      
+      
+####################################################################################################
+
+select * from finance.transWORK where ReportCollege is Null;
 
 DESC finance.transWORK;
 
@@ -390,47 +542,13 @@ GROUP BY ALt_Dept_ID,
         ReportCollege;
          
  
- 
- 
- 
- 
- 
-      
+       
 DROP TABLE IF EXISTS finance.reportNullColl;
 Create table finance.reportNullColl AS
 SELECT 	*
         from finance.transWORK
         WHERE ReportCollege IS NULL;
 ;      
-
-
-SELECT SFY,ReportCollege,SUM(Posted_Amount) AS Amount
-from finance.transWORK
-WHERE ReportCollege NOT LIKE '%Omit%' OR ReportCollege IS Null
-GROUP BY SFY,ReportCollege
-ORDER BY SFY,ReportCollege;
-
-
-
-
-
-DROP TABLE IF EXISTS finance.reportDeptid;
-Create table finance.reportNullColl AS
-
-
-
-SELECT DEPTID,Department as DeptName from lookup.deptlookup WHERE DEPTID IN 
-(SELECT 	Distinct DeptiD
-        from finance.transWORK
-        WHERE ReportCollege IS NULL);
-;  
-
-
-      
-      
-      
-####################################################################################################
-
 
 
 
