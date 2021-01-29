@@ -21,7 +21,8 @@ WHERE hm.DEPTID=lu.DEPTID;
 ###########################################################################################################################
 ###########################################################################################################################
 ## Assigned report Colleges to Tranaction Files for SFY 2019-2020 and SFY 2020-2021
-
+## USING MATTS MAPPING FILE 
+#############################
 DROP TABLE IF EXISTS finance.transWORK;
 Create table finance.transWORK
 SELECT * from Adhoc.combined_hist_rept
@@ -32,8 +33,8 @@ WHERE Fiscal_Year in (2020,2021);
 
 Alter Table finance.transWORK
 	ADD DeptName	varchar(45),
-	ADD CollAbbr	varchar(12),
-	ADD College	varchar(45),
+    ADD College	varchar(45),
+    Add CollAbbr varchar(10),
 	ADD ReportCollege	varchar(45),
     ADD TypeFlag varchar(25);
     
@@ -41,17 +42,12 @@ Alter Table finance.transWORK
 SET SQL_SAFE_UPDATES = 0;
 
     
-UPDATE finance.transWORK tw, finance.hsc_map lu
-SET tw.DeptName=lu.DeptName,
-	tw.CollAbbr=lu.CollAbbr,
-	tw.College=lu.College,
-	tw.ReportCollege=lu.ReportCollege
+UPDATE finance.transWORK tw, finance.mattmap lu
+SET tw.DeptName=lu.ProgramSupport,
+	tw.College=lu.ProgramSuppCollege,
+	tw.ReportCollege=lu.ProgramSuppCollege
 WHERE tw.Alt_Dept_ID=lu.DeptID; 
 
-drop table finance.temp;
-create table finance.temp as 
-SELECT * from finance.hsc_map
-WHERE DEPTID IN ('29680230','29680231','29680519'); 
 
 
 
@@ -85,7 +81,6 @@ UPDATE finance.transWORK SET TypeFlag="TL"  WHERE Alt_Dept_ID IN ('29680600');
 UPDATE finance.transWORK tw, finance.TL_ProjMap lu
 SET tw.TypeFlag=lu.TypeFlag,
     tw.DeptName=lu.DeptName,
-    tw.CollAbbr=lu.CollAbbr,
     tw.College=lu.ReportCollege,
     tw.ReportCollege=lu.ReportCollege
 WHERE tw.Project_Code=lu.Project_Code;
@@ -100,7 +95,6 @@ UPDATE finance.transWORK SET ReportCollege='OMIT - TL CTSI Main' WHERE Project_C
 UPDATE finance.transWORK tw, finance.tl_depts lu
 SET tw.TypeFlag=lu.TypeFlag,
     tw.DeptName=lu.DeptName,
-    tw.CollAbbr=lu.CollAbbr,
     tw.College=lu.ReportCollege,
     tw.ReportCollege=lu.ReportCollege
 WHERE tw.ALt_Dept_ID=lu.ALt_Dept_ID
@@ -113,8 +107,7 @@ WHERE tw.ALt_Dept_ID=lu.ALt_Dept_ID
 ## GAP  FUNDING
 UPDATE finance.transWORK
  SET DeptName="MD-PEDS-ADMINISTRATION",
-     CollAbbr="MD",
-     College="Medicine",
+      College="Medicine",
      ReportCollege="Medicine"
 where TypeFlag="GAP"; 
 
@@ -195,16 +188,16 @@ UPDATE finance.transWORK Set ReportCollege='OMIT - Project' WHERE Project_Code='
 UPDATE finance.transWORK Set ReportCollege='OMIT - Project' WHERE Project_Code='P0181206' AND Account_Code='420000';
 
 ## KL2 Pay  - Remove Records for Susbitition
-UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt_Dept_ID='29680601' AND Project_Code='P0131093' AND Account_Code='611110' AND ReportCollege IS NULL;
-UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt_Dept_ID='29680601' AND Project_Code='P0131093' AND Account_Code='611120' AND ReportCollege IS NULL;
-UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt_Dept_ID='29680601' AND Project_Code='P0131093' AND Account_Code='612110' AND ReportCollege IS NULL;
-UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt_Dept_ID='29680601' AND Project_Code='P0131093' AND Account_Code='612120' AND ReportCollege IS NULL;
-UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt_Dept_ID='29680601' AND Project_Code='P0131093' AND Account_Code='612310' AND ReportCollege IS NULL;
-UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt_Dept_ID='29680601' AND Project_Code='P0131093' AND Account_Code='612320' AND ReportCollege IS NULL;
-UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt_Dept_ID='29680601' AND Project_Code='P0166289' AND Account_Code='611110' AND ReportCollege IS NULL;
-UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt_Dept_ID='29680601' AND Project_Code='P0166289' AND Account_Code='611120' AND ReportCollege IS NULL;
-UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt_Dept_ID='29680601' AND Project_Code='P0166289' AND Account_Code='612110' AND ReportCollege IS NULL;
-UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt_Dept_ID='29680601' AND Project_Code='P0166289' AND Account_Code='612120' AND ReportCollege IS NULL;
+UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt_Dept_ID='29680601' AND Project_Code='P0131093' AND Account_Code='611110';
+UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt_Dept_ID='29680601' AND Project_Code='P0131093' AND Account_Code='611120';
+UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt_Dept_ID='29680601' AND Project_Code='P0131093' AND Account_Code='612110';
+UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt_Dept_ID='29680601' AND Project_Code='P0131093' AND Account_Code='612120';
+UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt_Dept_ID='29680601' AND Project_Code='P0131093' AND Account_Code='612310';
+UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt_Dept_ID='29680601' AND Project_Code='P0131093' AND Account_Code='612320';
+UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt_Dept_ID='29680601' AND Project_Code='P0166289' AND Account_Code='611110';
+UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt_Dept_ID='29680601' AND Project_Code='P0166289' AND Account_Code='611120';
+UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt_Dept_ID='29680601' AND Project_Code='P0166289' AND Account_Code='612110';
+UPDATE finance.transWORK SET ReportCollege='OMIT - KL2 Pay Substitite' WHERE Alt_Dept_ID='29680601' AND Project_Code='P0166289' AND Account_Code='612120';
 
 
 ###  Matts Expense Elimination  Redundant with PIvot Table
@@ -237,14 +230,7 @@ Update finance.transWORK SET ReportCollege='OFFICE OF STUDENT AFFAIRS' WHERE Rep
 Update finance.transWORK SET ReportCollege='Student Affairs' WHERE ReportCollege IN ('OFFICE OF STUDENT AFFAIRS','GRADUATE SCHOOL');
 UPDATE finance.transWORK SET Grant_year="Year 1-R" WHERE Grant_YEAR="Year 4/10 Gap";
 
-### ASSIGN MISSING DEPTID
-UPDATE finance.transWORK tw, finance.fix1 lu
-SET tw.DeptName=lu.DeptName,
-    tw.CollAbbr=lu.CollAbbr,
-    tw.College=lu.ReportCollege,
-    tw.ReportCollege=lu.ReportCollege
-WHERE tw.DeptID=lu.DeptID
-AND tw.ReportCollege is NULL  ;  
+ 
 
 ### FROM MATTS NOTE 1-20-2021
 UPDATE finance.transWORK SET ReportCollege='HSC Library' , DeptName='' WHERE ALT_DEPT_ID='29680246' AND Project_Code='P0122563' AND  Account_Code='734260' AND ReportCollege IS NULL;
@@ -335,12 +321,78 @@ UPDATE finance.transWORK SET ReportCollege='OMIT - TL Adjustment' WHERE Alt_Dept
 #########################################################################################################################################################
 #########################################################################################################################################################
 #########################################################################################################################################################
-29680230, 29680231, 29680519 
+
 
 
 ################################################# CHECK
 SELECT ReportCollege, COUNT(*) as N, Sum(Posted_Amount) AS Amount  from finance.transWORK WHERE ReportCollege LIKE '%OMIT%' OR ReportCollege is Null GROUP BY  ReportCollege ;
 SELECT ReportCollege, COUNT(*) as N  from finance.transWORK WHERE ReportCollege NOT LIKE '%OMIT%' OR  ReportCollege is Null  GROUP BY  ReportCollege ;
+
+###############################################################################
+###############################################################################
+####SUMMARY TABLE
+
+select count(*) from finance.transWORK Where ReportCollege is Null;
+
+
+Drop TABLE IF Exists finance.AllMapSFY;
+Create table finance.AllMapSFY AS
+SELECT 
+	SFY,
+	ReportCollege,
+	TypeFlag,
+	Count(*) AS nTrans,
+	SUM(Posted_Amount) as Posted_Amount
+from finance.transWORK
+WHERE (ReportCollege NOT LIKE "%OMIT%") OR (ReportCollege is Null)
+Group BY SFY,
+	     ReportCollege,
+	     TypeFlag;
+
+UPDATE finance.AllMapSFY SET ReportCollege="***UNDEFINED***" WHERE ReportCollege IS NULL ;       
+         
+select count(*) from finance.transWORK WHERE  ReportCollege is Null;          
+         
+Drop TABLE IF Exists finance.AllMapOut;
+Create table finance.AllMapOut AS
+SELECT ReportCollege, TypeFlag 
+FROM finance.AllMapSFY
+GROUP BY ReportCollege, TypeFlag;  
+
+Alter table finance.AllMapOut
+ADD n2020 int(6),
+ADD Amount2020 Decimal(65,10),
+ADD n2021 int(6),
+ADD Amount2021 Decimal(65,10);
+
+UPDATE finance.AllMapOut mo, finance.AllMapSFY lu
+SET 	mo.n2020=lu.nTrans,
+		mo.Amount2020= Posted_Amount
+WHERE mo.ReportCollege=lu.ReportCollege
+  AND mo.TypeFlag=lu.TypeFlag
+  AND lu.SFY='SFY 2019-2020';
+
+UPDATE finance.AllMapOut mo, finance.AllMapSFY lu
+SET 	mo.n2021=lu.nTrans,
+		mo.Amount2021= Posted_Amount
+WHERE mo.ReportCollege=lu.ReportCollege
+  AND mo.TypeFlag=lu.TypeFlag
+  AND lu.SFY='SFY 2020-2021';
+
+select * from finance.AllMapOut;
+
+
+
+SELECT 	ReportCollege,
+		Sum(n2020) as n2020,
+        Sum(Amount2020) as Amount2020,
+        SUM(n2021) as n2021,
+        Sum(Amount2021) as Amount2021
+from finance.AllMapOut
+GROUP BY ReportCollege  ;      
+
+
+select * from finance.CollSFYSumm;
 
 
 ##########################################################################################################
@@ -352,7 +404,7 @@ DROP TABLE IF EXISTS finance.SFYbyCOLL;
 create table finance.SFYbyCOLL AS
 SELECT SFY,ReportCollege,SUM(Posted_Amount) AS Amount
 from finance.transWORK
-WHERE ReportCollege NOT LIKE '%Omit%' OR ReportCollege IS Null
+WHERE ReportCollege NOT LIKE '%Omit%' #OR ReportCollege IS Null
 GROUP BY SFY,ReportCollege
 ORDER BY SFY,ReportCollege;
 
@@ -374,6 +426,15 @@ UPDATE finance.CollSFYSumm cs, finance.SFYbyCOLL lu
 SET cs.SFY_2020_2021=lu.Amount
 WHERE lu.SFY='SFY 2020-2021'
 AND cs.ReportCollege=lu.ReportCollege;
+
+
+SELECT 	ReportCollege,
+		Sum(n2020) as n2020,
+        Sum(Amount2020) as Amount2020,
+        SUM(n2021) as n2021,
+        Sum(Amount2021) as Amount2021
+from finance.CollSFYSumm
+GROUP BY ReportCollege        
 
 
 select * from finance.CollSFYSumm;
