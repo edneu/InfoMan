@@ -14,4 +14,4 @@ SET mm.Department=lu.Department,
 Where  mm.DEPTID=lu.DEPTID; 
 
   
-    
+select distinct ReportCollege from finance.hsc_map    ;
