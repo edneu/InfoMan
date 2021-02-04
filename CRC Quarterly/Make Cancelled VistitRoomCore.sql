@@ -20,7 +20,7 @@ Select 	"OutPatient" AS VisitType,
         BED as BedID,
         PATIENT AS PatientID
 from ctsi_webcamp_pr.opvisit
-WHERE STATUS=2 
+#WHERE STATUS=2 
 UNION ALL
 Select 	"Inpatient" AS VisitType,
 		UNIQUEFIELD AS VisitID,
@@ -134,20 +134,20 @@ SET vt.SFY=lu.SFY,
 	vt.Quarter=lu.Quarter
 WHERE vt.Month=lu.Month;    
 
-
+select distinct MOnth from ctsi_webcamp_adhoc.visitcore;
 /*
 select VisitStart,VisitEnd,TIMESTAMPDIFF(MINUTE,VisitStart,VisitEnd)
 FROM ctsi_webcamp_adhoc.visitcore;
 
-SELECT * from ctsi_webcamp_adhoc.visitcore;
+SELECT * from ctsi_webcamp_adhoc.visitcore where MOnth="2021-02";
 desc ctsi_webcamp_adhoc.visitcore;
 */		
 ## DATE FILTER
 ## Only Completed Visits
-DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE VisitStatus<>2;
+###DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE VisitStatus not in (1,2);
 ## DATE FILTERS
-DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE VisitStart<str_to_date('01,01,2016','%m,%d,%Y');  
-DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE VisitStart>CURDATE();     
+##DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE VisitStart<=str_to_date('02,01,2021','%m,%d,%Y');  
+###DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE VisitStart>CURDATE();     
 #Select * FROM ctsi_webcamp_adhoc.visitcore;  
 
 
@@ -328,7 +328,7 @@ WHERE cs.CoreSvcProtocolID=ar.PROTOCOL
   AND cs.LabTestID=ar.LABTEST;
 
 # KEEP ONLY THE COMPLETE VISITS
-DELETE FROM ctsi_webcamp_adhoc.CoreSvcLU WHERE CoreSvcStatus<>2;
+#DELETE FROM ctsi_webcamp_adhoc.CoreSvcLU WHERE CoreSvcStatus<>2;
 
 /*
 SELECT * from ctsi_webcamp_adhoc.CoreSvcLU;
@@ -470,7 +470,23 @@ DELETE FROM ctsi_webcamp_adhoc.VisitRoomCore where CoreSvcID is null;
 ## END OF FILE CREATION
 #######################################################################################
 #######################################################################################
-#######################################################################################
+
+DROP TABLE ctsi_webcamp_adhoc.Feb2021;
+Create table ctsi_webcamp_adhoc.Feb2021 AS
+SELECT Month,
+       Count(distinct VisitID) as nVisits,
+       Count(Distinct ProtocolID) as nProtocols,
+       SUM(VisitLenMin) AS VisitMinutes,
+       SUM(AMOUNT) AS AMOUNT
+ FROM ctsi_webcamp_adhoc.VisitRoomCore
+ WHERE Month IN ('2020-07','2020-08','2020-09','2020-10','2020-11','2020-12','2021-01','2021-02','2021-03','2021-04','2021-05','2021-06')
+ GROUP BY 	MOnth;
+			
+
+select max(VISITDATE) FROM ctsi_webcamp_pr.opvisit;
+
+
+
 #######################################################################################
 USE ctsi_webcamp_adhoc
 
