@@ -472,7 +472,7 @@ DELETE FROM ctsi_webcamp_adhoc.VisitRoomCore where CoreSvcID is null;
 #######################################################################################
 #######################################################################################
 #######################################################################################
-USE ctsi_webcamp_adhoc
+
 
 DROP TABLE UTIL_BY_ROOM_MOnth;
 Create table UTIL_BY_ROOM_MOnth AS
@@ -556,7 +556,106 @@ UNION ALL
 SELECT "First CoreSvc Date" AS DescMeasure, min(CoreSvcStart) As Measure from ctsi_webcamp_adhoc.VisitRoomCore
 UNION ALL
 SELECT "Last CoreSvc Date" AS DescMeasure, max(CoreSvcEnd) As Measure from ctsi_webcamp_adhoc.VisitRoomCore;
+############################################################################################################################
+############################################################################################################################
+drop table if exists ctsi_webcamp_adhoc.ptrack;
+create table ctsi_webcamp_adhoc.ptrack as
+SELECT *
+FROM ctsi_webcamp_adhoc.VisitRoomCore
+WHERE VisitStart>=str_to_date('09,01,2019','%m,%d,%Y');
 
+drop table if exists ctsi_webcamp_adhoc.MonVistProtocol;
+create table ctsi_webcamp_adhoc.MonVistProtocol as
+SELECT  CRCNumber,
+		ProtocolID,
+        PI_NAME,
+        Title
+from ctsi_webcamp_adhoc.ptrack
+WHERE PI_NAME IS NOT NULL
+GROUP BY  CRCNumber,
+		ProtocolID,
+        PI_NAME,
+        Title  ;       
+
+drop table if exists ctsi_webcamp_adhoc.MonProtLU;
+create table ctsi_webcamp_adhoc.MonProtLU as
+SELECT ProtocolID,
+	   Month,
+       count(distinct VisitID) as nVisits
+from ctsi_webcamp_adhoc.ptrack
+GROUP BY  ProtocolID,
+	      Month;      
+          
+ALter table ctsi_webcamp_adhoc.MonVistProtocol
+    ADD m_2019_09 int(6),
+    ADD m_2019_10 int(6),    
+    ADD m_2019_11 int(6),
+    ADD m_2019_12 int(6),
+    ADD m_2020_01 int(6),
+    ADD m_2020_02 int(6),
+    ADD m_2020_03 int(6),
+    ADD m_2020_04 int(6),
+    ADD m_2020_05 int(6),
+    ADD m_2020_06 int(6),
+    ADD m_2020_07 int(6),
+    ADD m_2020_08 int(6),
+    ADD m_2020_09 int(6),
+    ADD m_2020_10 int(6),
+    ADD m_2020_11 int(6),
+    ADD m_2020_12 int(6),
+    ADD m_2021_01 int(6),
+    ADD m_2021_02 int(6);
+
+
+UPDATE ctsi_webcamp_adhoc.MonVistProtocol
+SET  m_2019_09=0,
+     m_2019_10=0,
+     m_2019_11=0,
+     m_2019_12=0,
+     m_2020_01=0,
+     m_2020_02=0,
+     m_2020_03=0,
+     m_2020_04=0,
+     m_2020_05=0,
+     m_2020_06=0,
+     m_2020_07=0,
+     m_2020_08=0,
+     m_2020_09=0,
+     m_2020_10=0,
+     m_2020_11=0,
+     m_2020_12=0,
+     m_2021_01=0,
+     m_2021_02=0;
+     
+  
+
+UPDATE ctsi_webcamp_adhoc.MonVistProtocol pm, ctsi_webcamp_adhoc.MonProtLU lu SET pm.m_2019_09=lu.nVisits WHERE lu.Month='2019-09' and pm.ProtocolID=lu.ProtocolID;
+UPDATE ctsi_webcamp_adhoc.MonVistProtocol pm, ctsi_webcamp_adhoc.MonProtLU lu SET pm.m_2019_10=lu.nVisits WHERE lu.Month='2019-10' and pm.ProtocolID=lu.ProtocolID;
+UPDATE ctsi_webcamp_adhoc.MonVistProtocol pm, ctsi_webcamp_adhoc.MonProtLU lu SET pm.m_2019_11=lu.nVisits WHERE lu.Month='2019-11' and pm.ProtocolID=lu.ProtocolID;
+UPDATE ctsi_webcamp_adhoc.MonVistProtocol pm, ctsi_webcamp_adhoc.MonProtLU lu SET pm.m_2019_12=lu.nVisits WHERE lu.Month='2019-12' and pm.ProtocolID=lu.ProtocolID;
+UPDATE ctsi_webcamp_adhoc.MonVistProtocol pm, ctsi_webcamp_adhoc.MonProtLU lu SET pm.m_2020_01=lu.nVisits WHERE lu.Month='2020-01' and pm.ProtocolID=lu.ProtocolID;
+UPDATE ctsi_webcamp_adhoc.MonVistProtocol pm, ctsi_webcamp_adhoc.MonProtLU lu SET pm.m_2020_02=lu.nVisits WHERE lu.Month='2020-02' and pm.ProtocolID=lu.ProtocolID;
+UPDATE ctsi_webcamp_adhoc.MonVistProtocol pm, ctsi_webcamp_adhoc.MonProtLU lu SET pm.m_2020_03=lu.nVisits WHERE lu.Month='2020-03' and pm.ProtocolID=lu.ProtocolID;
+UPDATE ctsi_webcamp_adhoc.MonVistProtocol pm, ctsi_webcamp_adhoc.MonProtLU lu SET pm.m_2020_04=lu.nVisits WHERE lu.Month='2020-04' and pm.ProtocolID=lu.ProtocolID;
+UPDATE ctsi_webcamp_adhoc.MonVistProtocol pm, ctsi_webcamp_adhoc.MonProtLU lu SET pm.m_2020_05=lu.nVisits WHERE lu.Month='2020-05' and pm.ProtocolID=lu.ProtocolID;
+UPDATE ctsi_webcamp_adhoc.MonVistProtocol pm, ctsi_webcamp_adhoc.MonProtLU lu SET pm.m_2020_06=lu.nVisits WHERE lu.Month='2020-06' and pm.ProtocolID=lu.ProtocolID;
+UPDATE ctsi_webcamp_adhoc.MonVistProtocol pm, ctsi_webcamp_adhoc.MonProtLU lu SET pm.m_2020_07=lu.nVisits WHERE lu.Month='2020-07' and pm.ProtocolID=lu.ProtocolID;
+UPDATE ctsi_webcamp_adhoc.MonVistProtocol pm, ctsi_webcamp_adhoc.MonProtLU lu SET pm.m_2020_08=lu.nVisits WHERE lu.Month='2020-08' and pm.ProtocolID=lu.ProtocolID;
+UPDATE ctsi_webcamp_adhoc.MonVistProtocol pm, ctsi_webcamp_adhoc.MonProtLU lu SET pm.m_2020_09=lu.nVisits WHERE lu.Month='2020-09' and pm.ProtocolID=lu.ProtocolID;
+UPDATE ctsi_webcamp_adhoc.MonVistProtocol pm, ctsi_webcamp_adhoc.MonProtLU lu SET pm.m_2020_10=lu.nVisits WHERE lu.Month='2020-10' and pm.ProtocolID=lu.ProtocolID;
+UPDATE ctsi_webcamp_adhoc.MonVistProtocol pm, ctsi_webcamp_adhoc.MonProtLU lu SET pm.m_2020_11=lu.nVisits WHERE lu.Month='2020-11' and pm.ProtocolID=lu.ProtocolID;
+UPDATE ctsi_webcamp_adhoc.MonVistProtocol pm, ctsi_webcamp_adhoc.MonProtLU lu SET pm.m_2020_12=lu.nVisits WHERE lu.Month='2020-12' and pm.ProtocolID=lu.ProtocolID;
+UPDATE ctsi_webcamp_adhoc.MonVistProtocol pm, ctsi_webcamp_adhoc.MonProtLU lu SET pm.m_2021_01=lu.nVisits WHERE lu.Month='2021-01' and pm.ProtocolID=lu.ProtocolID;
+UPDATE ctsi_webcamp_adhoc.MonVistProtocol pm, ctsi_webcamp_adhoc.MonProtLU lu SET pm.m_2021_02=lu.nVisits WHERE lu.Month='2021-02' and pm.ProtocolID=lu.ProtocolID;
+
+
+
+
+
+
+
+         
+select distinct Month from  ctsi_webcamp_adhoc.MonProtLU;         
 #######################################################################################
 #######################################################################################
 ##### Diagnostics

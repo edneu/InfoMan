@@ -260,7 +260,8 @@ WHERE Alt_Dept_ID IS NULL;
 ALTER TABLE loaddata.newtranshist 	ADD DupFlag int(1),
 									ADD	DupKEY varchar(4000);
 
-
+ALTER TABLE Adhoc.combined_hist_rept ADD DupFlag int(1),
+									ADD	DupKEY varchar(4000);
 
 desc loaddata.newtranshist;
 
@@ -480,7 +481,7 @@ select CTSI_Fiscal_Year,min(Journal_Date),max(Journal_Date),count(*) from Adhoc.
 ##################################################################################################################
 ##### BACKUP AND RENAME
 /*
-CREATE TABLE Adhoc.comb_hist_report20201201BU AS
+CREATE TABLE Adhoc.comb_hist_report20210309BU AS
 SELECT * from Adhoc.combined_hist_rept;
 
 drop table if exists Adhoc.combined_hist_rept;

@@ -7,7 +7,7 @@
 
 select "Combined Hist" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from Adhoc.combined_hist_rept
 UNION ALL
-select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from Adhoc.allandsecim202001;
+select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from loaddata.newtranshist;
 
 
 
@@ -19,7 +19,7 @@ select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(J
 
 drop table if exists loaddata.newtranshist;
 Create table loaddata.newtranshist as
-SELECT * from Adhoc.allandsecim202001;
+SELECT * from loaddata.newtrasnhist;
 
 
 ALTER TABLE loaddata.newtranshist	ADD UnDupFlag int(1),
@@ -44,6 +44,8 @@ SET DupKEY=TRIM(CONCAT(
 		Trim(Journal_Date),
 		Trim(round(Posted_Amount,2)))
 );
+
+ALTER TABLE loaddata.newtranshist Change newtrasnhist_id  newtranshist_id int(11);
 
 SELECT count(*),COUNT(DISTINCT DupKEY) from loaddata.newtranshist;
 
@@ -221,7 +223,64 @@ SELECT
 	Posted_Amount
 from loaddata.newtranshist 
 ;
+desc combined_hist_rept;
 
+
+drop table if exists Adhoc.combined_hist_rept_NEW;
+create table Adhoc.combined_hist_rept_NEW AS
+select 
+	combined_hist_rept_id,
+	Transaction_Detail,
+	TransMonth,
+    DeptID,
+	Alt_Dept_ID,
+    ##DeptID_Desc,
+	Fund_Code,
+	Program_Code,
+	Source_of_Funds_Code,
+	Flex_Code,
+	Project_Code,
+	ERP_Account_Level_4,
+	Account_Code,
+	Doc_Desc,
+	Doc_Detail,
+	Encumbrance_Description,
+	Journal_ID,
+	Journal_Date,
+	Fiscal_Year,
+    Accounting_Period,
+    Grant_Year,
+	CTSI_Fiscal_Year,
+	Posted_Amount
+ from Adhoc.combined_hist_rept
+ WHERE Fiscal_Year<>2021
+UNION ALL 
+SELECT 
+	newtranshist_id AS combined_hist_rept_id,
+	Transaction_Detail,
+	TransMonth,
+    DeptID,
+	Alt_Dept_ID,
+    ##DeptID_Desc,
+	Fund_Code,
+	Program_Code,
+	Source_of_Funds_Code,
+	Flex_Code,
+	Project_Code,
+	ERP_Account_Level_4,
+	Account_Code,
+	Doc_Desc,
+	Doc_Detail,
+	Encumbrance_Description,
+	Journal_ID,
+	Journal_Date,
+	Fiscal_Year,
+    Accounting_Period,
+    Grant_Year,
+	CTSI_Fiscal_Year,
+	Posted_Amount
+from loaddata.newtranshist ;
+;
 
 
 
@@ -232,8 +291,9 @@ from loaddata.newtranshist
 
 SELECT "Previous Combined File"  as Measure, COUNT(*) as N from Adhoc.combined_hist_rept
 UNION ALL
-SELECT "New File Total N"  as Measure, COUNT(*) as N from loaddata.newtranshist;
-
+SELECT "New File Total N"  as Measure, COUNT(*) as N from loaddata.newtranshist
+UNION ALL
+SELECT "New Combined File"  as Measure, COUNT(*) as N from Adhoc.combined_hist_rept_NEW;
 
 
 

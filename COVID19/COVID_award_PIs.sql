@@ -40,3 +40,4 @@ delete from work.covidinvud where Email is NULL;
    ##work.email
 select * from work.covidinvud; 
 
+select * from lookup.ufids where UF_EMAIL like "Cpb@%";

@@ -3,7 +3,7 @@
 
 DROP TABLE IF EXISTS work.pymatch ;
 Create table work.pymatch AS
-Select * from work.payrollmatchjan21;
+Select * from work.payrollmatchfeb21;
 
 select distinct Source from  work.pymatch;
 
@@ -47,7 +47,14 @@ UPDATE work.pyxmatch pm, work.pymatch lu SET MD_PHD=1 WHERE pm.UFID=lu.UFID AND 
 UPDATE work.pyxmatch pm, work.pymatch lu SET OCR=1 WHERE pm.UFID=lu.UFID AND lu.Source="OCR";
 UPDATE work.pyxmatch pm, work.pymatch lu SET CERHB=1 WHERE pm.UFID=lu.UFID AND lu.Source="CERHB";
 ##UPDATE work.pyxmatch pm, work.pymatch lu SET NETWORK=1 WHERE pm.UFID=lu.UFID AND lu.Source="NETWORK";
-UPDATE work.pyxmatch SET On_Payroll= CTSI+SECIM+MD_PHD+OCR+CERHB+NETWORK;
+UPDATE work.pyxmatch SET On_Payroll= CTSI+SECIM+MD_PHD+OCR+CERHB;
 ##UPDATE work.pyxmatch SET On_Payroll= 1 WHERE (CTSI+SECIM+MD_PHD+OCR+CERHB)>0;
 
 select *  from work.pyxmatch;
+
+
+Alter table work.pyxmatch ADD HomeDeptID varchar(15);
+
+UPDATE work.pyxmatch pm, work.assisthomedept lu
+SET pm.HomeDeptID=lu.Home_Dept_ID
+WHERE pm.UFID=lu.UFID;
