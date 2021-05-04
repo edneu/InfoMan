@@ -36,6 +36,3 @@ WHERE UNIQUEFIELD IN
    Select count(distinct VisitID) aS nIPVisits from ctsi_webcamp_adhoc.vrcRPPR WHERE VisitType="Inpatient";   
    
    
-## OVERNIGHT
-   Select count(distinct VisitID) aS nOvernight from ctsi_webcamp_adhoc.vrcRPPR 
-	where VisitLenMin>1440;   

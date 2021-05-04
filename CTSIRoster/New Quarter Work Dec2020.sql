@@ -5,7 +5,7 @@ group by Year;
 DESC brian.rosterwrk_clean;
 
 create table work.rosterstr as 
-Select * from  loaddata.q42019_roster  limit 10;
+Select * from  loaddata.q4_2020_roster  limit 10;
 desc loaddata.q42019_roster;
 desc lookup.roster;
 
@@ -40,7 +40,7 @@ DROP TABLE IF EXISTS loaddata.roster;
 CREATE TABLE loaddata.roster
 SELECT rosterwrk_clean_id AS rosterid,
        Space(1) AS Roster_Key,
-       Year AS Year,
+       2020 AS Year,
        " " AS STD_PROGRAM,
        UFID AS UFID,
        LastName AS LastName,
@@ -75,7 +75,7 @@ SELECT rosterwrk_clean_id AS rosterid,
        " " AS CTSA_Award,
        " " AS UserClass,
        " " as ReportRole
-from brian.rosterwrk_clean;
+from loaddata.q4_2020_roster;
 
 
 
@@ -183,12 +183,12 @@ select * from work.roster_additions;
 Alter table work.roster_additions modify Rosterid int(11);
 
 select max(rosterid)+1 from lookup.roster;
-
      SET SQL_SAFE_UPDATES = 0;
       UPDATE work.roster_additions SET rosterid = 0 ;
       SELECT @i:=(select max(rosterid) from lookup.roster);
       UPDATE work.roster_additions SET rosterid = @i:=@i+1;
      SET SQL_SAFE_UPDATES = 1;
+
 
 select * from work.roster_additions;
 
@@ -289,6 +289,14 @@ select distinct FacultyType from work.roster_additions;
 
 select * from lookup.Employees where Employee_id='69663436';
 
+select FacType,count(*) from work.roster_additions group by FacType;
+
+UPDATE work.roster_additions
+SET Faculty='Non-Faculty',
+	FacType='Non-Faculty',
+	FacultyType='N/A'
+WHERE FacType is Null;
+
 
 
 select distinct FacultyType from lookup.roster;
@@ -357,6 +365,9 @@ UPDATE work.roster_additions SET  FacType = 'N/A' where FacType is Null;
        WHERE Faculty="Faculty";
 
 
+
+
+ALTER TABLE work.roster_additions DROP Rept_Program2, DROP Report_Program;
 ###############################################################################
 ###############################################################################
 #########################   EOF   #############################################
@@ -364,7 +375,7 @@ UPDATE work.roster_additions SET  FacType = 'N/A' where FacType is Null;
 ###############################################################################
 
 /*
-create table loaddata.rosterBU20201217 AS select * from lookup.roster;
+create table loaddata.rosterBU20200408 AS select * from lookup.roster;
 
 DESC lookup.roster;
 DESC work.roster_additions;
@@ -380,11 +391,24 @@ SELECT * FROM  work.roster_additions ;
 
 desc lookup.roster;
 
+desc  work.roster_additions ;;
+
+
+
+
+
+
+desc lookup.roster;
+
 Alter table work.roster_additions ADD ReportRole varchar(45);
  ;
 
 select max(rosterid) from loaddata.newroster;
 */
+
+SELECT Report_Program,Rept_Program2,Rept_Program, count(*) from work.roster_additions group by Report_Program,Rept_Program2,Rept_Program ;
+
+
 #### VERIFY rosterid Assignment
      select "Max Roster ID Lookup.roster" AS Metric,max(rosterid) as val from lookup.roster
       UNION ALL
@@ -398,8 +422,8 @@ select max(rosterid) from loaddata.newroster;
      
 /*
 
-drop table if exists loaddata.rosterq32019BU; 
-create table loaddata.roster20201217BU as select * from lookup.roster;
+
+
 
 drop table lookup.roster; 
 create table lookup.roster as

@@ -3,26 +3,35 @@
 #### ACTIVE PROTOCOLS BY YEAR
 drop table if exists ctsi_webcamp_adhoc.protocolTMP;
 CREATE TABLE ctsi_webcamp_adhoc.protocolTMP AS
-    SELECT Year(VISITDATE) AS ActYear,
-           PROTOCOL,
-            "OPVisit" AS VisitType 
+    SELECT  PROTOCOL,
+            "OPVisit" AS VisitType ,
+            Count(DISTINCT VISITID) as nVISITS
       FROM ctsi_webcamp_pr.OPVISIT 
       WHERE PROTOCOL IS NOT NULL 
-       AND STATUS IN (2,3)
+            AND VISITDATE >= str_to_date('03,1,2020','%m,%d,%Y')
+            AND VISITDATE <= str_to_date ('02,28,2021','%m,%d,%Y')
+            AND STATUS IN (2,3)
+       GROUP BY Protocol, VisitType
      UNION ALL
-    SELECT Year(ADMITDATE) as ActYear,
-           PROTOCOL,
-           "IPVisit" AS VisitType  
+    SELECT  PROTOCOL,
+           "IPVisit" AS VisitType,
+           Count(DISTINCT VISITID) as nVISITS
       FROM ctsi_webcamp_pr.ADMISSIO 
       WHERE PROTOCOL IS NOT NULL 
+      AND ADMITDATE >= str_to_date('03,1,2020','%m,%d,%Y')
+      AND ADMITDATE <= str_to_date ('02,28,2021','%m,%d,%Y')
        AND STATUS IN (2,3) 
+          GROUP BY "IPVisit", VisitType 
     UNION ALL
-    SELECT Year(ADMITDATE) as ActYear,
-           PROTOCOL,
-          "SBVisit" AS VisitType 
+    SELECT PROTOCOL,
+           "SBVisit" AS VisitType ,
+            Count(DISTINCT VISITID) as nVISITS
       FROM ctsi_webcamp_pr.SBADMISSIO 
      WHERE PROTOCOL IS NOT NULL 
-       AND STATUS IN (2,3) 
+      AND ADMITDATE >= str_to_date('03,1,2020','%m,%d,%Y')
+      AND ADMITDATE <= str_to_date ('02,28,2021','%m,%d,%Y')
+       AND STATUS IN (2,3)
+        GROUP BY "SBVisit", VisitType
 ;
 
 select ActYear,

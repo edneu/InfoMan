@@ -56,7 +56,12 @@ Where FacType IN ('Associate Professor','Professor','Assistant Professor')
 GROUP BY year,
 		FacType;
         
-        
+  
+Select 	FacType,
+		count(distinct Person_key) as Undup
+From lookup.roster         
+Where FacType IN ('Associate Professor','Professor','Assistant Professor')
+Group by FacType;
         
         
  DROP TABLE IF exists results.YearFacOut;
@@ -90,11 +95,23 @@ Select * from results.YearFacOut;
 
 
 ################################################################
+
+SELECT count(distinct Person_key) as Undup
+FROM lookup.roster 
+Where Faculty="Faculty";
+
+
+
+
+
 SELECT Year,count(distinct Person_key) as Undup
 FROM lookup.roster 
 Where Faculty="Non-Faculty"
 GROUP BY Year;
 
+SELECT count(distinct Person_key) as Undup
+FROM lookup.roster 
+Where Faculty="Non-Faculty";
 
 
 Select 	FacType,

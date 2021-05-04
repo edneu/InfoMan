@@ -13,7 +13,7 @@ drop table work.pubmed_raw;
 
 
 Alter table work.pubmed_raw
-ADD Citation varchar(4000),
+ADD Citation Text,
 ADD PMID varchar(12),
 ADD PMCID varchar(12);
 
@@ -47,9 +47,10 @@ SET SQL_SAFE_UPDATES = 1;
 ##### MAKE Pubmed Output file
 DROP TABLE IF EXISTS work.PubmedOUT;
 create table work.PubmedOUT as
-select 
+select
 PMID,PMCID,Citation from 
 work.pubmed_raw
+##where Citation like "%COVID%"
 order by PMID;
 
 

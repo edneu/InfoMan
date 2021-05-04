@@ -7,7 +7,7 @@
 
 select "Combined Hist" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from Adhoc.combined_hist_rept
 UNION ALL
-select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from loaddata.newtranshist;
+select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from loaddata.newtranshist202104;
 
 
 
@@ -19,7 +19,7 @@ select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(J
 
 drop table if exists loaddata.newtranshist;
 Create table loaddata.newtranshist as
-SELECT * from loaddata.newtrasnhist;
+SELECT * from loaddata.newtranshist202104;
 
 
 ALTER TABLE loaddata.newtranshist	ADD UnDupFlag int(1),
@@ -45,7 +45,7 @@ SET DupKEY=TRIM(CONCAT(
 		Trim(round(Posted_Amount,2)))
 );
 
-ALTER TABLE loaddata.newtranshist Change newtrasnhist_id  newtranshist_id int(11);
+##ALTER TABLE loaddata.newtranshist Change newtrasnhist_id  newtranshist_id int(11);
 
 SELECT count(*),COUNT(DISTINCT DupKEY) from loaddata.newtranshist;
 
@@ -183,6 +183,7 @@ UPDATE loaddata.newtranshist
 SET Alt_Dept_ID=DeptID
 WHERE Alt_Dept_ID IS NULL;
 
+select * from  loaddata.newtranshist  where Alt_Dept_ID is null;
 
 
 ##################################################
@@ -311,7 +312,7 @@ select CTSI_Fiscal_Year,min(Journal_Date),max(Journal_Date),count(*) from Adhoc.
 ##################################################################################################################
 ##### BACKUP AND RENAME
 /*
-CREATE TABLE Adhoc.comb_hist_report20210104BU AS
+CREATE TABLE Adhoc.comb_hist_report20210405BU AS
 SELECT * from Adhoc.combined_hist_rept;
 
 drop table if exists Adhoc.combined_hist_rept;
