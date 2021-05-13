@@ -660,5 +660,13 @@ select distinct Month from  ctsi_webcamp_adhoc.MonProtLU;
 #######################################################################################
 ##### Diagnostics
 
+DROP TABLE IF EXISTS ctsi_webcamp_adhoc.CRCSumm;
+Create table ctsi_webcamp_adhoc.CRCSumm AS 
 
-
+SELECT 	Year(VisitStart) as Year,
+	    Count(distinct ProtocolID) as nProtocols,
+        Count(distinct PIPersonID) as nPIs,
+        Count(distinct VisitID) as nVisits,
+        Count(distinct PatientID) as nPatients
+from ctsi_webcamp_adhoc.visitroomcore
+GROUP BY Year(VisitStart);

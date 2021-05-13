@@ -102,5 +102,7 @@ select distinct JobTitle from work.NIHRank;
 
 select distinct FacRank from work.NIHRank;
 
+select FacRank,sum(Direct) as Direct, Sum(INDIRECT) as INDIRECT, SUM(Total) as NIH_TOTAL from work.NIHRank Group by FacRank;
+
 
 
