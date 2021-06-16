@@ -3,8 +3,7 @@
 **  /TYPE=ODBC
 **  /CONNECT='DSN=DSP Click IS BASE;Description=Sponsored Program PS '+
 **    'Views;UID=;Trusted_Connection=Yes;APP=IBM SPSS Products: Statistics '+
-**    'Common;WSID=FCTR-3236-W2;DATABASE=IS_BaseData'.
-  
+**    'Common;WSID=FCTR-3236-
 
 COMPUTE COVID_Flag=0.
 EXECUTE.
@@ -21,6 +20,7 @@ EXECUTE.
 FREQUENCIES VARIABLES=COVID_Flag   /ORDER=ANALYSIS.
 
 
+
 FILTER OFF.
 USE ALL.
 SELECT IF (COVID_Flag=1).
@@ -29,7 +29,7 @@ EXECUTE.
 
 
 
-SAVE TRANSLATE OUTFILE='V:\Projects\EdNeu\COVID 19 Task Force\COVID-19 UFirst Proposal Detail 20210512.xlsx'
+SAVE TRANSLATE OUTFILE='V:\Projects\EdNeu\COVID 19 Task Force\COVID-19 UFirst Proposal Detail 20210616.xlsx'
   /TYPE=XLS
   /VERSION=12
   /MAP
@@ -62,3 +62,5 @@ COVID_Flag.
 
 
 
+W2;DATABASE=IS_BaseData'.
+  

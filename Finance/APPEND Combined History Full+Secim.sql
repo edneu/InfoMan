@@ -7,7 +7,7 @@
 
 select "Combined Hist" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from Adhoc.combined_hist_rept
 UNION ALL
-select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from loaddata.newtranshist202104;
+select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from loaddata.newtranshist202105;
 
 
 
@@ -19,7 +19,7 @@ select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(J
 
 drop table if exists loaddata.newtranshist;
 Create table loaddata.newtranshist as
-SELECT * from loaddata.newtranshist202104;
+SELECT * from loaddata.newtranshist202105;
 
 
 ALTER TABLE loaddata.newtranshist	ADD UnDupFlag int(1),
@@ -48,6 +48,9 @@ SET DupKEY=TRIM(CONCAT(
 ##ALTER TABLE loaddata.newtranshist Change newtrasnhist_id  newtranshist_id int(11);
 
 SELECT count(*),COUNT(DISTINCT DupKEY) from loaddata.newtranshist;
+
+Alter table loaddata.newtranshist CHANGE newtranshist202105_id newtranshist_id int(11);
+
 
 Drop table if Exists Adhoc.temp;
 create table Adhoc.temp as
@@ -185,8 +188,82 @@ WHERE Alt_Dept_ID IS NULL;
 
 select * from  loaddata.newtranshist  where Alt_Dept_ID is null;
 
+########################################################################################
+########################################################################################
+########################################################################################
+########################################################################################
+########################################################################################
+########################################################################################
+########################################################################################
+########################################################################################
+############## REMOVE DUPS IN PArtial FILE IS PROVIDED 
 
-##################################################
+SET SQL_SAFE_UPDATES = 0;
+
+ALTER TABLE loaddata.newtranshist	ADD UnDupFlag int(1),
+									ADD	DupKEY varchar(4000);
+
+ALTER TABLE Adhoc.combined_hist_rept	ADD DupKey int(1);
+									
+
+
+
+UPDATE loaddata.newtranshist
+SET DupKEY=TRIM(CONCAT(
+		Trim(Transaction_Detail),
+		Trim(DeptID),
+		Trim(Fund_Code),
+		Trim(Program_Code),
+		Trim(Source_of_Funds_Code),
+		Trim(Flex_Code),
+		Trim(Project_Code),
+		Trim(ERP_Account_Level_4),
+		Trim(Account_Code),
+		Trim(Journal_ID),
+		Trim(Journal_Date),
+		Trim(round(Posted_Amount,2)))
+);
+
+
+UPDATE Adhoc.combined_hist_rept
+SET DupKEY=TRIM(CONCAT(
+		Trim(Transaction_Detail),
+		Trim(DeptID),
+		Trim(Fund_Code),
+		Trim(Program_Code),
+		Trim(Source_of_Funds_Code),
+		Trim(Flex_Code),
+		Trim(Project_Code),
+		Trim(ERP_Account_Level_4),
+		Trim(Account_Code),
+		Trim(Journal_ID),
+		Trim(Journal_Date),
+		Trim(round(Posted_Amount,2)))
+);
+
+##CREATE INDEX Dupkey1 ON loaddata.newtranshist (DUPKEY);
+## CREATE INDEX Dupkey2 ON Adhoc.combined_hist_rept (DUPKEY);
+
+DROP TABLE IF EXISTS work.transmasterdupkey;
+Create table work.transmasterdupkey AS
+SELECT DupKey from Adhoc.combined_hist_rept
+WHERE Journal_Date>=(SELECT MIN(Journal_Date) from  loaddata.newtranshist);
+
+
+
+UPDATE loaddata.newtranshist SET UnDupFlag=1;
+
+UPDATE loaddata.newtranshist SET UnDupFlag=0
+WHERE DupKEY NOT IN (SELECT DISTINCT DupKEY from work.transmasterdupkey);
+
+
+
+#############################################################################
+########################################################################################
+########################################################################################
+########################################################################################
+########################################################################################
+########################################################################################
 
 
 
@@ -195,9 +272,34 @@ select * from  loaddata.newtranshist  where Alt_Dept_ID is null;
 
 
 
-
+####################################################
 drop table if exists Adhoc.combined_hist_rept_NEW;
 create table Adhoc.combined_hist_rept_NEW AS
+SELECT combined_hist_rept_id,
+	Transaction_Detail,
+	TransMonth,
+    DeptID,
+	Alt_Dept_ID,
+    ##DeptID_Desc,
+	Fund_Code,
+	Program_Code,
+	Source_of_Funds_Code,
+	Flex_Code,
+	Project_Code,
+	ERP_Account_Level_4,
+	Account_Code,
+	Doc_Desc,
+	Doc_Detail,
+	Encumbrance_Description,
+	Journal_ID,
+	Journal_Date,
+	Fiscal_Year,
+    Accounting_Period,
+    Grant_Year,
+	CTSI_Fiscal_Year,
+	Posted_Amount
+from Adhoc.combined_hist_rept
+UNION ALL
 SELECT 
 	newtranshist_id AS combined_hist_rept_id,
 	Transaction_Detail,
@@ -223,66 +325,7 @@ SELECT
 	CTSI_Fiscal_Year,
 	Posted_Amount
 from loaddata.newtranshist 
-;
-desc combined_hist_rept;
-
-
-drop table if exists Adhoc.combined_hist_rept_NEW;
-create table Adhoc.combined_hist_rept_NEW AS
-select 
-	combined_hist_rept_id,
-	Transaction_Detail,
-	TransMonth,
-    DeptID,
-	Alt_Dept_ID,
-    ##DeptID_Desc,
-	Fund_Code,
-	Program_Code,
-	Source_of_Funds_Code,
-	Flex_Code,
-	Project_Code,
-	ERP_Account_Level_4,
-	Account_Code,
-	Doc_Desc,
-	Doc_Detail,
-	Encumbrance_Description,
-	Journal_ID,
-	Journal_Date,
-	Fiscal_Year,
-    Accounting_Period,
-    Grant_Year,
-	CTSI_Fiscal_Year,
-	Posted_Amount
- from Adhoc.combined_hist_rept
- WHERE Fiscal_Year<>2021
-UNION ALL 
-SELECT 
-	newtranshist_id AS combined_hist_rept_id,
-	Transaction_Detail,
-	TransMonth,
-    DeptID,
-	Alt_Dept_ID,
-    ##DeptID_Desc,
-	Fund_Code,
-	Program_Code,
-	Source_of_Funds_Code,
-	Flex_Code,
-	Project_Code,
-	ERP_Account_Level_4,
-	Account_Code,
-	Doc_Desc,
-	Doc_Detail,
-	Encumbrance_Description,
-	Journal_ID,
-	Journal_Date,
-	Fiscal_Year,
-    Accounting_Period,
-    Grant_Year,
-	CTSI_Fiscal_Year,
-	Posted_Amount
-from loaddata.newtranshist ;
-;
-
+WHERE UnDupFlag=0;
 
 
 

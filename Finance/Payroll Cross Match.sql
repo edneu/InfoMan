@@ -3,11 +3,14 @@
 
 DROP TABLE IF EXISTS work.pymatch ;
 Create table work.pymatch AS
-Select * from work.payrollmatchfeb21;
+Select * from work.payrollmatchjune21;
 
 select distinct Source from  work.pymatch;
 
 select Source,(count(distinct UFID)) from work.pymatch group by Source;
+
+ALTER TABLE work.pymatch CHANGE `NAME` Employee_Name varchar(45);
+
 
 DROP TABLE IF EXISTS work.pyxmatch ;
 Create table work.pyxmatch AS
