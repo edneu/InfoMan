@@ -43,6 +43,30 @@ SELECT * from pilots.PILOTS_MASTER
 WHERE Awarded="Awarded"
 AND Category in ("LHS","Translational");
 
+UPDATE pilots.PILOTS_MASTER
+SET Orig_Award_Year=Year(AwardLetterDate),
+	ORGINAL_AWARD=Award_Amt
+WHERE Awarded="Awarded"
+AND Category in ("LHS","Translational");
+
+drop table if exists work.temp3;
+create table work.temp3 AS
+SELECT Pilot_ID,Title,UFID from pilots.PILOTS_MASTER
+WHERE Awarded="Awarded"
+AND Category in ("LHS","Translational");
+
+
+
+
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE pilots.PILOTS_MASTER
+SET Role="PI",
+	Institution="UF"
+WHERE Pilot_ID IN (385,386,387,388,389)    ;
+
+
+
 
 desc pilots.PILOTS_MASTER;
 
@@ -182,3 +206,5 @@ DROP COLUMN Rochester,
 DROP COLUMN RochCat,
 DROP COLUMN RochCat2;
 
+
+Desc pilots.PILOTS_MASTER;

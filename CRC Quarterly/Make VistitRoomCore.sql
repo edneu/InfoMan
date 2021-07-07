@@ -67,6 +67,10 @@ ALTER TABLE ctsi_webcamp_adhoc.visitcore
 ADD PI_NAME varchar(55),
 ADD Title varchar(255),
 ADD CRCNumber varchar(25),
+ADD IRBNUMBER varchar(25),
+ADD EXPSTART datetime,
+ADD CRCTERM datetime,
+ADD U_OCRNO varchar(20),
 ADD PatientName varchar(45),
 ADD VisitStart datetime,
 ADD VisitEnd datetime,
@@ -89,8 +93,14 @@ WHERE vc.PatientID=lu.UNIQUEFIELD;
 
 UPDATE ctsi_webcamp_adhoc.visitcore vc, ctsi_webcamp_pr.protocol lu
 SET vc.Title=lu.LONGTITLE,
-	vc.CRCNumber=lu.Protocol
+	vc.CRCNumber=lu.Protocol,
+    vc.IRBNUMBER=lu.IRBNUMBER,
+    vc.EXPSTART=lu.EXPSTART,
+    vc.CRCTERM=lu.CRCTERM,
+    vc.U_OCRNO=lu.U_OCRNO
 WHERE vc.ProtocolID=lu.UNIQUEFIELD;
+
+
 
 
 UPDATE ctsi_webcamp_adhoc.visitcore
@@ -146,8 +156,8 @@ desc ctsi_webcamp_adhoc.visitcore;
 ## Only Completed Visits
 DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE VisitStatus<>2;
 ## DATE FILTERS
-DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE VisitStart<str_to_date('01,01,2016','%m,%d,%Y');  
-DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE VisitStart>CURDATE();     
+##DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE VisitStart<str_to_date('01,01,2016','%m,%d,%Y');  
+#DELETE FROM ctsi_webcamp_adhoc.visitcore  WHERE VisitStart>CURDATE();     
 #Select * FROM ctsi_webcamp_adhoc.visitcore;  
 
 
@@ -163,6 +173,10 @@ SELECT 	Month,
         VisitType,
 		VisitID,
         CRCNumber,
+        IRBNUMBER,
+        EXPSTART,
+        CRCTERM,
+        U_OCRNO,
         VisitStart,
         VisitEnd,
         VisitLenMin,
@@ -398,6 +412,10 @@ SELECT     vc.Month,
            vc.PI_NAME,
            vc.Title,
            vc.CRCNumber,
+           vc.IRBNUMBER,
+           vc.EXPSTART,
+           vc.CRCTERM,
+           vc.U_OCRNO,
            rl.BedID AS RoomLUID,
            rl.Bed,
            rl.RoomID,
@@ -437,6 +455,10 @@ SELECT
            vr.PI_NAME,
            vr.Title,
            vr.CRCNumber,
+           vr.IRBNUMBER,
+           vr.U_OCRNO,
+           vr.EXPSTART,
+           vr.CRCTERM,
            vr.RoomID,
            vr.Room,
           cr.CoreSvcID,
@@ -465,6 +487,8 @@ AND vr.VisitID=cr.VisitID;
 DELETE FROM ctsi_webcamp_adhoc.VisitRoomCore where CoreSvcID is null;
 
 
+SELECT * from ctsi_webcamp_adhoc.VisitRoomCore;
+
 #######################################################################################
 #######################################################################################
 ## END OF FILE CREATION
@@ -472,8 +496,128 @@ DELETE FROM ctsi_webcamp_adhoc.VisitRoomCore where CoreSvcID is null;
 #######################################################################################
 #######################################################################################
 #######################################################################################
+#######################################################################################
+#######################################################################################
+#######################################################################################
+#######################################################################################
 
 
+#######################################################################################
+#######################################################################################
+## SANDRA SMITH REQUEST
+
+
+
+/*
+Protocol Number
+PI Last Name
+PI First Name
+CRC Number
+OCR Number where available
+IRB Number
+IRB Activation Date (if known)
+IRB Expiration Date (if known)
+Budget/Project Activation Date (if known)
+Budget/Project Expiration Date (if known)
+*/
+
+DROP TABLE IF EXISTS ctsi_webcamp_adhoc.SSRQST; 
+CREATE TABLE ctsi_webcamp_adhoc.SSRQST AS 
+SELECT ProtocolID,
+       max(PI_NAME) AS PI_NAME,
+       MAX(CRCNumber) AS CRCNumber,
+       MAX(U_OCRNO) AS OCR_NUMBER,
+       max(IRBNUMBER) AS IRBNUMBER,
+       min(EXPSTART) AS EXPSTART,
+       MAX(CRCTERM) AS CRCTERM,
+       count(Distinct VisitID) AS nVISITS ,
+       MIN(VisitStart) AS FirstVisit,
+       MAX(VisitEnd) AS LastVisit,
+       MAX(VisitEnd) AS LastSchedVisit ## Placeholder for update 
+FROM  ctsi_webcamp_adhoc.VisitRoomCore
+WHERE ProtocolID IS NOT NULL
+GROUP BY ProtocolID
+;
+      
+
+
+DROP TABLE IF EXISTS ctsi_webcamp_adhoc.lastsched; 
+CREATE TABLE ctsi_webcamp_adhoc.lastsched 
+Select  PROTOCOL AS ProtocolID,
+		MAX(VISITDATE) AS LastSched
+ from ctsi_webcamp_pr.opvisit
+WHERE STATUS in (1,6) 
+AND PROTOCOL IS NOT NULL
+AND VISITDATE IS NOT NULL
+GROUP BY PROTOCOL
+UNION ALL
+Select  PROTOCOL AS ProtocolID,
+        MAX(ADMITDATE) AS LastSched 	
+from ctsi_webcamp_pr.admissio
+WHERE STATUS in (1,6)
+AND PROTOCOL IS NOT NULL
+AND ADMITDATE IS NOT NULL
+GROUP BY PROTOCOL 
+UNION ALL
+Select PROTOCOL AS ProtocolID,
+       MAX(ADMITDATE) AS LastSched
+from ctsi_webcamp_pr.sbadmissio
+WHERE STATUS in (1,6)
+AND PROTOCOL IS NOT NULL
+AND ADMITDATE IS NOT NULL
+GROUP BY PROTOCOL;  
+
+
+
+UPDATE ctsi_webcamp_adhoc.SSRQST SET LastSchedVisit = NULL;
+
+UPDATE ctsi_webcamp_adhoc.SSRQST ss,ctsi_webcamp_adhoc.lastsched lu      
+SET ss.LastSchedVisit=lu.LastSched
+WHERE ss. ProtocolID=lu. ProtocolID
+AND lu. ProtocolID IS NOT NULL;
+
+
+DELETE FROM ctsi_webcamp_adhoc.SSRQST WHERE PI_NAME IS NULL;
+
+#################  IRB APPROVAL DATES
+
+ALTER TABLE ctsi_webcamp_adhoc.SSRQST
+	ADD IRB_Approval datetime,
+	ADD IRB_Expire datetime;
+
+UPDATE ctsi_webcamp_adhoc.SSRQST ss, ctsi_webcamp_adhoc.irb_jul_2021 lu
+SET ss.IRB_Approval=lu.Date_Originally_Approved,
+	ss.IRB_Expire=lu.Expiration_Date
+WHERE ss.IRBNUMBER=lu.ID;    
+
+
+
+UPDATE ctsi_webcamp_adhoc.SSRQST ss, ctsi_webcamp_adhoc.wirb20210701 lu
+SET ss.IRB_Approval=lu.Approval_Date,
+	ss.IRB_Expire=lu.Expiration_Date
+WHERE ss.IRBNUMBER=lu.WIRBID;    
+
+
+
+
+select * from ctsi_webcamp_adhoc.SSRQST;
+
+# 0 or null=not entered
+# 1=Scheduled
+# 2=Completed
+# 3=Begun
+# 4=No-show
+# 5=Request cancelled
+# 6=Requested
+# 7=Request denied
+# 8=Stopped prematurely
+# 9=Re-scheduling requested
+
+
+
+#######################################################################################
+#######################################################################################
+#######################################################################################
 DROP TABLE UTIL_BY_ROOM_MOnth;
 Create table UTIL_BY_ROOM_MOnth AS
 SELECT Month,

@@ -94,7 +94,7 @@ SET GLOBAL local_infile = 1;
 
 
 
-load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory 20210503.txt" 
+load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory 20210624.txt" 
 into table loaddata.awards_history 
 fields terminated by '\t'
 lines terminated by '\n'
@@ -254,11 +254,20 @@ UPDATE loaddata.awards_history ah, lookup.academic_units lu
        SET ah.AcademicUnit=lu.AcademicUnit
        WHERE ah.CLK_AWD_PI_COLLEGE=lu.College;
 
+UPDATE loaddata.awards_history ah, lookup.academic_units lu
+       SET ah.AcademicUnit=lu.AcademicUnit
+       WHERE ah.CLK_AWD_PROJ_COLLEGE=lu.College
+       AND ah.AcademicUnit IS NULL  ;       
+       
+  
+
 UPDATE loaddata.awards_history  
 SET MONTH=concat(YEAR(FUNDS_ACTIVATED),"-",LPAD(MONTH(FUNDS_ACTIVATED),2,"0")) ;
 
 ##select distinct CLK_AWD_PI_COLLEGE from loaddata.awards_history where AcademicUnit IS NULL;
 ##select AcademicUnit,count(*) from loaddata.awards_history group by AcademicUnit;
+
+
 
 ## ADD ROSTER FIELDS
 ALTER TABLE loaddata.awards_history
@@ -343,7 +352,7 @@ UPDATE loaddata.awards_history ah SET Roster2020=1 Where Year(FUNDS_ACTIVATED)=2
 
 SET sql_mode = '';
 SET SQL_SAFE_UPDATES = 0;
-create table loaddata.backupAwardsHistory20210504 AS SELECT * from lookup.awards_history;
+create table loaddata.backupAwardsHistory20210624 AS SELECT * from lookup.awards_history;
 
 
 select distinct (CLK_AWD_PRJ_END_DT) from loaddata.awards_history;
