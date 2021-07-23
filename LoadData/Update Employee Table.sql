@@ -12,7 +12,7 @@ SELECT * from lookup.Employees;
 
 DROP TABLE IF EXISTS work.activeemp;
 CREATE TABLE work.activeemp AS
-select * from lookup.active_emp_20200831;
+select * from loaddata.active_emp_20210721;
 
 
 ## Replace Active Employee File in Lookup
@@ -53,49 +53,7 @@ WHERE Employee_ID NOT IN (SELECT DISTINCT Employee_ID from work.activeemp);
 #################################################################################
 #################################################################################
 #################################################################################
-## EMPLOYEE EMAIL FILE UPDATE
-
-DROP TABLE IF EXISTS work.EmpEmail;
-CREATE TABLE work.EmpEmail AS
-SELECT * from loaddata.empemail20200831;
-
-
-
-DROP TABLE IF EXISTS work.EmpEmailUpdate;
-Create table work.EmpEmailUpdate AS
-SELECT  Name,
-		Department_Code,
-		Department,
-		Job_Code,
-		Job_Title,
-		Email_Address as email
-FROM work.EmpEmail
-UNION ALL
-SELECT 	Name,
-		Department_Code,
-		Department,
-		Job_Code,
-		Job_Title,
-		email
-FROM lookup.employee_email
-WHERE email NOT IN (SELECT DISTINCT Email_Address from work.EmpEmail);
-
-
-## Check Rec Nums
-SELECT "Old File" as Measure, Count(distinct email) as nEMAIL, Count(*) as nRECs from lookup.employee_email
-UNION ALL
-SELECT "New File" as Measure, Count(distinct email) as nEMAIL, Count(*) as nRECs  from work.EmpEmailUpdate;
-
-
-DROP TABLE IF EXISTS loaddata.EMP_EMAIL_BU;
-CREATE TABLE loaddata.EMP_EMAIL_BU As select * from lookup.employee_email;
-
-DROP TABLE IF EXISTS lookup.employee_email;
-CREATE TABLE lookup.employee_email AS
-SELECT * from work.EmpEmailUpdate;
-
-
-#####################################################################################
+####################################################################################
 #####################################################################################
 #####################################################################################
 
@@ -110,35 +68,31 @@ SET SQL_SAFE_UPDATES = 0;
 
 
 
-#### ADD EMAIL FROM EMPLOYEE EMAIL LIAD
+
+
+#### ADD EMAIL FROM EMAIL FILE
       ALTER TABLE work.EmployeeUpdate ADD EMAIL varchar(255);
-
-      CREATE INDEX emailtemp ON work.EmployeeUpdate (Name);
-
-      UPDATE work.EmployeeUpdate SET email=null;
       
-      
-##### ADD EMAIL FROM PERVIOUS Employere File
-     UPDATE work.EmployeeUpdate eu, lookup.Employees lu
-        SET eu.email=lu.EMAIL
-        WHERE eu.Employee_ID=lu.Employee_ID;
+      UPDATE work.EmployeeUpdate eu, lookup.email lu
+      SET eu.EMAIL=lu.UF_EMAIL
+      WHERE eu.Employee_ID=lu.UF_UFID
+      AND lu.UF_PRIMARY_FLG="Y"
+      AND eu.EMAIL IS NULL;
 
-      
 
-      SET SQL_SAFE_UPDATES = 0; 
-        UPDATE work.EmployeeUpdate eu, lookup.employee_email lu
-        SET eu.email=lu.email
-        WHERE (eu.email IS Null or eu.email="")
-        AND eu.NAME=lu.NAME
-        AND eu.Department_Code=lu.Department_Code
-        AND eu.Job_Code_Code=lu.Job_Code;
+      UPDATE work.EmployeeUpdate eu, lookup.email lu
+      SET eu.EMAIL=lu.UF_EMAIL
+      WHERE eu.Employee_ID=lu.UF_UFID
+      AND eu.EMAIL IS NULL;      
+      
+        
+
 
 #### FILL IN MISSING EMAIL FROM UFID FILE
       SET SQL_SAFE_UPDATES = 0; 
         UPDATE work.EmployeeUpdate eu, lookup.ufids lu
         SET eu.email=lu.UF_EMAIL
-        WHERE (eu.email IS Null or eu.email="")
-          AND eu.Employee_ID=UF_UFID
+        WHERE eu.Employee_ID=UF_UFID
           AND eu.email is NULL
           AND lu.UF_EMAIL<>' ';
 

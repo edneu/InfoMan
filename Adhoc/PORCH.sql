@@ -117,7 +117,10 @@ WHERE 	pp.facType is NULL;
  
 SELECT Distinct FacType from work.PorchPeople;
 
-SELECT * from work.PorchPeople WHERE FacType is NULL;
+SELECT * from work.PorchPeople ;
+WHERE FacType is NULL;
+
+
 #########################################################################################################
 
 

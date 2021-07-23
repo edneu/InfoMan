@@ -277,6 +277,12 @@ Select * from work.dm_summ;
 ###########################################################################################
 ###########################################################################################
 ###########################################################################################
+######### ADD ASSIS
+
+
+
+
+
 
 ############################################################################################
 ###Analysis for DM
@@ -475,7 +481,38 @@ GROUP BY CLK_AWD_PI,CLK_PI_UFID
 ORDER BY Amount DESC
 LIMIT 10;
 
+###
+drop table if exists work.high20noCTSI;
+Create table work.high20noCTSI AS
+Select CLK_AWD_PI,SUM(SPONSOR_AUTHORIZED_AMOUNT) AS Amount
+FROM work.dm_awards  
+WHERE CalYear IN ('CY 2020')
+AND   (REPORTING_SPONSOR_NAME LIKE "%NATL INST OF HLTH%"
+        OR CLK_AWD_SPONSOR_NAME LIKE "%NATL INST OF HLTH%"
+        OR CLK_AWD_PRIME_SPONSOR_NAME LIKE "&NATL INST OF HLTH%")
+AND             Roster2008+
+				Roster2009+
+				Roster2010+
+				Roster2011+
+				Roster2012+
+				Roster2013+
+				Roster2014+
+				Roster2015+
+				Roster2016+
+				Roster2017+
+				Roster2018+
+				Roster2019+
+				Roster2020=0      
+GROUP BY CLK_AWD_PI,CLK_PI_UFID
+ORDER BY Amount DESC
+LIMIT 20;
+
+
 
 
 
 SELECT Month,CalYear, SFY, FFY, COUNT(*) AS N from work.dm_awards group by Month,CalYear, SFY, FFY;
+
+
+
+SELECT 
