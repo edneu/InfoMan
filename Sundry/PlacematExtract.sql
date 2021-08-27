@@ -351,19 +351,6 @@ SELECT ProgComp As ProgComp,
  
  
  
-SELECT DISTINCT ProgComp from work.Prog_Owners;
-
-
-Community And Collaboration
-Hub Capacity
-Informatics
-Network Capacity
-Network Science
-Precision Health
-Research Methods
-Translational Endeavors
- 
- 
   ##############################################
  ##############################################
  ##############################################
@@ -550,3 +537,99 @@ UPDATE work.assist_modsumm cs, work.assistmap lu SET cs.TWD=1 WHERE cs.UFID=lu.U
 
 
 select * from  work.assist_modsumm;
+
+
+############# FIX NO UFID Records in OWNER (FSU)
+
+
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE  work.OwnersSumm 
+SET UFID=TRIM(Substr(Owner,1,12))
+WHERE UFID="FSU";
+
+
+
+
+
+############ Create owner and Modulke (from assist) list
+
+drop table if exists work.temp1;
+create table work.temp1 AS
+select UFID,max(Name) as Name from work.assist_modsumm GROUP BY UFID
+UNION ALL
+select UFID,max(Owner) as Name  from work.OwnersSumm GROUP BY UFID;
+
+
+
+drop table if exists work.UFIDOwnerModuleA;
+create table work.UFIDOwnerModuleA AS
+select UFID,max(Name) as Name from work.temp1 GROUP BY UFID;
+
+
+drop table if exists work.UFIDOwnerModuleB;
+create table work.UFIDOwnerModuleB AS
+SELECT 	UOM.UFID,
+		UOM.Name,
+		lu.CommCollab,	
+		lu.HubCap,			
+		lu.Informatics,			
+		lu.NetCap,
+		lu.NetSci,		
+		lu.PresHlth,			
+		lu.ResMeth,			
+		lu.TranEndv			
+  FROM work.UFIDOwnerModuleA UOM
+     LEFT JOIN work.OwnersSumm lu
+	    ON UOM.UFID = lu.UFID;
+;
+drop table if exists work.UFIDOwnerModule;
+create table work.UFIDOwnerModule AS
+SELECT 	ta.UFID,
+		ta.Name,
+		ta.CommCollab,	
+		ta.HubCap,			
+		ta.Informatics,
+		ta.NetCap,
+		ta.NetSci,		
+		ta.PresHlth,			
+		ta.ResMeth,			
+		ta.TranEndv	,
+        lu.Informatics as Informatics_mod,
+		lu.BERD,
+		lu.TeamScience,
+		lu.CommEng,
+		lu.Eval_CQI,
+		lu.InstCarreerDev,
+		lu.IntLifeSpan,
+		lu.IntgSpecialPop,
+		lu.RecruitCenter,
+		lu.TrialInnovation,
+		lu.NetworkSci,
+		lu.Org_Governce,
+		lu.ParticpantClinInteract,
+		lu.TransPilots,
+		lu.PrecisionHlth,
+		lu.Qual_Eff,
+		lu.RKS,
+		lu.SRV,
+		lu.TWD
+  FROM work.UFIDOwnerModuleB ta
+     LEFT JOIN work.assist_modsumm lu
+	    ON ta.UFID = lu.UFID;
+;        
+        
+       
+ desc  work.assist_modsumm;  
+ 
+ 
+   
+		
+lu.CommCollab,	
+lu.HubCap,			
+lu.Informatics,			
+lu.NetCap,
+lu.NetSci,		
+lu.PresHlth,			
+lu.ResMeth,			
+lu.TranEndv			

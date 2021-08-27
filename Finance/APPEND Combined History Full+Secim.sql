@@ -5,9 +5,9 @@
 ### This proceduuyre assumes that the Cumulative transaction file and Secim File are laoded (NO Appending)
 
 
-select "Combined Hist" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from Adhoc.combined_hist_rept
+select "Combined Hist" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords, sum(Posted_Amount) as Total from Adhoc.combined_hist_rept
 UNION ALL
-select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords from loaddata.newtranshist202105;
+select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) AS nRecords, sum(Posted_Amount) as Total  from loaddata.newtranshist202107;
 
 
 
@@ -19,7 +19,7 @@ select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(J
 
 drop table if exists loaddata.newtranshist;
 Create table loaddata.newtranshist as
-SELECT * from loaddata.newtranshist202105;
+SELECT * from  loaddata.newtranshist202107;
 
 
 ALTER TABLE loaddata.newtranshist	ADD UnDupFlag int(1),
@@ -42,9 +42,15 @@ SET DupKEY=TRIM(CONCAT(
 		Trim(Account_Code),
 		Trim(Journal_ID),
 		Trim(Journal_Date),
+        TRIM(Doc_Desc),
 		Trim(round(Posted_Amount,2)))
 );
 
+/*
+Drop table if exists Adhoc.temp; 
+create table Adhoc.temp as
+Select * from loaddata.newtranshist order by DupKey;
+*/
 ##ALTER TABLE loaddata.newtranshist Change newtrasnhist_id  newtranshist_id int(11);
 
 SELECT count(*),COUNT(DISTINCT DupKEY) from loaddata.newtranshist;
@@ -154,6 +160,8 @@ select Grant_Year,count(*) from loaddata.newtranshist  group by Grant_Year;
 select CTSI_Fiscal_Year,count(*) from loaddata.newtranshist  group by CTSI_Fiscal_Year;
 SELECT CTSI_Fiscal_Year,Grant_Year,TransMonth,count(*) as nRecs from loaddata.newtranshist  group by CTSI_Fiscal_Year,Grant_Year,TransMonth;
 
+SELECT TransMonth,count(*) as nRecs from loaddata.newtranshist group by TransMonth;
+
 select Journal_Date,count(*) from loaddata.newtranshist where CTSI_Fiscal_Year IS NULL group by Journal_Date;
 select Journal_Date,count(*) from loaddata.newtranshist where Grant_Year IS NULL group by Journal_Date;
 
@@ -163,6 +171,7 @@ select Journal_Date,count(*) from loaddata.newtranshist where Grant_Year IS NULL
 ## Check for undefined Flex Codes
 SELECT Flex_Code,count(*) from loaddata.newtranshist 
 WHERE Flex_Code NOT IN (SELECT DISTINCT DeptFlex from Adhoc.flex_codes)
+AND Year(Journal_Date)=2021
 group by Flex_Code;
 
 desc Adhoc.flex_codes;
@@ -221,6 +230,7 @@ SET DupKEY=TRIM(CONCAT(
 		Trim(Account_Code),
 		Trim(Journal_ID),
 		Trim(Journal_Date),
+        TRIM(Doc_Desc),
 		Trim(round(Posted_Amount,2)))
 );
 
@@ -238,6 +248,7 @@ SET DupKEY=TRIM(CONCAT(
 		Trim(Account_Code),
 		Trim(Journal_ID),
 		Trim(Journal_Date),
+        TRIM(Doc_Desc),
 		Trim(round(Posted_Amount,2)))
 );
 
@@ -275,7 +286,7 @@ WHERE DupKEY NOT IN (SELECT DISTINCT DupKEY from work.transmasterdupkey);
 ####################################################
 drop table if exists Adhoc.combined_hist_rept_NEW;
 create table Adhoc.combined_hist_rept_NEW AS
-SELECT combined_hist_rept_id,
+/*SELECT combined_hist_rept_id,
 	Transaction_Detail,
 	TransMonth,
     DeptID,
@@ -300,6 +311,7 @@ SELECT combined_hist_rept_id,
 	Posted_Amount
 from Adhoc.combined_hist_rept
 UNION ALL
+*/
 SELECT 
 	newtranshist_id AS combined_hist_rept_id,
 	Transaction_Detail,
@@ -324,7 +336,7 @@ SELECT
     Grant_Year,
 	CTSI_Fiscal_Year,
 	Posted_Amount
-from loaddata.newtranshist 
+from loaddata.newtranshist ;
 WHERE UnDupFlag=0;
 
 
@@ -355,7 +367,7 @@ select CTSI_Fiscal_Year,min(Journal_Date),max(Journal_Date),count(*) from Adhoc.
 ##################################################################################################################
 ##### BACKUP AND RENAME
 /*
-CREATE TABLE Adhoc.comb_hist_report20210405BU AS
+CREATE TABLE Adhoc.comb_hist_report20210727BU AS
 SELECT * from Adhoc.combined_hist_rept;
 
 drop table if exists Adhoc.combined_hist_rept;

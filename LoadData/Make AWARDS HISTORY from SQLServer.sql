@@ -94,9 +94,9 @@ SET GLOBAL local_infile = 1;
 
 
 
-load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory 20210624.txt" 
+load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory 20210825.rpt" 
 into table loaddata.awards_history 
-fields terminated by '\t'
+fields terminated by '|'
 lines terminated by '\n'
 IGNORE 1 LINES
 (
@@ -187,7 +187,7 @@ ORGNL_FUNDS_ACTIVATED
 );
 
 
-
+###Select distinct EXCEPTION,count(*)  FROM loaddata.awards_history group by Exception;
 
 SET SQL_SAFE_UPDATES = 0;
 
@@ -204,7 +204,7 @@ UNION ALL
 Select "New File" AS Measure, Count(*) AS Reccount from loaddata.awards_history;
 
 
-select * from loaddata.awards_history;
+## select * from loaddata.awards_history;
 
 Select "FUNDS_ACTIVATED" as Measure ,Min(FUNDS_ACTIVATED), Max(FUNDS_ACTIVATED) from loaddata.awards_history
 UNION ALL
@@ -233,7 +233,7 @@ select "AuthAmt" as Measure, min(SPONSOR_AUTHORIZED_AMOUNT) as Minimum, max(SPON
 
 
 
-select * from loaddata.awards_history;
+
 
 #############################################################################################
 #############################################################################################
@@ -249,6 +249,8 @@ ALTER TABLE loaddata.awards_history
 	ADD MONTH VARCHAR(8);
 
 SET SQL_SAFE_UPDATES = 0;
+
+UPDATE loaddata.awards_history SET  AcademicUnit=NULL;
 
 UPDATE loaddata.awards_history ah, lookup.academic_units lu
        SET ah.AcademicUnit=lu.AcademicUnit
@@ -352,7 +354,7 @@ UPDATE loaddata.awards_history ah SET Roster2020=1 Where Year(FUNDS_ACTIVATED)=2
 
 SET sql_mode = '';
 SET SQL_SAFE_UPDATES = 0;
-create table loaddata.backupAwardsHistory20210624 AS SELECT * from lookup.awards_history;
+create table loaddata.backupAwardsHistory20210825 AS SELECT * from lookup.awards_history;
 
 
 select distinct (CLK_AWD_PRJ_END_DT) from loaddata.awards_history;
@@ -367,9 +369,11 @@ WHERE EXCEPTION IN (
  ' ""Heterogeneity and Impact of Rotavirus Vaccination in Asia"""',
  ' Master Services Agreement and Statement of Work ' ,
  ' US Alpha-1 	Medical Advisory Board ',
-'2019'	,
 'Best Managment Practices Program and Research',
-'2020','EXCLUDE-BYPASS',
+'2019',
+'2020',
+'2021',
+'EXCLUDE-BYPASS',
 'EXCLUDE-CARRYOVER',
 'EXCLUDE-CORE',
 'EXCLUDE-NOT AUTH',
@@ -406,7 +410,7 @@ Select * from loaddata.awards_history where CLK_AWD_PRJ_END_DT IN (SELECT MAX(CL
 */
 DROP TABLE IF EXISTS work.CTSI_PI_Funding;
 CREATE TABLE work.CTSI_PI_Funding AS
-SELECT 	YEAR(FUNDS_ACTIVATED),
+SELECT 	YEAR(FUNDS_ACTIVATED) AS FundYear,
 		SUM(DIRECT_AMOUNT) AS Direct,
         SUM(INDIRECT_AMOUNT) AS Indirect,
         SUM(SPONSOR_AUTHORIZED_AMOUNT) as TotalAmt
@@ -414,7 +418,7 @@ FROM lookup.awards_history
 WHERE Roster2009=1
 GROUP BY YEAR(FUNDS_ACTIVATED)
 UNION ALL        
-SELECT 	YEAR(FUNDS_ACTIVATED),
+SELECT 	YEAR(FUNDS_ACTIVATED)  AS FundYear,
 		SUM(DIRECT_AMOUNT) AS Direct,
         SUM(INDIRECT_AMOUNT) AS Indirect,
         SUM(SPONSOR_AUTHORIZED_AMOUNT) as TotalAmt
@@ -422,7 +426,7 @@ FROM lookup.awards_history
 WHERE Roster2010=1
 GROUP BY YEAR(FUNDS_ACTIVATED)
 UNION ALL        
-SELECT 	YEAR(FUNDS_ACTIVATED),
+SELECT 	YEAR(FUNDS_ACTIVATED)  AS FundYear,
 		SUM(DIRECT_AMOUNT) AS Direct,
         SUM(INDIRECT_AMOUNT) AS Indirect,
         SUM(SPONSOR_AUTHORIZED_AMOUNT) as TotalAmt
@@ -430,7 +434,7 @@ FROM lookup.awards_history
 WHERE Roster2011=1
 GROUP BY YEAR(FUNDS_ACTIVATED)
 UNION ALL        
-SELECT 	YEAR(FUNDS_ACTIVATED),
+SELECT 	YEAR(FUNDS_ACTIVATED)  AS FundYear,
 		SUM(DIRECT_AMOUNT) AS Direct,
         SUM(INDIRECT_AMOUNT) AS Indirect,
         SUM(SPONSOR_AUTHORIZED_AMOUNT) as TotalAmt
@@ -438,7 +442,7 @@ FROM lookup.awards_history
 WHERE Roster2012=1
 GROUP BY YEAR(FUNDS_ACTIVATED)
 UNION ALL        
-SELECT 	YEAR(FUNDS_ACTIVATED),
+SELECT 	YEAR(FUNDS_ACTIVATED) AS FundYear,
 		SUM(DIRECT_AMOUNT) AS Direct,
         SUM(INDIRECT_AMOUNT) AS Indirect,
         SUM(SPONSOR_AUTHORIZED_AMOUNT) as TotalAmt
@@ -446,7 +450,7 @@ FROM lookup.awards_history
 WHERE Roster2013=1
 GROUP BY YEAR(FUNDS_ACTIVATED)
 UNION ALL        
-SELECT 	YEAR(FUNDS_ACTIVATED),
+SELECT 	YEAR(FUNDS_ACTIVATED) AS FundYear,
 		SUM(DIRECT_AMOUNT) AS Direct,
         SUM(INDIRECT_AMOUNT) AS Indirect,
         SUM(SPONSOR_AUTHORIZED_AMOUNT) as TotalAmt
@@ -454,7 +458,7 @@ FROM lookup.awards_history
 WHERE Roster2014=1
 GROUP BY YEAR(FUNDS_ACTIVATED)
 UNION ALL        
-SELECT 	YEAR(FUNDS_ACTIVATED),
+SELECT 	YEAR(FUNDS_ACTIVATED) AS FundYear,
 		SUM(DIRECT_AMOUNT) AS Direct,
         SUM(INDIRECT_AMOUNT) AS Indirect,
         SUM(SPONSOR_AUTHORIZED_AMOUNT) as TotalAmt
@@ -462,7 +466,7 @@ FROM lookup.awards_history
 WHERE Roster2015=1
 GROUP BY YEAR(FUNDS_ACTIVATED)
 UNION ALL        
-SELECT 	YEAR(FUNDS_ACTIVATED),
+SELECT 	YEAR(FUNDS_ACTIVATED) AS FundYear,
 		SUM(DIRECT_AMOUNT) AS Direct,
         SUM(INDIRECT_AMOUNT) AS Indirect,
         SUM(SPONSOR_AUTHORIZED_AMOUNT) as TotalAmt
@@ -470,7 +474,7 @@ FROM lookup.awards_history
 WHERE Roster2016=1
 GROUP BY YEAR(FUNDS_ACTIVATED)
 UNION ALL        
-SELECT 	YEAR(FUNDS_ACTIVATED),
+SELECT 	YEAR(FUNDS_ACTIVATED) AS FundYear,
 		SUM(DIRECT_AMOUNT) AS Direct,
         SUM(INDIRECT_AMOUNT) AS Indirect,
         SUM(SPONSOR_AUTHORIZED_AMOUNT) as TotalAmt
@@ -478,7 +482,7 @@ FROM lookup.awards_history
 WHERE Roster2017=1
 GROUP BY YEAR(FUNDS_ACTIVATED)
 UNION ALL        
-SELECT 	YEAR(FUNDS_ACTIVATED),
+SELECT 	YEAR(FUNDS_ACTIVATED) AS FundYear,
 		SUM(DIRECT_AMOUNT) AS Direct,
         SUM(INDIRECT_AMOUNT) AS Indirect,
         SUM(SPONSOR_AUTHORIZED_AMOUNT) as TotalAmt
@@ -486,7 +490,7 @@ FROM lookup.awards_history
 WHERE Roster2018=1
 GROUP BY YEAR(FUNDS_ACTIVATED)
 UNION ALL        
-SELECT 	YEAR(FUNDS_ACTIVATED),
+SELECT 	YEAR(FUNDS_ACTIVATED) AS FundYear,
 		SUM(DIRECT_AMOUNT) AS Direct,
         SUM(INDIRECT_AMOUNT) AS Indirect,
         SUM(SPONSOR_AUTHORIZED_AMOUNT) as TotalAmt
@@ -494,12 +498,13 @@ FROM lookup.awards_history
 WHERE Roster2019=1
 GROUP BY YEAR(FUNDS_ACTIVATED)
 UNION ALL        
-SELECT 	YEAR(FUNDS_ACTIVATED),
+SELECT 	YEAR(FUNDS_ACTIVATED) AS FundYear,
 		SUM(DIRECT_AMOUNT) AS Direct,
         SUM(INDIRECT_AMOUNT) AS Indirect,
         SUM(SPONSOR_AUTHORIZED_AMOUNT) as TotalAmt
 FROM lookup.awards_history
 WHERE Roster2020=1
-GROUP BY YEAR(FUND_ACTIVATED);
+GROUP BY YEAR(FUNDS_ACTIVATED);
 
 
+SELECT * from work.CTSI_PI_Funding;

@@ -72,7 +72,7 @@ WHERE pm.UFID=lu.UFID;
 
 
 ###################
-COMPLETE UFIDS in Assist Records
+##COMPLETE UFIDS in Assist Records
 
 Select * from work.payrollmatchjuly21;
 
