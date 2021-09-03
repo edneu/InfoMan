@@ -319,8 +319,13 @@ FROM work.PedsAwards
 WHERE PorchInv=1
 GROUP BY SFY, InvType;
 
-#############
-## Create person Verification
+##############################################################################
+##############################################################################
+##############################################################################
+##############################################################################
+##############################################################################
+##############################################################################
+## Create person Summary Table
 drop table if exists work.porchcensus;
 create table work.porchcensus as
 select Employee_ID,
@@ -345,22 +350,93 @@ ALTER TABLE work.porchcensus
 	ADD FUND_17_18 decimal(65,10),
 	ADD FUND_18_19 decimal(65,10),	
 	ADD FUND_19_20 decimal(65,10),
-	ADD FUND_20_21 decimal(65,10);
+	ADD FUND_20_21 decimal(65,10),
     
+    ADD NIH_FUND_17_18 decimal(65,10),
+	ADD NIH_FUND_18_19 decimal(65,10),	
+	ADD NIH_FUND_19_20 decimal(65,10),
+	ADD NIH_FUND_20_21 decimal(65,10),
+    
+    ADD IND_FUND_17_18 decimal(65,10),
+	ADD IND_FUND_18_19 decimal(65,10),	
+	ADD IND_FUND_19_20 decimal(65,10),
+	ADD IND_FUND_20_21 decimal(65,10),
+ 
+	ADD nPropSub_1718 int(5),
+	ADD nPropSub_1819 int(5),
+	ADD nPropSub_1920 int(5),
+	ADD nPropSub_2021 int(5),
+
+	ADD nPropAwd_1718 int(5),
+	ADD nPropAwd_1819 int(5),
+	ADD nPropAwd_1920 int(5),
+	ADD nPropAwd_2021 int(5),
+  
+	ADD amtPropSub_1718 decimal(12,2),
+	ADD amtPropSub_1819 decimal(12,2),
+	ADD amtPropSub_1920 decimal(12,2),
+	ADD amtPropSub_2021 decimal(12,2),
+
+	ADD amtPropAwd_1718 decimal(12,2),
+	ADD amtPropAwd_1819 decimal(12,2),
+	ADD amtPropAwd_1920 decimal(12,2),
+	ADD amtPropAwd_2021 decimal(12,2);
+  
+  
+  
+
+
+ 
+ 
+ 
+ 
+SET SQL_SAFE_UPDATES = 0; 
+ 
 UPDATE work.porchcensus
-SET  Peds_17_18=0,
+SET Peds_17_18=0,
 	Peds_18_19=0,	
 	Peds_19_20=0,
 	Peds_20_21=0,
-	PORCH_17_18=0,
+	
+    PORCH_17_18=0,
 	PORCH_18_19=0,
 	PORCH_19_20=0,
 	PORCH_20_21=0,  
+    
     FUND_17_18=0,
 	FUND_18_19=0,
 	FUND_19_20=0,
-	FUND_20_21=0;
+	FUND_20_21=0,
     
+    NIH_FUND_17_18=0,
+	NIH_FUND_18_19=0,
+	NIH_FUND_19_20=0,
+	NIH_FUND_20_21=0,
+    
+    IND_FUND_17_18=0,
+	IND_FUND_18_19=0,
+	IND_FUND_19_20=0,
+	IND_FUND_20_21=0,
+    
+    nPropSub_1718=0,
+	nPropSub_1819=0,
+	nPropSub_1920=0,
+	nPropSub_2021=0,
+
+	nPropAwd_1718=0,
+	nPropAwd_1819=0,
+	nPropAwd_1920=0,
+	nPropAwd_2021=0,
+  
+	amtPropSub_1718=0,
+	amtPropSub_1819=0,
+	amtPropSub_1920=0,
+	amtPropSub_2021=0,
+
+	amtPropAwd_1718=0,
+	amtPropAwd_1819=0,
+	amtPropAwd_1920=0,
+	amtPropAwd_2021=0;
     
 
 UPDATE work.porchcensus pc,  work.PorchPeople lu SET Peds_17_18=1 WHERE pc.Employee_ID=lu.Employee_ID and lu.SFY='SFY 2017-2018';
@@ -407,10 +483,203 @@ SELECT 	SFY,
 from work.sfyfund1       
 GROUP  BY SFY, UFID;
 
+########## NIH
+drop table if exists work.sfyNIHfund1;
+create table work.sfyNIHfund1 as
+SELECT 	SFY,
+		CLK_PI_UFID AS UFID,
+		SUM(SPONSOR_AUTHORIZED_AMOUNT) as Amount
+from work.PedsAwards        
+WHERE PI_Classify IN ('PEDS CONT - NOT PEDS PROJ',
+					  'PEDS CONT = PEDS PROJ')
+AND NIH=1                      
+GROUP  BY SFY,UFID
+UNION ALL
+SELECT 	SFY,
+		CLK_AWD_PROJ_MGR_UFID AS UFID,
+		SUM(SPONSOR_AUTHORIZED_AMOUNT) as Amount
+from work.PedsAwards        
+WHERE PI_Classify IN ('PEDS CONT AND DIFF PEDS PROJ',
+					  'NOT PEDS CONT - PEDS PROJ')
+AND NIH=1                         
+GROUP  BY SFY, UFID;
+
+
+drop table if exists work.sfyNIHfund;
+create table work.sfyNIHfund as
+SELECT 	SFY,
+		UFID,
+		SUM(Amount) as Amount
+from work.sfyNIHfund1       
+GROUP  BY SFY, UFID;
+
+##########################################
+#### INDUSTRY
+drop table if exists work.sfyINDUSTRYfund1;
+create table work.sfyINDUSTRYfund1 as
+SELECT 	SFY,
+		CLK_PI_UFID AS UFID,
+		SUM(SPONSOR_AUTHORIZED_AMOUNT) as Amount
+from work.PedsAwards        
+WHERE PI_Classify IN ('PEDS CONT - NOT PEDS PROJ',
+					  'PEDS CONT = PEDS PROJ')
+AND Industry=1                     
+GROUP  BY SFY,UFID
+UNION ALL
+SELECT 	SFY,
+		CLK_AWD_PROJ_MGR_UFID AS UFID,
+		SUM(SPONSOR_AUTHORIZED_AMOUNT) as Amount
+from work.PedsAwards        
+WHERE PI_Classify IN ('PEDS CONT AND DIFF PEDS PROJ',
+					  'NOT PEDS CONT - PEDS PROJ')
+AND Industry=1                       
+GROUP  BY SFY, UFID;
+
+
+drop table if exists work.sfyINDUSTRYfund;
+create table work.sfyINDUSTRYfund as
+SELECT 	SFY,
+		UFID,
+		SUM(Amount) as Amount
+from work.sfyINDUSTRYfund1  
+GROUP  BY SFY, UFID;
+
+
+
+
+
+
+
+
+
 UPDATE work.porchcensus pc, work.sfyfund lu SET FUND_17_18=lu.Amount WHERE pc.Employee_ID=lu.UFID and lu.SFY='SFY 2017-2018';
 UPDATE work.porchcensus pc, work.sfyfund lu SET FUND_18_19=lu.Amount WHERE pc.Employee_ID=lu.UFID and lu.SFY='SFY 2018-2019';
 UPDATE work.porchcensus pc, work.sfyfund lu SET FUND_19_20=lu.Amount WHERE pc.Employee_ID=lu.UFID and lu.SFY='SFY 2019-2020';
 UPDATE work.porchcensus pc, work.sfyfund lu SET FUND_20_21=lu.Amount WHERE pc.Employee_ID=lu.UFID and lu.SFY='SFY 2020-2021';
 
+UPDATE work.porchcensus pc, work.sfyNIHfund lu SET NIH_FUND_17_18=lu.Amount WHERE pc.Employee_ID=lu.UFID and lu.SFY='SFY 2017-2018';
+UPDATE work.porchcensus pc, work.sfyNIHfund lu SET NIH_FUND_18_19=lu.Amount WHERE pc.Employee_ID=lu.UFID and lu.SFY='SFY 2018-2019';
+UPDATE work.porchcensus pc, work.sfyNIHfund lu SET NIH_FUND_19_20=lu.Amount WHERE pc.Employee_ID=lu.UFID and lu.SFY='SFY 2019-2020';
+UPDATE work.porchcensus pc, work.sfyNIHfund lu SET NIH_FUND_20_21=lu.Amount WHERE pc.Employee_ID=lu.UFID and lu.SFY='SFY 2020-2021';
+
+UPDATE work.porchcensus pc, work.sfyINDUSTRYfund lu SET IND_FUND_17_18=lu.Amount WHERE pc.Employee_ID=lu.UFID and lu.SFY='SFY 2017-2018';
+UPDATE work.porchcensus pc, work.sfyINDUSTRYfund lu SET IND_FUND_18_19=lu.Amount WHERE pc.Employee_ID=lu.UFID and lu.SFY='SFY 2018-2019';
+UPDATE work.porchcensus pc, work.sfyINDUSTRYfund lu SET IND_FUND_19_20=lu.Amount WHERE pc.Employee_ID=lu.UFID and lu.SFY='SFY 2019-2020';
+UPDATE work.porchcensus pc, work.sfyINDUSTRYfund lu SET IND_FUND_20_21=lu.Amount WHERE pc.Employee_ID=lu.UFID and lu.SFY='SFY 2020-2021';
+
+
 SELECT * from work.porchcensus;
 
+##############################################################################
+##############################################################################
+##############################################################################
+##############################################################################
+##############################################################################
+##############################################################################
+
+##### PROPOSAL DATA
+select * from lookup.proposals;
+
+
+
+
+### create workfile of proposal from PEDs employees
+drop table if exists work.pedspropsals; 
+create table work.pedspropsals as
+select * from lookup.proposals
+WHERE CLK_PI_UFID IN (Select DISTINCT Employee_ID from work.porchcensus)
+AND CLK_PRO_DATE_SUBMITTED>=str_to_date('01,01,2017','%m,%d,%Y');
+
+
+ALTER TABLE work.pedspropsals
+  ADD UFID varchar(12),
+  ADD SFY varchar(25),
+  ADD PropStatus varchar(25);
+  
+UPDATE work.pedspropsals SET UFID=lpad(CLK_PI_UFID,8,'0');
+
+UPDATE work.pedspropsals SET SFY ='SFY 2017-2018' WHERE CLK_PRO_DATE_SUBMITTED BETWEEN str_to_date('07,01,2017','%m,%d,%Y') and str_to_date('06,30,2018','%m,%d,%Y');
+UPDATE work.pedspropsals SET SFY ='SFY 2018-2019' WHERE CLK_PRO_DATE_SUBMITTED BETWEEN str_to_date('07,01,2018','%m,%d,%Y') and str_to_date('06,30,2019','%m,%d,%Y');
+UPDATE work.pedspropsals SET SFY ='SFY 2019-2020' WHERE CLK_PRO_DATE_SUBMITTED BETWEEN str_to_date('07,01,2019','%m,%d,%Y') and str_to_date('06,30,2020','%m,%d,%Y');
+UPDATE work.pedspropsals SET SFY ='SFY 2020-2021' WHERE CLK_PRO_DATE_SUBMITTED BETWEEN str_to_date('07,01,2020','%m,%d,%Y') and str_to_date('06,30,2021','%m,%d,%Y');
+
+UPDATE work.pedspropsals SET PropStatus="Awarded" WHERE CLK_CURRENTSTATE IN ("Awarded","Award Pending");
+UPDATE work.pedspropsals SET PropStatus="Not Awarded" WHERE CLK_CURRENTSTATE IN ("Not Funded");
+UPDATE work.pedspropsals SET PropStatus="In Review" WHERE CLK_CURRENTSTATE IN ('Pending Sponsor Review','NOT USED - Pending Post Submission Response');
+UPDATE work.pedspropsals SET PropStatus="Withdrawn" WHERE CLK_CURRENTSTATE IN ('Withdrawn','Terminated','Not Invited');
+
+DELETE FROM work.pedspropsals WHERE CLK_CURRENTSTATE IS NULL;
+DELETE FROM work.pedspropsals WHERE SFY IS NULL;
+
+
+
+
+drop table if exists work.pedsPropsalsSumm; 
+create table work.pedsPropsalsSumm as
+select 	SFY,
+		UFID,
+        PropStatus,
+        COUNT(DISTINCT CLK_PROPOSAL_ID) as nProposals,
+        SUM(CLK_GRAND_TOTAL) as Amount
+from work.pedspropsals
+GROUP BY SFY, UFID, PropStatus;  
+
+##############################################################   
+
+#SUBMITTED	   	
+UPDATE work.porchcensus pc, work.pedsPropsalsSumm lu 
+	   SET pc.nPropSub_1718=lu.nProposals,
+           pc.amtPropSub_1718=lu.Amount
+       WHERE pc.Employee_ID=lu.UFID 
+       and lu.SFY='SFY 2017-2018' ;   
+       
+UPDATE work.porchcensus pc, work.pedsPropsalsSumm lu 
+	   SET pc.nPropSub_1819=lu.nProposals,
+           pc.amtPropSub_1819=lu.Amount
+       WHERE pc.Employee_ID=lu.UFID 
+       and lu.SFY='SFY 2018-2019' ;   
+       
+UPDATE work.porchcensus pc, work.pedsPropsalsSumm lu 
+	   SET pc.nPropSub_1920=lu.nProposals,
+           pc.amtPropSub_1920=lu.Amount
+       WHERE pc.Employee_ID=lu.UFID 
+       and lu.SFY='SFY 2019-2020' ;          
+       
+UPDATE work.porchcensus pc, work.pedsPropsalsSumm lu 
+	   SET pc.nPropSub_2021=lu.nProposals,
+           pc.amtPropSub_2021=lu.Amount
+       WHERE pc.Employee_ID=lu.UFID 
+       and lu.SFY='SFY 2020-2021' ;          
+
+# AWARDED
+UPDATE work.porchcensus pc, work.pedsPropsalsSumm lu 
+	   SET pc.nPropAwd_1718=lu.nProposals,
+           pc.amtPropAwd_1718=lu.Amount
+       WHERE pc.Employee_ID=lu.UFID 
+       AND lu.PropStatus="Awarded" 
+       and lu.SFY='SFY 2017-2018'   ;
+
+UPDATE work.porchcensus pc, work.pedsPropsalsSumm lu 
+	   SET pc.nPropAwd_1819=lu.nProposals,
+           pc.amtPropAwd_1819=lu.Amount
+       WHERE pc.Employee_ID=lu.UFID 
+       AND lu.PropStatus="Awarded" 
+       and lu.SFY='SFY 2018-2019'   ;
+       
+UPDATE work.porchcensus pc, work.pedsPropsalsSumm lu 
+	   SET pc.nPropAwd_1920=lu.nProposals,
+           pc.amtPropAwd_1920=lu.Amount
+       WHERE pc.Employee_ID=lu.UFID 
+       AND lu.PropStatus="Awarded" 
+       and lu.SFY='SFY 2019-2020'   ;
+
+UPDATE work.porchcensus pc, work.pedsPropsalsSumm lu 
+	   SET pc.nPropAwd_2021=lu.nProposals,
+           pc.amtPropAwd_2021=lu.Amount
+       WHERE pc.Employee_ID=lu.UFID 
+       AND lu.PropStatus="Awarded" 
+       and lu.SFY='SFY 2020-2021'   ;       
+
+################################################################
+
+SELECT * from work.porchcensus;
