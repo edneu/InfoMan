@@ -1,8 +1,9 @@
-
+###### Developed for the 2021 TL KL Common Metrics 
 ## drop table work.cm_kl_tl_2021;
 ## select * from work.cm_kl_tl_2021;
 
 ## Create work table work.cmtlkl
+
 drop table if exists work.cmtlkl;
 Create Table work.cmtlkl as
 select * from work.cm_kl_tl_2021;

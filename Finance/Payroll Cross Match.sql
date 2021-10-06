@@ -189,6 +189,9 @@ SELECT * from lookup.ufids WHERE UF_LAST_NM='Krasnogorskyi' AND UF_FIRST_NM LIKE
 SELECT * from lookup.ufids WHERE UF_LAST_NM='Chamba' ;
 SELECT * from lookup.ufids WHERE UF_LAST_NM='Farrell' AND UF_FIRST_NM LIKE 'C%';
 SELECT * from lookup.ufids WHERE UF_LAST_NM='Neeley' AND UF_FIRST_NM LIKE 'An%';
+
+
+select count(distinct STD_PROGRAM) from lookup.roster where YEar in (2021);
  
  
  

@@ -1,0 +1,63 @@
+
+
+select * from yulia.tracts;
+
+DROP TABLE IF exists yulia.TractsAwardProj;
+Create table yulia.TractsAwardProj AS 
+select "TRACTS Project PI" AS Type,
+		awards_history_id,
+		CLK_AWD_ID,
+		CLK_AWD_FULL_TITLE,
+		CLK_AWD_STATE,
+		CLK_AWD_PI,
+		CLK_PI_UFID,
+		CLK_AWD_PROJ_ID,
+		CLK_AWD_PROJ_NAME,
+		CLK_AWD_PROJ_MGR,
+		CLK_AWD_PROJ_MGR_UFID
+		CLK_AWD_PROJ_DEPT,
+		CLK_AWD_PROJ_COLLEGE,
+		REPORTING_SPONSOR_NAME,
+		REPORTING_SPONSOR_CUSTID,
+		REPORTING_SPONSOR_CAT,
+		REPORTING_SPONSOR_AWD_ID,
+		DIRECT_AMOUNT,
+		INDIRECT_AMOUNT,
+		SPONSOR_AUTHORIZED_AMOUNT,
+		FUNDS_ACTIVATED
+from lookup.awards_history
+WHERE CLK_AWD_PROJ_MGR_UFID IN (SELECT DISTINCT Employee_ID from yulia.tracts) 
+UNION ALL
+Select "TRACTS AWARD PI " AS Type,
+		awards_history_id,
+		CLK_AWD_ID,
+		CLK_AWD_FULL_TITLE,
+		CLK_AWD_STATE,
+		CLK_AWD_PI,
+		CLK_PI_UFID,
+		CLK_AWD_PROJ_ID,
+		CLK_AWD_PROJ_NAME,
+		CLK_AWD_PROJ_MGR,
+		CLK_AWD_PROJ_MGR_UFID
+		CLK_AWD_PROJ_DEPT,
+		CLK_AWD_PROJ_COLLEGE,
+		REPORTING_SPONSOR_NAME,
+		REPORTING_SPONSOR_CUSTID,
+		REPORTING_SPONSOR_CAT,
+		REPORTING_SPONSOR_AWD_ID,
+		DIRECT_AMOUNT,
+		INDIRECT_AMOUNT,
+		SPONSOR_AUTHORIZED_AMOUNT,
+		FUNDS_ACTIVATED
+from lookup.awards_history
+WHERE CLK_PI_UFID IN (SELECT DISTINCT Employee_ID from yulia.tracts);
+
+
+
+
+####### PROPOSALS
+DROP TABLE IF exists yulia.tracts_proposals;
+Create table yulia.tracts_proposals AS 
+SELECT * from lookup.proposals
+where CLK_PI_UFID IN (SELECT DISTINCT Employee_ID from yulia.tracts);
+

@@ -380,9 +380,12 @@ ALTER TABLE work.porchcensus
 	ADD amtPropAwd_1718 decimal(12,2),
 	ADD amtPropAwd_1819 decimal(12,2),
 	ADD amtPropAwd_1920 decimal(12,2),
-	ADD amtPropAwd_2021 decimal(12,2);
+	ADD amtPropAwd_2021 decimal(12,2),
   
-  
+	ADD nIRBappr_1718 int(5),
+	ADD nIRBappr_1819 int(5),
+	ADD nIRBappr_1920 int(5),
+	ADD nIRBappr_2021 int(5);
   
 
 
@@ -436,7 +439,12 @@ SET Peds_17_18=0,
 	amtPropAwd_1718=0,
 	amtPropAwd_1819=0,
 	amtPropAwd_1920=0,
-	amtPropAwd_2021=0;
+	amtPropAwd_2021=0,
+    
+    nIRBappr_1718=0,
+	nIRBappr_1819=0,
+	nIRBappr_1920=0,
+	nIRBappr_2021=0;
     
 
 UPDATE work.porchcensus pc,  work.PorchPeople lu SET Peds_17_18=1 WHERE pc.Employee_ID=lu.Employee_ID and lu.SFY='SFY 2017-2018';
@@ -682,4 +690,57 @@ UPDATE work.porchcensus pc, work.pedsPropsalsSumm lu
 
 ################################################################
 
+#########################################################################
+#########################################################################
+#########################################################################
+#########################################################################
+### IRB
+
+select * from lookup.myirb;
+
+SET SQL_SAFE_UPDATES = 0;
+UPDATE lookup.myirb SET PI_UFID=lpad(PI_UFID,8,'0');
+
+DROP TABLE IF EXISTS work.irb;
+CREATE TABLE work.irb as
+SELECT * from lookup.myirb;
+ 
+
+ALTER TABLE work.irb ADD SFY varchar(25);
+
+SET SQL_SAFE_UPDATES = 0;  
+UPDATE work.irb SET SFY ='SFY 2017-2018' WHERE Date_Originally_Approved BETWEEN str_to_date('07,01,2017','%m,%d,%Y') and str_to_date('06,30,2018','%m,%d,%Y');
+UPDATE work.irb SET SFY ='SFY 2018-2019' WHERE Date_Originally_Approved BETWEEN str_to_date('07,01,2018','%m,%d,%Y') and str_to_date('06,30,2019','%m,%d,%Y');
+UPDATE work.irb SET SFY ='SFY 2019-2020' WHERE Date_Originally_Approved BETWEEN str_to_date('07,01,2019','%m,%d,%Y') and str_to_date('06,30,2020','%m,%d,%Y');
+UPDATE work.irb SET SFY ='SFY 2020-2021' WHERE Date_Originally_Approved BETWEEN str_to_date('07,01,2020','%m,%d,%Y') and str_to_date('06,30,2021','%m,%d,%Y');
+
+DELETE from work.irb where SFY is NULL;
+
+drop table if Exists work.irb_summ;
+CREATE TABLE work.irb_summ as
+SELECT SFY,PI_UFID,COUNT(DISTINCT ID) as nIRB from work.irb group by SFY,PI_UFID ;
+
+UPDATE work.porchcensus pc, work.irb_summ lu 
+	   SET pc.nIRBappr_1718=lu.nIRB
+       WHERE pc.Employee_ID=lu.PI_UFID 
+       and lu.SFY='SFY 2017-2018'   ;
+       
+UPDATE work.porchcensus pc, work.irb_summ lu 
+	   SET pc.nIRBappr_1819=lu.nIRB
+       WHERE pc.Employee_ID=lu.PI_UFID 
+       and lu.SFY='SFY 2018-2019'   ;
+
+UPDATE work.porchcensus pc, work.irb_summ lu 
+	   SET pc.nIRBappr_1920=lu.nIRB
+       WHERE pc.Employee_ID=lu.PI_UFID 
+       and lu.SFY='SFY 2019-2020'   ;
+       
+UPDATE work.porchcensus pc, work.irb_summ lu 
+	   SET pc.nIRBappr_2021=lu.nIRB
+       WHERE pc.Employee_ID=lu.PI_UFID 
+       and lu.SFY='SFY 2020-2021'   ;    
+       
+       
+#####################################################       
 SELECT * from work.porchcensus;
+
