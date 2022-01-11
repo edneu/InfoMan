@@ -4,12 +4,14 @@
 ### LOAD FROM EXCEL SPREADHEET
 ### This proceduuyre assumes that the Cumulative transaction file and Secim File are laoded (NO Appending)
 
+create table loaddata.newtranshist202112 as SELECT * from loaddata.newtranshist_id;
+
 
 select "Combined Hist" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords, sum(Posted_Amount) as Total from Adhoc.combined_hist_rept
 UNION ALL
-select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) AS nRecords, sum(Posted_Amount) as Total  from loaddata.newtranshist202110;
+select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) AS nRecords, sum(Posted_Amount) as Total  from loaddata.newtranshist202201;
 
-
+desc loaddata.newtranshist;
 
 #################
 #################
@@ -19,7 +21,7 @@ select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(J
 
 drop table if exists loaddata.newtranshist;
 Create table loaddata.newtranshist as
-SELECT * from  loaddata.newtranshist202107;
+SELECT * from  loaddata.newtranshist202201;
 
 
 ALTER TABLE loaddata.newtranshist	ADD UnDupFlag int(1),
@@ -29,58 +31,8 @@ select * from loaddata.newtranshist;
 
 SET SQL_SAFE_UPDATES = 0;
 
-UPDATE loaddata.newtranshist
-SET DupKEY=TRIM(CONCAT(
-		Trim(Transaction_Detail),
-		Trim(DeptID),
-		Trim(Fund_Code),
-		Trim(Program_Code),
-		Trim(Source_of_Funds_Code),
-		Trim(Flex_Code),
-		Trim(Project_Code),
-		Trim(ERP_Account_Level_4),
-		Trim(Account_Code),
-		Trim(Journal_ID),
-		Trim(Journal_Date),
-        TRIM(Doc_Desc),
-		Trim(round(Posted_Amount,2)))
-);
-
-/*
-Drop table if exists Adhoc.temp; 
-create table Adhoc.temp as
-Select * from loaddata.newtranshist order by DupKey;
-*/
-##ALTER TABLE loaddata.newtranshist Change newtrasnhist_id  newtranshist_id int(11);
-
-SELECT count(*),COUNT(DISTINCT DupKEY) from loaddata.newtranshist;
-
 Alter table loaddata.newtranshist CHANGE newtranshist202110_id newtranshist_id int(11);
 
-
-Drop table if Exists Adhoc.temp;
-create table Adhoc.temp as
-SELECT DUPKEY,MIn(newtranshist_id) as UNDUPID ,COUNT(*) nRec from loaddata.newtranshist GROUP BY DUPKEY;
-
-
-CREATE INDEX Dupkey1 ON loaddata.newtranshist (newtranshist_id);
-CREATE INDEX Dupkey2 ON Adhoc.temp (UNDUPID);
-
-
-
-UPDATE loaddata.newtranshist SET UnDupFlag=0;
-
-UPDATE loaddata.newtranshist SET UnDupFlag=1
-WHERE newtranshist_id IN (SELECT DISTINCT UNDUPID from Adhoc.temp);
-
-SELECT UnDupFlag,count(*) from loaddata.newtranshist group by UnDupFlag;
-
-
-DELETE FROM loaddata.newtranshist Where UnDupFlag=0;
-
-ALTER TABLE loaddata.newtranshist
-DROP UnDupFlag, 
-DROP DupKEY;
 
 #############################################################################
 #############################################################################
@@ -205,70 +157,6 @@ select * from  loaddata.newtranshist  where Alt_Dept_ID is null;
 ########################################################################################
 ########################################################################################
 ########################################################################################
-############## REMOVE DUPS IN PArtial FILE IS PROVIDED 
-
-SET SQL_SAFE_UPDATES = 0;
-
-ALTER TABLE loaddata.newtranshist	ADD UnDupFlag int(1),
-									ADD	DupKEY varchar(4000);
-
-ALTER TABLE Adhoc.combined_hist_rept	ADD DupKey int(1);
-									
-
-
-
-UPDATE loaddata.newtranshist
-SET DupKEY=TRIM(CONCAT(
-		Trim(Transaction_Detail),
-		Trim(DeptID),
-		Trim(Fund_Code),
-		Trim(Program_Code),
-		Trim(Source_of_Funds_Code),
-		Trim(Flex_Code),
-		Trim(Project_Code),
-		Trim(ERP_Account_Level_4),
-		Trim(Account_Code),
-		Trim(Journal_ID),
-		Trim(Journal_Date),
-        TRIM(Doc_Desc),
-		Trim(round(Posted_Amount,2)))
-);
-
-
-UPDATE Adhoc.combined_hist_rept
-SET DupKEY=TRIM(CONCAT(
-		Trim(Transaction_Detail),
-		Trim(DeptID),
-		Trim(Fund_Code),
-		Trim(Program_Code),
-		Trim(Source_of_Funds_Code),
-		Trim(Flex_Code),
-		Trim(Project_Code),
-		Trim(ERP_Account_Level_4),
-		Trim(Account_Code),
-		Trim(Journal_ID),
-		Trim(Journal_Date),
-        TRIM(Doc_Desc),
-		Trim(round(Posted_Amount,2)))
-);
-
-##CREATE INDEX Dupkey1 ON loaddata.newtranshist (DUPKEY);
-## CREATE INDEX Dupkey2 ON Adhoc.combined_hist_rept (DUPKEY);
-
-DROP TABLE IF EXISTS work.transmasterdupkey;
-Create table work.transmasterdupkey AS
-SELECT DupKey from Adhoc.combined_hist_rept
-WHERE Journal_Date>=(SELECT MIN(Journal_Date) from  loaddata.newtranshist);
-
-
-
-UPDATE loaddata.newtranshist SET UnDupFlag=1;
-
-UPDATE loaddata.newtranshist SET UnDupFlag=0
-WHERE DupKEY NOT IN (SELECT DISTINCT DupKEY from work.transmasterdupkey);
-
-
-
 #############################################################################
 ########################################################################################
 ########################################################################################
@@ -286,32 +174,6 @@ WHERE DupKEY NOT IN (SELECT DISTINCT DupKEY from work.transmasterdupkey);
 ####################################################
 drop table if exists Adhoc.combined_hist_rept_NEW;
 create table Adhoc.combined_hist_rept_NEW AS
-/*SELECT combined_hist_rept_id,
-	Transaction_Detail,
-	TransMonth,
-    DeptID,
-	Alt_Dept_ID,
-    ##DeptID_Desc,
-	Fund_Code,
-	Program_Code,
-	Source_of_Funds_Code,
-	Flex_Code,
-	Project_Code,
-	ERP_Account_Level_4,
-	Account_Code,
-	Doc_Desc,
-	Doc_Detail,
-	Encumbrance_Description,
-	Journal_ID,
-	Journal_Date,
-	Fiscal_Year,
-    Accounting_Period,
-    Grant_Year,
-	CTSI_Fiscal_Year,
-	Posted_Amount
-from Adhoc.combined_hist_rept
-UNION ALL
-*/
 SELECT 
 	newtranshist_id AS combined_hist_rept_id,
 	Transaction_Detail,
@@ -337,7 +199,7 @@ SELECT
 	CTSI_Fiscal_Year,
 	Posted_Amount
 from loaddata.newtranshist ;
-WHERE UnDupFlag=0;
+
 
 
 
@@ -367,7 +229,7 @@ select CTSI_Fiscal_Year,min(Journal_Date),max(Journal_Date),count(*) from Adhoc.
 ##################################################################################################################
 ##### BACKUP AND RENAME
 /*
-CREATE TABLE Adhoc.comb_hist_report20210727BU AS
+CREATE TABLE Adhoc.comb_hist_report202201BU AS
 SELECT * from Adhoc.combined_hist_rept;
 
 drop table if exists Adhoc.combined_hist_rept;

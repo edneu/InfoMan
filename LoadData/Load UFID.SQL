@@ -42,9 +42,9 @@ select * from loaddata.ufids;
 
 
 
-load data local infile "P:\\My Documents\\My Documents\\Loaddata\\UFIDs20200214.dat" 
+load data local infile "P:\\My Documents\\My Documents\\Loaddata\\ufid20211203.csv" 
 into table loaddata.ufids 
-fields terminated by '\t'
+fields terminated by '|'
 lines terminated by '\n'
 (   UF_UFID,
 UF_DISPLAY_NM,
@@ -90,7 +90,9 @@ select "New Table (loaddata.ufids):",count(*), count(distinct uf_ufid) from load
 UNION ALL 
 select "Current Table: (lookup.ufids)",count(*), count(distinct uf_ufid) from lookup.ufids;
 
-select * from loaddata.ufids;
+select * from loaddata.ufids limit 1000;
+
+delete from loaddata.ufids where recid=1;
 
 select min(UF_UFID), MAX(UF_UFID) from loaddata.ufids ;
 
@@ -108,7 +110,7 @@ Alter table loaddata.ufids
 	ADD ae_Department_Code	varchar(12),			
 	ADD ae_Department	varchar(45),			
 	ADD ae_Employee_ID	varchar(12),			
-	ADD ae_Name	varchar(45),			
+	ADD ae_Name	varchar(255),			
 	ADD ae_FTE	decimal(12,2),		
 	ADD ae_Salary_Plan_Code varchar(5),				
 	ADD ae_Salary_Plan	varchar(45),				
@@ -145,9 +147,9 @@ desc loaddata.ufids;
 
 /*
 
-create table loaddata.backupufid20191029 as select * from lookup.ufids;
-
-drop table lookup.ufids;
+create table loaddata.backupufid20211203 as select * from lookup.ufids;
+SET sql_mode = '';
+drop table if exists lookup.ufids;
 create table lookup.ufids AS
 select * from loaddata.ufids;
 

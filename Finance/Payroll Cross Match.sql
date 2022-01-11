@@ -3,15 +3,15 @@
 
 DROP TABLE IF EXISTS work.pymatch ;
 Create table work.pymatch AS
-Select * from work.payrollmatchjuly21;
+Select * from work.payrollmatchdec21;
 
 select distinct Source from  work.pymatch;
 
 select Source,(count(distinct UFID)) from work.pymatch group by Source;
 
-ALTER TABLE work.pymatch CHANGE `NAME` Employee_Name varchar(255);
+ALTER TABLE work.pymatch CHANGE `Line_Item_Detail` Employee_Name varchar(255);
 
-
+select * from work.pymatch ;
 
 UPDATE work.pymatch pm, work.no_ufids lu
 SET pm.UFID=lu.UFID 
@@ -184,15 +184,34 @@ select * from  work.pymatch;
 
 
 
-SELECT * from lookup.ufids WHERE UF_LAST_NM='Krasnogorska' ;
+SELECT * from lookup.ufids WHERE UF_LAST_NM='Guirgis' ;
 SELECT * from lookup.ufids WHERE UF_LAST_NM='Krasnogorskyi' AND UF_FIRST_NM LIKE 'E%';
 SELECT * from lookup.ufids WHERE UF_LAST_NM='Chamba' ;
 SELECT * from lookup.ufids WHERE UF_LAST_NM='Farrell' AND UF_FIRST_NM LIKE 'C%';
-SELECT * from lookup.ufids WHERE UF_LAST_NM='Neeley' AND UF_FIRST_NM LIKE 'An%';
+SELECT * from lookup.ufids WHERE UF_LAST_NM='caputo' AND UF_FIRST_NM LIKE 'An%';
+
+SELECT * from lookup.ufids WHERE UF_EMAIL='huihu@ufl.edu';
 
 
-select count(distinct STD_PROGRAM) from lookup.roster where YEar in (2021);
- 
- 
- 
+
+Caputo, Anna Maria
+Caton, Tina
+Chamba, Tony
+Edwards, Talethia
+Gwin, Charlie
+Moore
+Thomas, Jessiaca Browder
+
+
+
+SELECT * FROM lookup.Employees
+WHERE Name like 'caputo%a%';
+
+,
+'Jones,Zach',
+'Lemos,Kevin',
+'Lynch,Brittany',
+'Wilson,Jessica');
+
+
  

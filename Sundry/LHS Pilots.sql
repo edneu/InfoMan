@@ -20,3 +20,4 @@ from pilots.PILOTS_MASTER
 where Category='Translational'
 	AND Awarded="Awarded"
     ORDER BY Pilot_ID;
+    

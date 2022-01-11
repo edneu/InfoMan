@@ -1,4 +1,4 @@
-## CLICK_UFIRST_AWARDS_HISTIRY
+## CLICK_UFIRST_AWARDS_HISTORY
 
 DROP TABLE IF EXISTS loaddata.awards_history;
 CREATE TABLE loaddata.awards_history 
@@ -94,7 +94,7 @@ SET GLOBAL local_infile = 1;
 
 
 
-load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory 20210825.rpt" 
+load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory20211203.csv" 
 into table loaddata.awards_history 
 fields terminated by '|'
 lines terminated by '\n'
@@ -194,7 +194,7 @@ SET SQL_SAFE_UPDATES = 0;
 
 
 
-## select * from loaddata.awards_history;
+## select * from loaddata.awards_history limit 10;
 
 
 ###delete from loaddata.awards_history    where awards_history_id=1;
@@ -285,7 +285,8 @@ ADD Roster2016 integer(1),
 ADD Roster2017 integer(1),
 ADD Roster2018 integer(1),
 ADD Roster2019 integer(1),
-ADD Roster2020 integer(1);
+ADD Roster2020 integer(1),
+ADD Roster2021 integer(1);
 
 
 SET SQL_SAFE_UPDATES = 0;
@@ -303,7 +304,8 @@ SET Roster2008=0,
 	Roster2017=0,
 	Roster2018=0,
 	Roster2019=0,
-    Roster2020=0;
+    Roster2020=0,
+    Roster2021=0;
 
 
 #########
@@ -327,7 +329,7 @@ UPDATE loaddata.awards_history ah SET Roster2017=1 Where Year(FUNDS_ACTIVATED)=2
 UPDATE loaddata.awards_history ah SET Roster2018=1 Where Year(FUNDS_ACTIVATED)=2018 AND ah.CLK_PI_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2018 and UFID<>0 AND UFID IS NOT NULL);
 UPDATE loaddata.awards_history ah SET Roster2019=1 Where Year(FUNDS_ACTIVATED)=2019 AND ah.CLK_PI_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2019 and UFID<>0 AND UFID IS NOT NULL);
 UPDATE loaddata.awards_history ah SET Roster2020=1 Where Year(FUNDS_ACTIVATED)=2020 AND ah.CLK_PI_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2020 and UFID<>0 AND UFID IS NOT NULL);
-
+UPDATE loaddata.awards_history ah SET Roster2021=1 Where Year(FUNDS_ACTIVATED)=2021 AND ah.CLK_PI_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2021 and UFID<>0 AND UFID IS NOT NULL);
 
 UPDATE loaddata.awards_history ah SET Roster2008=1 Where Year(FUNDS_ACTIVATED)=2008 AND ah.CLK_AWD_PROJ_MGR_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2009 and UFID<>0 AND UFID IS NOT NULL);  ## USE 2009 roster for 2008 (AT)
 UPDATE loaddata.awards_history ah SET Roster2009=1 Where Year(FUNDS_ACTIVATED)=2009 AND ah.CLK_AWD_PROJ_MGR_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2009 and UFID<>0 AND UFID IS NOT NULL);
@@ -341,8 +343,8 @@ UPDATE loaddata.awards_history ah SET Roster2016=1 Where Year(FUNDS_ACTIVATED)=2
 UPDATE loaddata.awards_history ah SET Roster2017=1 Where Year(FUNDS_ACTIVATED)=2017 AND ah.CLK_AWD_PROJ_MGR_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2017 and UFID<>0 AND UFID IS NOT NULL);
 UPDATE loaddata.awards_history ah SET Roster2018=1 Where Year(FUNDS_ACTIVATED)=2018 AND ah.CLK_AWD_PROJ_MGR_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2018 and UFID<>0 AND UFID IS NOT NULL);
 UPDATE loaddata.awards_history ah SET Roster2019=1 Where Year(FUNDS_ACTIVATED)=2019 AND ah.CLK_AWD_PROJ_MGR_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2019 and UFID<>0 AND UFID IS NOT NULL);
-UPDATE loaddata.awards_history ah SET Roster2020=1 Where Year(FUNDS_ACTIVATED)=2020 AND ah.CLK_AWD_PROJ_MGR_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2019 and UFID<>0 AND UFID IS NOT NULL);
-
+UPDATE loaddata.awards_history ah SET Roster2020=1 Where Year(FUNDS_ACTIVATED)=2020 AND ah.CLK_AWD_PROJ_MGR_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2020 and UFID<>0 AND UFID IS NOT NULL);
+UPDATE loaddata.awards_history ah SET Roster2021=1 Where Year(FUNDS_ACTIVATED)=2021 AND ah.CLK_AWD_PROJ_MGR_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2021 and UFID<>0 AND UFID IS NOT NULL);
 
 #############################################################################################
 #############################################################################################
@@ -354,7 +356,14 @@ UPDATE loaddata.awards_history ah SET Roster2020=1 Where Year(FUNDS_ACTIVATED)=2
 
 SET sql_mode = '';
 SET SQL_SAFE_UPDATES = 0;
-create table loaddata.backupAwardsHistory20210825 AS SELECT * from lookup.awards_history;
+create table loaddata.backupAwardsHistory20211203 AS SELECT * from lookup.awards_history;
+
+
+Select "Old File" AS Measure, Count(*) AS Reccount from lookup.awards_history
+UNION ALL
+Select "New File" AS Measure, Count(*) AS Reccount from loaddata.awards_history;
+
+
 
 
 select distinct (CLK_AWD_PRJ_END_DT) from loaddata.awards_history;
@@ -408,6 +417,20 @@ select min(CLK_AWD_PRJ_END_DT) from lookup.awards_history;
 Select * from loaddata.awards_history where CLK_AWD_PRJ_END_DT IN (SELECT MAX(CLK_AWD_PRJ_END_DT) from loaddata.awards_history)  ;
 
 */
+
+
+Select "Old File" AS Measure, Count(*) AS Reccount from lookup.awards_history
+UNION ALL
+Select "New File" AS Measure, Count(*) AS Reccount from loaddata.awards_history;
+
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
 DROP TABLE IF EXISTS work.CTSI_PI_Funding;
 CREATE TABLE work.CTSI_PI_Funding AS
 SELECT 	YEAR(FUNDS_ACTIVATED) AS FundYear,

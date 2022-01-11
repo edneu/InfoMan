@@ -458,7 +458,7 @@ UPDATE work.porchcensus pc,  work.PorchPeople lu SET PORCH_19_20=1 WHERE pc.Empl
 UPDATE work.porchcensus pc,  work.PorchPeople lu SET PORCH_20_21=1 WHERE pc.Employee_ID=lu.Employee_ID and lu.SFY='SFY 2020-2021' AND lu.Works_with_PoRCH=1;
 
 
-
+SELECT PI_CLASSIFY from work.PedsAwards;
 
 
 #### ADD FUNDING REFERENCE TO porchcensus
@@ -744,3 +744,290 @@ UPDATE work.porchcensus pc, work.irb_summ lu
 #####################################################       
 SELECT * from work.porchcensus;
 
+DROP TABLE IF EXISTS work.porchfactypeagg;
+CREATE TABLE work.porchfactypeagg as
+SELECT FacType,
+     Sum(Peds_17_18) AS Peds_17_18,
+     Sum(Peds_18_19) AS Peds_18_19,
+     Sum(Peds_19_20) AS Peds_19_20,
+     Sum(Peds_20_21) AS Peds_20_21,
+     Sum(PORCH_17_18) AS PORCH_17_18,
+     Sum(PORCH_18_19) AS PORCH_18_19,
+     Sum(PORCH_19_20) AS PORCH_19_20,
+     Sum(PORCH_20_21) AS PORCH_20_21,
+     Sum(FUND_17_18) AS FUND_17_18,
+     Sum(FUND_18_19) AS FUND_18_19,
+     Sum(FUND_19_20) AS FUND_19_20,
+     Sum(FUND_20_21) AS FUND_20_21,
+     Sum(NIH_FUND_17_18) AS NIH_FUND_17_18,
+     Sum(NIH_FUND_18_19) AS NIH_FUND_18_19,
+     Sum(NIH_FUND_19_20) AS NIH_FUND_19_20,
+     Sum(NIH_FUND_20_21) AS NIH_FUND_20_21,
+     Sum(IND_FUND_17_18) AS IND_FUND_17_18,
+     Sum(IND_FUND_18_19) AS IND_FUND_18_19,
+     Sum(IND_FUND_19_20) AS IND_FUND_19_20,
+     Sum(IND_FUND_20_21) AS IND_FUND_20_21,
+     Sum(nPropSub_1718) AS nPropSub_1718,
+     Sum(nPropSub_1819) AS nPropSub_1819,
+     Sum(nPropSub_1920) AS nPropSub_1920,
+     Sum(nPropSub_2021) AS nPropSub_2021,
+     Sum(nPropAwd_1718) AS nPropAwd_1718,
+     Sum(nPropAwd_1819) AS nPropAwd_1819,
+     Sum(nPropAwd_1920) AS nPropAwd_1920,
+     Sum(nPropAwd_2021) AS nPropAwd_2021,
+     Sum(amtPropSub_1718) AS amtPropSub_1718,
+     Sum(amtPropSub_1819) AS amtPropSub_1819,
+     Sum(amtPropSub_1920) AS amtPropSub_1920,
+     Sum(amtPropSub_2021) AS amtPropSub_2021,
+     Sum(amtPropAwd_1718) AS amtPropAwd_1718,
+     Sum(amtPropAwd_1819) AS amtPropAwd_1819,
+     Sum(amtPropAwd_1920) AS amtPropAwd_1920,
+     Sum(amtPropAwd_2021) AS amtPropAwd_2021,
+     Sum(nIRBappr_1718) AS nIRBappr_1718,
+     Sum(nIRBappr_1819) AS nIRBappr_1819,
+     Sum(nIRBappr_1920) AS nIRBappr_1920,
+     Sum(nIRBappr_2021) AS nIRBappr_2021
+  
+from work.porchcensus
+GROUP BY FacType ;
+
+
+DROP TABLE IF EXISTS work.porchwork;
+CREATE TABLE work.porchwork as
+SELECT "Faculty" as Type,
+     Sum(Peds_17_18) AS Peds_17_18,
+     Sum(Peds_18_19) AS Peds_18_19,
+     Sum(Peds_19_20) AS Peds_19_20,
+     Sum(Peds_20_21) AS Peds_20_21,
+     Sum(PORCH_17_18) AS PORCH_17_18,
+     Sum(PORCH_18_19) AS PORCH_18_19,
+     Sum(PORCH_19_20) AS PORCH_19_20,
+     Sum(PORCH_20_21) AS PORCH_20_21,
+     Sum(FUND_17_18) AS FUND_17_18,
+     Sum(FUND_18_19) AS FUND_18_19,
+     Sum(FUND_19_20) AS FUND_19_20,
+     Sum(FUND_20_21) AS FUND_20_21
+FROM  work.porchcensus   
+WHERE FacType IN ('Assistant Professor','Associate Professor','Professor')
+GROUP BY "Faculty"
+UNION ALL 
+SELECT FacType as Type,
+     Sum(Peds_17_18) AS Peds_17_18,
+     Sum(Peds_18_19) AS Peds_18_19,
+     Sum(Peds_19_20) AS Peds_19_20,
+     Sum(Peds_20_21) AS Peds_20_21,
+     Sum(PORCH_17_18) AS PORCH_17_18,
+     Sum(PORCH_18_19) AS PORCH_18_19,
+     Sum(PORCH_19_20) AS PORCH_19_20,
+     Sum(PORCH_20_21) AS PORCH_20_21,
+     Sum(FUND_17_18) AS FUND_17_18,
+     Sum(FUND_18_19) AS FUND_18_19,
+     Sum(FUND_19_20) AS FUND_19_20,
+     Sum(FUND_20_21) AS FUND_20_21
+FROM  work.porchcensus   
+WHERE FacType NOT IN ('Assistant Professor','Associate Professor','Professor')
+GROUP BY FacType;
+
+
+
+DROP TABLE IF EXISTS work.porchwork;
+CREATE TABLE work.porchwork as
+SELECT
+     Sum(FUND_17_18) AS FUND_17_18,
+     Sum(FUND_18_19) AS FUND_18_19,
+     Sum(FUND_19_20) AS FUND_19_20,
+     Sum(FUND_20_21) AS FUND_20_21,
+     
+     Sum(NIH_FUND_17_18) AS NIH_FUND_17_18,
+     Sum(NIH_FUND_18_19) AS NIH_FUND_18_19,
+     Sum(NIH_FUND_19_20) AS NIH_FUND_19_20,
+     Sum(NIH_FUND_20_21) AS NIH_FUND_20_21,
+     
+     Sum(IND_FUND_17_18) AS IND_FUND_17_18,
+     Sum(IND_FUND_18_19) AS IND_FUND_18_19,
+     Sum(IND_FUND_19_20) AS IND_FUND_19_20,
+     Sum(IND_FUND_20_21) AS IND_FUND_20_21,
+
+     Sum(FUND_17_18*PORCH_17_18) AS PRCH_FUND_17_18,
+     Sum(FUND_18_19*PORCH_18_19) AS PRCH_FUND_18_19,
+     Sum(FUND_19_20*PORCH_19_20) AS PRCH_FUND_19_20,
+     Sum(FUND_20_21*PORCH_20_21) AS PRCH_FUND_20_21,
+     
+     Sum(NIH_FUND_17_18*PORCH_17_18) AS PRCH_NIH_FUND_17_18,
+     Sum(NIH_FUND_18_19*PORCH_18_19) AS PRCH_NIH_FUND_18_19,
+     Sum(NIH_FUND_19_20*PORCH_19_20) AS PRCH_NIH_FUND_19_20,
+     Sum(NIH_FUND_20_21*PORCH_20_21) AS PRCH_NIH_FUND_20_21,
+     
+     Sum(IND_FUND_17_18*PORCH_17_18) AS PRCH_IND_FUND_17_18,
+     Sum(IND_FUND_18_19*PORCH_18_19) AS PRCH_IND_FUND_18_19,
+     Sum(IND_FUND_19_20*PORCH_19_20) AS PRCH_IND_FUND_19_20,
+     Sum(IND_FUND_20_21*PORCH_20_21) AS PRCH_IND_FUND_20_21
+
+FROM  work.porchcensus   ;
+  
+  
+  select sum(PORCH_17_18),
+  #######################################################
+  DROP TABLE IF EXISTS work.PorchRecon;
+  create table work.PorchRecon AS
+  select * from work.new_peds_emp;
+  
+
+  select count(*) as N, count(distinct Employee_ID) as nUFID, count(distinct Name) as nName from  work.PorchRecon;
+  
+  
+  select * from lookup.ufids where UF_UFID="58293959";
+  
+  drop table if exists work.temp;
+  create table work.temp as 
+  select Employee_ID,Name from work.emp_assn_peds group by Employee_ID,Name;
+  
+  select count(*) as N, count(distinct Employee_ID) as nUFID, count(distinct Name) as nName from  work.PorchRecon;
+  
+    select Employee_ID, Name, COUNT(*) as nRECS from  work.PorchRecon  group by Employee_ID, Name;
+    
+    
+SELECT * from work.PorchRecon WHERE Employee_ID IN     
+('53264799',
+'55713888',
+'62593021',
+'83481523');
+ 
+ ######################################################### 
+ ######################################################### 
+ ######################################################### 
+ ######################################################### 
+ ######################################################### 
+  DROP TABLE IF EXISTS work.PedsEmptemp;
+  create table work.PedsEmptemp AS
+  select  Employee_ID AS UFID,
+		  max(NAME) as Name
+  from work.PorchRecon
+  GROUP BY Employee_ID
+  UNION ALL 
+  select  Employee_ID AS UFID,
+		  max(NAME) as Name
+  from  work.porchcensus 
+  GROUP BY Employee_ID;
+  
+  DROP TABLE IF EXISTS work.PedsEmp;
+  create table work.PedsEmp AS
+  select  UFID,
+		  max(NAME) as Name
+  from  work.PedsEmptemp
+  GROUP BY UFID
+  ORDER BY UFID;
+   
+  ##############################################################
+ALTER TABLE work.PedsEmp
+  ADD ORIG_HIRE_DT datetime,
+  ADD Hire_Month int(11),
+  ADD EMAIL_ADDR varchar(45),
+  ADD Salary_Admin_Plan_Code varchar(5),
+  ADD Salary_Admin_Plan varchar(45),
+  ADD DEPTID varchar(12),
+  ADD DESCR varchar(45),
+  ADD FIELDVALUE varchar(5),
+
+  ADD FacType varchar(25),
+  ADD Peds_17_18 int(1),
+  ADD Peds_18_19 int(1),
+  ADD Peds_19_20 int(1),
+  ADD Peds_20_21 int(1),
+  ADD PORCH_17_18 int(1),
+  ADD PORCH_18_19 int(1),
+  ADD PORCH_19_20 int(1),
+  ADD PORCH_20_21 int(1),
+  ADD FUND_17_18 decimal(65,10),
+  ADD FUND_18_19 decimal(65,10),
+  ADD FUND_19_20 decimal(65,10),
+  ADD FUND_20_21 decimal(65,10),
+  ADD NIH_FUND_17_18 decimal(65,10),
+  ADD NIH_FUND_18_19 decimal(65,10),
+  ADD NIH_FUND_19_20 decimal(65,10),
+  ADD NIH_FUND_20_21 decimal(65,10),
+  ADD IND_FUND_17_18 decimal(65,10),
+  ADD IND_FUND_18_19 decimal(65,10),
+  ADD IND_FUND_19_20 decimal(65,10),
+  ADD IND_FUND_20_21 decimal(65,10),
+  ADD nPropSub_1718 int(5),
+  ADD nPropSub_1819 int(5),
+  ADD nPropSub_1920 int(5),
+  ADD nPropSub_2021 int(5),
+  ADD nPropAwd_1718 int(5),
+  ADD nPropAwd_1819 int(5),
+  ADD nPropAwd_1920 int(5),
+  ADD nPropAwd_2021 int(5),
+  ADD amtPropSub_1718 decimal(12,2),
+  ADD amtPropSub_1819 decimal(12,2),
+  ADD amtPropSub_1920 decimal(12,2),
+  ADD amtPropSub_2021 decimal(12,2),
+  ADD amtPropAwd_1718 decimal(12,2),
+  ADD amtPropAwd_1819 decimal(12,2),
+  ADD amtPropAwd_1920 decimal(12,2),
+  ADD amtPropAwd_2021 decimal(12,2),
+  ADD nIRBappr_1718 int(5),
+  ADD nIRBappr_1819 int(5),
+  ADD nIRBappr_1920 int(5),
+  ADD nIRBappr_2021 int(5);
+  
+
+SET SQL_SAFE_UPDATES = 0;
+
+     UPDATE work.PedsEmp pe, work.PorchRecon pr SET pe.ORIG_HIRE_DT=pr.ORIG_HIRE_DT WHERE pe.UFID=pr.Employee_ID;
+     UPDATE work.PedsEmp pe, work.PorchRecon pr SET pe.Hire_Month=pr.Hire_Month WHERE pe.UFID=pr.Employee_ID;
+     UPDATE work.PedsEmp pe, work.PorchRecon pr SET pe.EMAIL_ADDR=pr.EMAIL_ADDR WHERE pe.UFID=pr.Employee_ID;
+     UPDATE work.PedsEmp pe, work.PorchRecon pr SET pe.Salary_Admin_Plan_Code=pr.Salary_Admin_Plan_Code WHERE pe.UFID=pr.Employee_ID;
+     UPDATE work.PedsEmp pe, work.PorchRecon pr SET pe.Salary_Admin_Plan=pr.Salary_Admin_Plan WHERE pe.UFID=pr.Employee_ID;
+     UPDATE work.PedsEmp pe, work.PorchRecon pr SET pe.DEPTID=pr.DEPTID WHERE pe.UFID=pr.Employee_ID;
+     UPDATE work.PedsEmp pe, work.PorchRecon pr SET pe.DESCR=pr.DESCR WHERE pe.UFID=pr.Employee_ID;
+     UPDATE work.PedsEmp pe, work.PorchRecon pr SET pe.FIELDVALUE=pr.FIELDVALUE WHERE pe.UFID=pr.Employee_ID;
+
+
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.FacType=pc.FacType WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.Peds_17_18=pc.Peds_17_18 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.Peds_18_19=pc.Peds_18_19 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.Peds_19_20=pc.Peds_19_20 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.Peds_20_21=pc.Peds_20_21 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.PORCH_17_18=pc.PORCH_17_18 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.PORCH_18_19=pc.PORCH_18_19 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.PORCH_19_20=pc.PORCH_19_20 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.PORCH_20_21=pc.PORCH_20_21 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.FUND_17_18=pc.FUND_17_18 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.FUND_18_19=pc.FUND_18_19 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.FUND_19_20=pc.FUND_19_20 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.FUND_20_21=pc.FUND_20_21 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.NIH_FUND_17_18=pc.NIH_FUND_17_18 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.NIH_FUND_18_19=pc.NIH_FUND_18_19 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.NIH_FUND_19_20=pc.NIH_FUND_19_20 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.NIH_FUND_20_21=pc.NIH_FUND_20_21 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.IND_FUND_17_18=pc.IND_FUND_17_18 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.IND_FUND_18_19=pc.IND_FUND_18_19 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.IND_FUND_19_20=pc.IND_FUND_19_20 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.IND_FUND_20_21=pc.IND_FUND_20_21 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.nPropSub_1718=pc.nPropSub_1718 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.nPropSub_1819=pc.nPropSub_1819 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.nPropSub_1920=pc.nPropSub_1920 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.nPropSub_2021=pc.nPropSub_2021 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.nPropAwd_1718=pc.nPropAwd_1718 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.nPropAwd_1819=pc.nPropAwd_1819 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.nPropAwd_1920=pc.nPropAwd_1920 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.nPropAwd_2021=pc.nPropAwd_2021 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.amtPropSub_1718=pc.amtPropSub_1718 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.amtPropSub_1819=pc.amtPropSub_1819 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.amtPropSub_1920=pc.amtPropSub_1920 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.amtPropSub_2021=pc.amtPropSub_2021 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.amtPropAwd_1718=pc.amtPropAwd_1718 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.amtPropAwd_1819=pc.amtPropAwd_1819 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.amtPropAwd_1920=pc.amtPropAwd_1920 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.amtPropAwd_2021=pc.amtPropAwd_2021 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.nIRBappr_1718=pc.nIRBappr_1718 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.nIRBappr_1819=pc.nIRBappr_1819 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.nIRBappr_1920=pc.nIRBappr_1920 WHERE pe.UFID=pc.Employee_ID;
+     UPDATE work.PedsEmp pe, work.porchcensus  pc SET pe.nIRBappr_2021=pc.nIRBappr_2021 WHERE pe.UFID=pc.Employee_ID;
+
+select * from work.PedsEmp; 
+
+#############################################################
+  
+  

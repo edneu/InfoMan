@@ -7,12 +7,11 @@ CREATE TABLE work.Employees AS
 SELECT * from lookup.Employees;
 
 
-
 ## CREATE WORKING COPY OF ActiveEmployee table
 
 DROP TABLE IF EXISTS work.activeemp;
 CREATE TABLE work.activeemp AS
-select * from loaddata.active_emp_20210721;
+select * from work.active_emp_20220104;
 
 
 ## Replace Active Employee File in Lookup
@@ -64,7 +63,7 @@ WHERE Employee_ID NOT IN (SELECT DISTINCT Employee_ID from work.activeemp);
 
 SET SQL_SAFE_UPDATES = 0;
 
-##### ADD EMAIL FROM PERVIOUS Employere File
+##### ADD EMAIL FROM Previous Employere File
 
 
 
@@ -86,7 +85,7 @@ SET SQL_SAFE_UPDATES = 0;
       AND eu.EMAIL IS NULL;      
       
         
-
+CREATE INDEX empidtemp ON work.EmployeeUpdate (Employee_ID);
 
 #### FILL IN MISSING EMAIL FROM UFID FILE
       SET SQL_SAFE_UPDATES = 0; 
@@ -187,7 +186,7 @@ WHERE eu.Employee_ID=lu.UF_UFID
 AND eu.UserName<>lu.UF_USER_NM
 AND lu.UF_USER_NM<>' ';
 
-
+select * from work.EmployeeUpdate;
 ######################################################
 ######################################################
 ######################################################

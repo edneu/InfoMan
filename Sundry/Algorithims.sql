@@ -52,13 +52,13 @@ CREATE INDEX vivoufid on lookup.vivo_pubs (ufid);
 CREATE INDEX ufid ON lookup.ufids (UF_UFID);
 CREATE INDEX email ON lookup.ufids (UF_EMAIL);
 CREATE INDEX UF_USER_NM ON lookup.ufids (UF_USER_NM);
-CREATE INDEX UFID_EMP ON lookup.employees (Employee_ID);
+CREATE INDEX UFID_EMP ON lookup.Employees (Employee_ID);
 CREATE INDEX ufid_Active ON lookup.active_emp (Employee_ID);
 CREATE INDEX rosterid ON lookup.roster (rosterid);
 
 
 
-
+CREATE INDEX UFID ON lookup.Employees (Employee_ID);
 SET SQL_SAFE_UPDATES = 0;
 
 DROP TABLE IF EXISTS work.TableList;
