@@ -641,11 +641,13 @@ create table work.pedpay as
 select * from loaddata.PedsEmp181920;
 
 ### ADD Porch Indicators
+/*
 ALter table work.pedpay
 ADD PORCH_17_18	int(1),
 ADD PORCH_18_19	int(1),
 ADD PORCH_19_20	int(1),
 ADD PORCH_20_21	int(1);
+*/
 
 CREATE INDEX ufid_pedpay ON work.pedpay (UFID);
 CREATE INDEX ufid_pedemp ON work.PedsEmp (UFID);
@@ -666,12 +668,6 @@ SET     pe.PORCH_17_18=lu.PORCH_17_18,
         pe.PORCH_20_21=lu.PORCH_20_21
 WHERE pe.UFID=lu.UFID;
 
-desc work.pedpay ;
-
-
-
-
-
 
 
 Alter table  work.pedpay 	
@@ -689,15 +685,15 @@ SET po.CurrentJobTitle=lu.Job_Code,
 WHERE po.UFID=lu.Employee_ID;
 
 
-select * from work.pedpay;
+### select * from work.pedpay;
 
 
-select CurrentJobTitle,EmployeeGroup,FacType, count(*) as nRECs, Count(distinct UFID) as nUFID
+select CurrentJobTitle,EmployeeGroup,FacType,  Faculty, count(*) as nRECs, Count(distinct UFID) as nUFID
 from  work.pedpay 
 WHERE CurrentJobTitle in (select distinct CurrentJobTitle from  work.pedpay WHERE FacType is Null)
-GROUP BY CurrentJobTitle,EmployeeGroup, FacType; 
+GROUP BY CurrentJobTitle,EmployeeGroup, FacType, Faculty; 
 
-Select distinct factype from work.pedpay;
+##Select distinct factype from work.pedpay;
 
     Update work.pedpay SET FacType='Faculty' WHERE EmployeeGroup='COM_CLINICAL_FAC' AND FacType IS null;
     Update work.pedpay SET FacType='Faculty' WHERE EmployeeGroup='FACULTY' AND FacType IS null;
@@ -706,14 +702,17 @@ Select distinct factype from work.pedpay;
     Update work.pedpay SET FacType='Non-Faculty' WHERE EmployeeGroup='OPSOTHER' AND FacType IS null;
     Update work.pedpay SET FacType='Non-Faculty' WHERE EmployeeGroup='STUDASST' AND FacType IS null;
     Update work.pedpay SET FacType='Non-Faculty' WHERE EmployeeGroup='TEMP' AND FacType IS null;
-    Update work.pedpay SET FacType='Resident' WHERE EmployeeGroup='RESIDENTS' AND FacType IS null;
-    Update work.pedpay SET FacType='Trainee' WHERE EmployeeGroup='GRADASSTS' AND FacType IS null;
-    Update work.pedpay SET FacType='Trainee' WHERE EmployeeGroup='POST_DOCS' AND FacType IS null;
+    Update work.pedpay SET FacType='Trainee' WHERE EmployeeGroup='RESIDENTS' ;
+    Update work.pedpay SET FacType='Trainee' WHERE EmployeeGroup='GRADASSTS' ;
+    Update work.pedpay SET FacType='Trainee' WHERE EmployeeGroup='POST_DOCS' ;
+    Update work.pedpay SET FacType='Trainee' WHERE EmployeeGroup='FELLOW' ;
 
 
 
 
-######
+###### VERIFY
+
+/*
 SELECT SFY_Source, Count(*) as nRECS from work.pedpay  group by SFY_Source;
 
 SELECT Dept, Count(*) as nRECS from work.pedpay  group by Dept;
@@ -745,3 +744,297 @@ SELECT CostCenterCalc, Count(*) as nRECS from work.pedpay group by CostCenterCal
 SELECT PayEnd, Count(*) as nRECS from work.pedpay group by PayEnd;
 SELECT AccountingDate, Count(*) as nRECS from work.pedpay group by AccountingDate;
 SELECT EmployeeRecord, Count(*) as nRECS from work.pedpay group by EmployeeRecord;
+
+*/
+
+
+Alter table work.pedpay ADD Faculty varchar(12),
+						ADD SFY varchar(15),
+						ADD In_Porch varchar(25);
+                        
+                        
+UPDATE  work.pedpay SET Faculty = "Non-Faculty";
+
+UPDATE  work.pedpay SET Faculty = "Faculty"
+WHERE FacType IN
+(
+'Assistant Professor',
+'Associate Professor',
+'Faculty',
+'Professor',
+'Other Faculty');
+
+
+
+
+Update work.pedpay SET SFY="SFY 2017-2018" WHERE SFY_Source=2018;
+Update work.pedpay SET SFY="SFY 2018-2019" WHERE SFY_Source=2019;
+Update work.pedpay SET SFY="SFY 2019-2020" WHERE SFY_Source=2020;
+
+
+UPDATE work.pedpay SET In_Porch="Non Porch";
+
+UPDATE work.pedpay SET In_Porch="Porch Particpant" WHERE SFY="SFY 2017-2018" AND PORCH_17_18=1;
+UPDATE work.pedpay SET In_Porch="Porch Particpant" WHERE SFY="SFY 2018-2019" AND PORCH_18_19=1;
+UPDATE work.pedpay SET In_Porch="Porch Particpant" WHERE SFY="SFY 2019-2020" AND PORCH_19_20=1;
+
+
+### CLEAN UP FACTYPE AND FACULTY
+SET SQL_SAFE_UPDATES = 0;
+UPDATE work.pedpay SET FacTYpe='Assistant Professor' WHERE CurrentJobTitle='ASO DEAN & CLIN AST PROF';
+UPDATE work.pedpay SET FacTYpe='Assistant Professor' WHERE CurrentJobTitle='CO RES AST PROF';
+UPDATE work.pedpay SET FacTYpe='Associate Professor' WHERE CurrentJobTitle='CO RES ASO PROF';
+UPDATE work.pedpay SET FacTYpe='Associate Professor' WHERE CurrentJobTitle='JNT ASO PROF';
+UPDATE work.pedpay SET FacTYpe='Associate Professor' WHERE CurrentJobTitle='JNT AST PROF';
+UPDATE work.pedpay SET FacTYpe='Professor' WHERE CurrentJobTitle='AFFL PROF';
+UPDATE work.pedpay SET FacTYpe='Professor' WHERE CurrentJobTitle='ASO PRG DIR & CLIN PROFESSOR';
+UPDATE work.pedpay SET FacTYpe='Professor' WHERE CurrentJobTitle='CO CLIN PROF';
+UPDATE work.pedpay SET FacTYpe='Professor' WHERE CurrentJobTitle='JNT PROF';
+UPDATE work.pedpay SET FacTYpe='Associate Professor' WHERE CurrentJobTitle='AFFL ASO PROF';
+UPDATE work.pedpay SET FacTYpe='Other Faculty' WHERE FacType='Faculty';
+
+
+UPDATE work.pedpay SET Faculty='Faculty' WHERE EmployeeGroup='COM_CLINICAL_FAC';
+UPDATE work.pedpay SET Faculty='Faculty' WHERE EmployeeGroup='FACULTY';
+UPDATE work.pedpay SET Faculty='Non-Faculty' WHERE EmployeeGroup='EXEMPT_TEAMS_USPS';
+UPDATE work.pedpay SET Faculty='Non-Faculty' WHERE EmployeeGroup='GRADASSTS';
+UPDATE work.pedpay SET Faculty='Non-Faculty' WHERE EmployeeGroup='NONEXEMPT_TEAMS_USPS';
+UPDATE work.pedpay SET Faculty='Non-Faculty' WHERE EmployeeGroup='OPSOTHER';
+UPDATE work.pedpay SET Faculty='Non-Faculty' WHERE EmployeeGroup='POST_DOCS';
+UPDATE work.pedpay SET Faculty='Non-Faculty' WHERE EmployeeGroup='RESIDENTS';
+UPDATE work.pedpay SET Faculty='Non-Faculty' WHERE EmployeeGroup='TEMP';
+
+UPDATE work.pedpay SET FacType='Faculty' WHERE EmployeeGroup='FACULTY' AND FacType='Non-Faculty';
+
+UPDATE work.pedpay SET Faculty='Faculty' 
+WHERE CurrentJobTitle IN (	'ADJ CLIN AST PROF',
+							'AFFL CLIN AST PROF',
+                            'AST PROF')
+AND EmployeeGroup="EXEMPT_TEAMS_USPS";
+
+
+
+
+UPDATE work.pedpay SET FacType='Other Faculty' WHERE  EmployeeGroup='FACULTY' 
+AND FacType='Faculty' 
+AND CurrentJobTitle IN ( 	'ACADEMIC LUMP SUM PAYMENT',
+							'AST IN',
+							'Clinical Programs Coord III',
+							'OPS-Spons Prjs Non-Clerical',
+							'RES AST SCTST');
+
+
+UPDATE work.pedpay SET FacType='Trainee' , Faculty='Non-Faculty' WHERE EmployeeGroup='FELLOW' ;
+UPDATE work.pedpay SET FacType='Trainee' WHERE EmployeeGroup='GRADASSTS';
+UPDATE work.pedpay SET FacType='Trainee' WHERE EmployeeGroup='POST_DOCS';
+
+UPDATE work.pedpay SET Faculty='Faculty' , FacType='Non-Faculty' WHERE EmployeeGroup='TEMP' AND FacType<>'Non-Faculty';
+
+
+UPDATE work.pedpay SET Faculty='Faculty' , FacType='Non-Faculty' WHERE  EmployeeGroup='OPSOTHER' 
+AND CurrentJobTitle IN ('AST SCTST','Biological Scientist IV');
+
+UPDATE work.pedpay SET Factype="Other Faculty" , Faculty="Faculty"
+	WHERE EmployeeGroup="COM_CLINICAL_FAC"
+    AND CurrentJobTitle IN
+				('OPS - Healthcare','OPS LUMP SUM PAYMENT')
+    AND FacType="Non-Faculty";
+
+UPDATE work.pedpay SET Factype="Assistant Professor" , Faculty="Faculty", CurrentJobTitle="AST PROF"
+	WHERE EmployeeGroup="COM_CLINICAL_FAC" 
+    AND FacType='Trainee'
+    AND CurrentJobTitle="RESIDENT";
+
+UPDATE work.pedpay SET Faculty="Non-Faculty"
+	WHERE EmployeeGroup="OPSOTHER" 
+    AND FacType='Non-Faculty'
+    AND CurrentJobTitle IN
+   ('AST SCTST', 'Biological Scientist IV');
+
+
+
+UPDATE work.pedpay SET Faculty="Non-Faculty", FacType="Non-Faculty"
+WHERE EmployeeGroup='EXEMPT_TEAMS_USPS'
+AND Faculty='Non-Faculty'
+AND FacType='Other Faculty';
+
+UPDATE work.pedpay SET Faculty="Faculty", FacType="Assistant Professor", CurrentJobTitle="AST PROF"
+WHERE EmployeeGroup='FACULTY'
+AND Faculty='Faculty'
+AND FacType='Trainee';
+
+
+UPDATE work.pedpay SET Faculty="Faculty", FacType="Assistant Professor"
+WHERE EmployeeGroup='OPSOTHER'
+AND Faculty='Non-Faculty'
+AND FacType='Assistant Professor';
+
+
+UPDATE work.pedpay SET Faculty="Faculty"
+WHERE EmployeeGroup='OPSOTHER'
+AND Faculty='Non-Faculty'
+AND FacType='Professor';
+
+UPDATE work.pedpay SET FacType="Assistant Professor"
+WHERE EmployeeGroup='TEMP'
+AND Faculty='Faculty'
+AND FacType='Non-Faculty'
+AND CurrentJobTitle IN 
+('ADJ CLIN AST PROF',
+'CLIN AST PROF');
+
+
+UPDATE work.pedpay SET FacType="Associate Professor"
+WHERE EmployeeGroup='TEMP'
+AND Faculty='Faculty'
+AND FacType='Non-Faculty'
+AND CurrentJobTitle IN 
+('ADJ ASO PROF',
+'CLIN ASO PROF');
+
+
+UPDATE work.pedpay SET FacType="Professor"
+WHERE EmployeeGroup='TEMP'
+AND Faculty='Faculty'
+AND FacType='Non-Faculty'
+AND CurrentJobTitle IN 
+('ADJ PROF');
+
+UPDATE work.pedpay SET FacType='Non-Faculty'
+WHERE Faculty='Non-Faculty'
+AND FacType='Other Faculty';
+
+
+
+
+
+
+##########################################################################################################################
+
+
+### 1
+drop table if exists work.ltout;
+create table work.ltout as
+Select 	SFY, 
+		Faculty, 
+        Count(distinct UFID) as Undup, 
+        Sum(Salary+FringeAmt) as Pay 
+FROM work.pedpay
+GROUP BY SFY, Faculty ;
+
+
+#### 2
+drop table if exists work.ltout;
+create table work.ltout as
+Select 	SFY, 
+        In_Porch, 
+        Count(distinct UFID) as Undup, 
+        Sum(Salary+FringeAmt) as Pay 
+FROM work.pedpay
+WHERE Faculty="Faculty"
+GROUP BY SFY, In_Porch;
+
+#### 3
+drop table if exists work.ltout;
+create table work.ltout as
+Select 	SFY, 
+        FacType,
+        Count(distinct UFID) as Undup, 
+        Sum(Salary+FringeAmt) as Pay 
+FROM work.pedpay
+WHERE Faculty="Faculty"
+AND In_porch='Porch Particpant'
+GROUP BY SFY, FacType;
+
+
+
+#### 4
+drop table if exists work.ltout;
+create table work.ltout as
+Select 	SFY, 
+        FacType,
+        Count(distinct UFID) as Undup, 
+        Sum(Salary+FringeAmt) as Pay 
+FROM work.pedpay
+WHERE Faculty="Faculty"
+GROUP BY SFY, FacType;
+
+##################################################################################################
+##################################################################################################
+
+
+
+
+drop table if exists work.ltout;
+create table work.ltout as
+Select 	SFY, 
+		EmployeeGroup, 
+        Count(distinct UFID) as Undup, 
+        Sum(Salary+FringeAmt) as Pay 
+FROM work.pedpay
+GROUP BY SFY, EmployeeGroup;
+
+
+
+drop table if exists work.ltout2;
+create table work.ltout2 as
+select EmployeeGroup, Faculty, FacType,CurrentJobTitle, count(*) as N
+FROM work.pedpay
+group by EmployeeGroup, Faculty, FacType, CurrentJobTitle;
+
+
+drop table if exists work.ltout2;
+create table work.ltout2 as
+select EmployeeGroup, Faculty, FacType, count(*) as N
+FROM work.pedpay
+group by EmployeeGroup, Faculty, FacType;
+
+
+drop table if exists work.ltout;
+create table work.ltout as
+Select 	SFY, 
+		Faculty, 
+        In_Porch, 
+        Count(distinct UFID) as Undup, 
+        Sum(Salary+FringeAmt) as Pay 
+FROM work.pedpay
+GROUP BY SFY, Faculty, In_Porch;
+
+
+
+
+
+
+drop table if exists work.ltout;
+create table work.ltout as
+Select 	SFY,
+        FacType,
+        In_Porch, 
+        Count(distinct UFID) as Undup, 
+        Sum(Salary+FringeAmt) as Pay 
+FROM work.pedpay
+WHERE Faculty="Faculty"
+GROUP BY SFY, Factype,  In_Porch;
+
+
+
+select * from work.pedpay
+where FacType="Trainee"
+AND Faculty="Faculty";
+
+
+
+
+
+
+
+
+drop table if exists work.ltout2;
+create table work.ltout2 as
+select EmployeeGroup, Faculty, FacType,CurrentJobTitle, count(*) as N
+FROM work.pedpay
+WHERE Faculty='Non-Faculty'
+AND FacType='Other Faculty'
+group by EmployeeGroup, Faculty, FacType, CurrentJobTitle;
+
+select Factype, Faculty, count(*) from work.pedpay group by Factype, Faculty;

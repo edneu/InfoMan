@@ -4,12 +4,15 @@
 ### LOAD FROM EXCEL SPREADHEET
 ### This proceduuyre assumes that the Cumulative transaction file and Secim File are laoded (NO Appending)
 
-create table loaddata.newtranshist202112 as SELECT * from loaddata.newtranshist_id;
+create table loaddata.newtranshist202203 as 
+SELECT * from loaddata.newtranshist202204;
 
+desc loaddata.newtranshist202203;
+##drop table loaddata.newtranshist202203 ;
 
 select "Combined Hist" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords, sum(Posted_Amount) as Total from Adhoc.combined_hist_rept
 UNION ALL
-select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) AS nRecords, sum(Posted_Amount) as Total  from loaddata.newtranshist202201;
+select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) AS nRecords, sum(Posted_Amount) as Total  from loaddata.newtranshist202204;
 
 desc loaddata.newtranshist;
 
@@ -21,7 +24,7 @@ desc loaddata.newtranshist;
 
 drop table if exists loaddata.newtranshist;
 Create table loaddata.newtranshist as
-SELECT * from  loaddata.newtranshist202201;
+SELECT * from  loaddata.newtranshist202204;
 
 
 ALTER TABLE loaddata.newtranshist	ADD UnDupFlag int(1),
@@ -31,7 +34,7 @@ select * from loaddata.newtranshist;
 
 SET SQL_SAFE_UPDATES = 0;
 
-Alter table loaddata.newtranshist CHANGE newtranshist202110_id newtranshist_id int(11);
+### Alter table loaddata.newtranshist CHANGE newtranshist202110_id newtranshist_id int(11);
 
 
 #############################################################################
@@ -229,7 +232,7 @@ select CTSI_Fiscal_Year,min(Journal_Date),max(Journal_Date),count(*) from Adhoc.
 ##################################################################################################################
 ##### BACKUP AND RENAME
 /*
-CREATE TABLE Adhoc.comb_hist_report202201BU AS
+CREATE TABLE Adhoc.comb_hist_report202204BU AS
 SELECT * from Adhoc.combined_hist_rept;
 
 drop table if exists Adhoc.combined_hist_rept;
