@@ -1,0 +1,89 @@
+﻿****  PACE RATE SHEETS ALL MEDICARE ELIGIBITY GROUPS (0,4,5).
+
+
+GET  FILE='C:\Documents and Settings\user\Desktop\EdNeuRates2013\CAPFILE1112.sav' .
+
+
+SELECT IF MCARE='4' OR MCARE='5' OR (MCARE='0' & ELIG='2'). 
+SELECT IF DIVELIG=1.
+SELECT IF AGE>=55.
+*SELECT IF (CommPct>=.5).
+SELECT IF PACE_BUCKET=1.
+EXECUTE.
+
+
+
+****** FOR RATES.
+
+
+*****       CR.FOR RATES.
+
+
+SORT CASES BY MCARE (A) MONTH (A) RECIPID (A) BUCKET (A) .
+EXECUTE.
+COMPUTE CASEMON=1.
+EXECUTE.
+IF MCARE=LAG(MCARE) & MONTH=LAG(MONTH) & RECIPID=LAG(RECIPID) CASEMON=0.
+EXECUTE.
+
+
+SAVE OUTFILE='C:\Documents and Settings\user\Desktop\EdNeuRates2013\PACE WORK FILE.sav'   /COMPRESSED.
+
+
+
+sort cases by MCARE (A) SFY (A) BUCKET(A) RECIPID (A). 
+COMPUTE CD_PSA=1.
+IF MCARE=lag(MCARE) & SFY=LAG(SFY) & RECIPID=LAG(RECIPID) AND BUCKET=LAG(BUCKET) CD_PSA=0.
+EXECUTE.
+
+
+AGGREGATE
+  /OUTFILE='C:\Documents and Settings\user\Desktop\EdNeuRates2013\PACE_RATESHEET AGG.sav'
+  /BREAK=MCARE SFY bucket
+  /PAID = SUM(amount) /UOS = SUM(units) /UNDUP = SUM(cd_PSA) /CLAIMS=SUM(CLAIMS)/ CM = SUM(CASEMON).
+EXECUTE.
+
+GET   FILE'C:\Documents and Settings\user\Desktop\EdNeuRates2013\PACE_RATESHEET AGG.sav'.
+
+
+SORT CASES BY MCARE (A) SFY (A) BUCKET (A).
+EXECUTE.
+
+ADD VALUE LABELS MCARE  0 'XIX Only'
+                                               4 'B Only'
+                                               5 'A&B'.
+
+SAVE OUTFILE='C:\Documents and Settings\user\Desktop\EdNeuRates2013\PACE RATE SHEET SEPT2013.sav'
+ /COMPRESSED.
+
+SUMMARIZE
+  /TABLES=CM UNDUP CLAIMS UOS PAID BY MCARE BY SFY BY BUCKET
+  /FORMAT=NOLIST TOTAL
+  /TITLE='PACE EXPERIENCE'
+  /MISSING=VARIABLE
+  /CELLS=SUM .
+
+GET FILE='C:\Documents and Settings\user\Desktop\EdNeuRates2013\PACE WORK FILE.sav' .
+
+COMPUTE UNDUP=1.
+SORT CASES BY MCARE (A) SFY (A) SSN (A).
+IF MCARE=LAG(MCARE) AND SFY=LAG(SFY) AND SSN=LAG(SSN) UNDUP=0.
+EXECUTE.
+
+SELECT IF UNDUP=1.
+EXECUTE .
+
+SAVE OUTFILE='C:\Documents and Settings\user\Desktop\EdNeuRates2013\PACE SFY SSN ARF.sav'  /COMPRESSED.
+
+ADD VALUE LABELS MCARE  0 'XIX Only'
+                                               4 'B Only'
+                                               5 'A&B'.
+
+
+SUMMARIZE
+  /TABLES=ARF  ARF2 BY MCARE
+  /FORMAT=NOLIST TOTAL
+  /TITLE='PACE BASE POPULATION ARF'
+  /MISSING=VARIABLE
+  /CELLS=MEAN COUNT .
+

@@ -1,0 +1,98 @@
+﻿*****       CR.Example of 1/1/2006 - 6/30/2006 Rates
+*****       CR.Example uses 2002-2003 and 2003-2004 CAP FILE CALLED "CAP FILE 0204"
+
+*****       CR.NEW METHODOLOGY
+*****       CR.TWO YEAR  
+*****       CR.Increase ADA and ALE Buckets by 30% (In inflation factors)
+****       CR. Statewide Base Rate
+****       CR.Statewide ARF adjustment
+****       CR.Plan Specific Adjustment for ARF and NH.
+
+
+******       CR.SCENARIOS FROM HERE *****.
+******       CR.NURSING HOME DIVERSION
+
+GET  FILE='C:\Documents and Settings\user\Desktop\EdNeuRates2013\CAPFILE1112.sav' .
+
+*SELECT IF DIVELIG=1.
+*SELECT IF MCARE~='0'.
+*SELECT IF AGE>=65.
+*SELECT IF CommPct>=.5.
+*SELECT IF NHD_BUCKET=1.
+*EXECUTE.
+
+FREQUENCIES VARIABLES=NHD_BUCKET CommPct AGE MCARE divelig
+  /ORDER=ANALYSIS.
+
+SUMMARIZE
+  /TABLES=AMOUNT BY BUCKET
+  /FORMAT=NOLIST TOTAL
+  /TITLE='MCARE 65+'
+  /MISSING=VARIABLE
+  /CELLS=COUNT MEAN SUM MIN MAX.
+*****       CR.FOR RATES.
+
+
+SORT CASES BY RECIPID (A) MONTH (A) BUCKET (A).
+EXECUTE.
+COMPUTE CASEMON=1.
+EXECUTE.
+IF MONTH=LAG(MONTH) & RECIPID=LAG(RECIPID) CASEMON=0.
+EXECUTE.
+
+
+SAVE OUTFILE='C:\Documents and Settings\user\Desktop\EdNeuRates2013\NHD WORK FILE.sav'   /COMPRESSED.
+
+
+
+sort cases by SFY (A) BUCKET(A) RECIPID (A). 
+COMPUTE CD_PSA=1.
+IF SFY=LAG(SFY) & RECIPID=LAG(RECIPID) AND BUCKET=LAG(BUCKET) CD_PSA=0.
+EXECUTE.
+
+
+AGGREGATE
+  /OUTFILE='C:\Documents and Settings\user\Desktop\EdNeuRates2013\NHD_RATESHEET AGG.sav'
+  /BREAK=SFY bucket
+  /PAID = SUM(amount) /UOS = SUM(units) /UNDUP = SUM(cd_PSA) /CLAIMS=SUM(CLAIMS)/ CM = SUM(CASEMON).
+EXECUTE.
+
+GET   FILE='C:\Documents and Settings\user\Desktop\EdNeuRates2013\NHD_RATESHEET AGG.sav'.
+SORT CASES BY BUCKET (A).
+
+
+SORT CASES BY SFY (A) BUCKET (A).
+EXECUTE.
+
+
+SAVE OUTFILE='C:\Documents and Settings\user\Desktop\EdNeuRates2013\NHD RATE SHEET SEPT13.sav'
+ /COMPRESSED.
+
+SUMMARIZE
+  /TABLES=CM UNDUP CLAIMS UOS PAID BY SFY BY bucket
+  /FORMAT=NOLIST TOTAL
+  /TITLE='Case Summaries'
+  /MISSING=VARIABLE
+  /CELLS=SUM .
+
+
+GET FILE='C:\Documents and Settings\user\Desktop\EdNeuRates2013\NHD WORK FILE.sav' .
+
+COMPUTE UNDUP=1.
+SORT CASES BY SFY (A) RECIPID (A).
+IF SFY=LAG(SFY) AND RECIPID=LAG(RECIPID) UNDUP=0.
+EXECUTE.
+
+SELECT IF UNDUP=1.
+EXECUTE .
+
+SAVE OUTFILE='C:\Documents and Settings\user\Desktop\EdNeuRates2013\SFY SSN ARF.sav'  /COMPRESSED.
+
+SUMMARIZE
+  /TABLES=ARF  ARF2 BY SFY
+  /FORMAT=NOLIST TOTAL
+  /TITLE='Case Summaries'
+  /MISSING=VARIABLE
+  /CELLS=mean COUNT .
+
+
