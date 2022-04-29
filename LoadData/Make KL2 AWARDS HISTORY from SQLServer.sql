@@ -1,7 +1,7 @@
 ## CLICK_UFIRST_AWARDS_HISTORY
 
-DROP TABLE IF EXISTS loaddata.awards_history;
-CREATE TABLE loaddata.awards_history 
+DROP TABLE IF EXISTS work.kl2_awards_history;
+CREATE TABLE work.kl2_awards_history 
 (
 	`awards_history_id` Integer auto_increment primary key,
 	`CLK_AWD_ID` Varchar(12) not null,
@@ -92,10 +92,10 @@ CREATE TABLE loaddata.awards_history
 
 SET GLOBAL local_infile = 1;
 
+##C:\Users\edneu\Dropbox (UFL)\Active Projects\TWD Awards Etc
 
-
-load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory20220429.dat" 
-into table loaddata.awards_history 
+load data local infile "P:\\edneu\\Dropbox (UFL)\\Active Projects\\TWD Awards Etc\\KL2 AWDS 2022-04-29.dat" 
+into table work.kl2_awards_history 
 fields terminated by '|'
 lines terminated by '\n'
 IGNORE 1 LINES
@@ -356,7 +356,7 @@ UPDATE loaddata.awards_history ah SET Roster2021=1 Where Year(FUNDS_ACTIVATED)=2
 
 SET sql_mode = '';
 SET SQL_SAFE_UPDATES = 0;
-create table loaddata.backupAwardsHistory20220429 AS SELECT * from lookup.awards_history;
+create table loaddata.backupAwardsHistory20211203 AS SELECT * from lookup.awards_history;
 
 
 Select "Old File" AS Measure, Count(*) AS Reccount from lookup.awards_history
