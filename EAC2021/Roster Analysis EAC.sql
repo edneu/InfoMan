@@ -7,6 +7,13 @@ WHERE Display_College not In ('Non-Academic','Non-UF')
 group by Display_College;
 
 
+SelecT  ctsi_year,year,count(*) from lookup.roster  group by ctsi_year,year;
+
+UPDATE lookup.roster SET ctsi_year='2018-2021' WHERE ctsi_year='2018-2020';
+
+UPDATE lookup.roster SET ctsi_year='2018-2021' WHERE year in (2018,2019,2020,2021,2022);
+
+
 ####Undup Fac BY ype and Grouped Year
 drop table if exists work.grYearFac;
 create table work.grYearFac AS
@@ -238,8 +245,10 @@ Select max('2019') as Year,COUNT(DISTINCT CLK_AWD_ID) AS nAwards,SUM(SPONSOR_AUT
 UNION ALL
 Select max('2020') as Year,COUNT(DISTINCT CLK_AWD_ID) AS nAwards,SUM(SPONSOR_AUTHORIZED_AMOUNT) AS Amt from lookup.awards_history WHERE Roster2020=1 
 UNION ALL
+Select max('2021') as Year,COUNT(DISTINCT CLK_AWD_ID) AS nAwards,SUM(SPONSOR_AUTHORIZED_AMOUNT) AS Amt from lookup.awards_history WHERE Roster2021=1 
+UNION ALL
 Select max('ALL') as Year,COUNT(DISTINCT CLK_AWD_ID) AS nAwards,SUM(SPONSOR_AUTHORIZED_AMOUNT) AS Amt from lookup.awards_history
-WHERE (Roster2009+Roster2010+Roster2011+Roster2012+Roster2013+Roster2014+Roster2015+Roster2016+Roster2017+Roster2018+Roster2019+Roster2020)>0;
+WHERE (Roster2009+Roster2010+Roster2011+Roster2012+Roster2013+Roster2014+Roster2015+Roster2016+Roster2017+Roster2018+Roster2019+Roster2020+Roster2021)>0;
 ;
 
 
@@ -288,6 +297,54 @@ SELECT Year(FUNDS_ACTIVATED) AS Year, COUNT(DISTINCT CLK_AWD_ID) AS nAwards,SUM(
 
 
 
+#####################
+SELeCT distinct UserClass from lookup.roster;
+
+## FACULTY
+select year,max("Faculty") AS UserClass,count(distinct Person_key) as Undup from lookup.roster WHERE UserCLass IN ('UF Faculty','FSU Faculty') OR Faculty='Faculty' group by Year;
+
+## NON FACULTY
+select year,max("Non-Faculty") AS UserClass,count(distinct Person_key) as Undup from lookup.roster 
+WHERE UserCLass NOT IN ('UF Faculty','FSU Faculty','UF Research Professtionals','FSU Research Professtionals','UF Grad Student / Trainee') OR Faculty<>'Faculty' group by Year;
 
 
+### TRAINEE
+select year,max("trainee") as UserClass,count(distinct Person_key) as Undup from lookup.roster WHERE UserCLass ='UF Grad Student / Trainee' group by Year;
+
+## OTHER REASEARCH PERSONNEL
+select year,Max("Other Research Personnel") as UserClass ,count(distinct Person_key) as Undup from lookup.roster 
+WHERE UserClass IN ('UF Research Professtionals','FSU Research Professtionals') group by Year;
+
+
+### Total UNdup
+select year,count(distinct Person_key) as Undup from lookup.roster  group by Year;
+
+## Assistant Professors
+select year,count(distinct Person_key) as Undup from lookup.roster 
+WHERE FacType="Assistant Professor"  group by Year;
+
+
+
+########### UNDUP ALL YEARS
+
+## FACULTY
+select "Faculty" AS UserClass,count(distinct Person_key) as Undup from lookup.roster WHERE UserCLass IN ('UF Faculty','FSU Faculty') OR Faculty='Faculty' 
+UNION ALL
+## NON FACULTY
+select"Non-Faculty" AS UserClass,count(distinct Person_key) as Undup from lookup.roster 
+WHERE UserCLass NOT IN ('UF Faculty','FSU Faculty','UF Research Professtionals','FSU Research Professtionals','UF Grad Student / Trainee') OR Faculty<>'Faculty' 
+UNION ALL
+### TRAINEE
+select "trainee" as UserClass,count(distinct Person_key) as Undup from lookup.roster WHERE UserCLass ='UF Grad Student / Trainee' 
+UNION ALL
+## OTHER REASEARCH PERSONNEL
+select "Other Research Personnel" as UserClass ,count(distinct Person_key) as Undup from lookup.roster 
+WHERE UserClass IN ('UF Research Professtionals','FSU Research Professtionals') 
+UNION ALL
+### Total UNdup
+select "Total Undup" AS UserClass ,count(distinct Person_key) as Undup from lookup.roster
+UNION ALL
+## Assistant Professors
+select "Ast Prof" AS UserClass,count(distinct Person_key) as Undup from lookup.roster 
+WHERE FacType="Assistant Professor";
 

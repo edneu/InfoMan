@@ -4,15 +4,17 @@
 ### LOAD FROM EXCEL SPREADHEET
 ### This proceduuyre assumes that the Cumulative transaction file and Secim File are laoded (NO Appending)
 
-create table loaddata.newtranshist202203 as 
-SELECT * from loaddata.newtranshist202204;
+create table loaddata.newtranshist202205 as 
+SELECT * from loaddata.page1;
 
-desc loaddata.newtranshist202203;
-##drop table loaddata.newtranshist202203 ;
+desc loaddata.newtranshist202205;
+##drop table loaddata.newtranshist202205 ;
+
+desc Adhoc.combined_hist_rept;
 
 select "Combined Hist" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords, sum(Posted_Amount) as Total from Adhoc.combined_hist_rept
 UNION ALL
-select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) AS nRecords, sum(Posted_Amount) as Total  from loaddata.newtranshist202204;
+select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) AS nRecords, sum(Posted_Amount) as Total  from loaddata.newtranshist202205;
 
 desc loaddata.newtranshist;
 
@@ -24,7 +26,7 @@ desc loaddata.newtranshist;
 
 drop table if exists loaddata.newtranshist;
 Create table loaddata.newtranshist as
-SELECT * from  loaddata.newtranshist202204;
+SELECT * from  loaddata.newtranshist202205;
 
 
 ALTER TABLE loaddata.newtranshist	ADD UnDupFlag int(1),
@@ -169,7 +171,7 @@ select * from  loaddata.newtranshist  where Alt_Dept_ID is null;
 
 
 
-
+desc loaddata.newtranshist ;
 
 
 
@@ -178,7 +180,7 @@ select * from  loaddata.newtranshist  where Alt_Dept_ID is null;
 drop table if exists Adhoc.combined_hist_rept_NEW;
 create table Adhoc.combined_hist_rept_NEW AS
 SELECT 
-	newtranshist_id AS combined_hist_rept_id,
+	combined_hist_report_id,
 	Transaction_Detail,
 	TransMonth,
     DeptID,
@@ -232,7 +234,7 @@ select CTSI_Fiscal_Year,min(Journal_Date),max(Journal_Date),count(*) from Adhoc.
 ##################################################################################################################
 ##### BACKUP AND RENAME
 /*
-CREATE TABLE Adhoc.comb_hist_report202204BU AS
+CREATE TABLE Adhoc.comb_hist_report202205BU AS
 SELECT * from Adhoc.combined_hist_rept;
 
 drop table if exists Adhoc.combined_hist_rept;
@@ -245,7 +247,7 @@ select count(*) from Adhoc.comb_hist_report20201109BU;
 
 DROP TABLE IF EXISTS Adhoc.combined_hist_rept;
 CREATE TABLE Adhoc.combined_hist_rept AS
-SELECT 	combined_hist_rept_id,
+SELECT 	combined_hist_report_id,
 		Alt_Dept_ID,
         CTSI_Fiscal_Year,
         TransMonth,

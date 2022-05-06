@@ -142,7 +142,7 @@ WHERE Name IN ('FLORIDA STATE UNIVERSITY')
 ORDER BY YEAR;
 
 
-SELECT Year,Rank,Award,PublicRank
+SELECT Name,Year,Rank,Award,PublicRank
 FROM lookup.blueridge_medicine
 WHERE Name IN ('FLORIDA STATE UNIVERSITY')
 ORDER BY YEAR;
@@ -151,7 +151,7 @@ ORDER BY YEAR;
 ('UNIVERSITY OF FLORIDA','FLORIDA STATE UNIVERSITY')
 
 
-SELECT Year,Name,Award,Rank,PublicRank
+SELECT Name,Year,Rank,Award,PublicRank
 FROM lookup.blueridge_medicine
 WHERE Name="University of Florida"
 ORDER BY YEAR;
