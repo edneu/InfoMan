@@ -487,7 +487,8 @@ AND vr.VisitID=cr.VisitID;
 DELETE FROM ctsi_webcamp_adhoc.VisitRoomCore where CoreSvcID is null;
 
 
-SELECT * from ctsi_webcamp_adhoc.VisitRoomCore;
+SELECT * from ctsi_webcamp_pr.protocol pc
+WHERE pc.protocol = "564";
 
 #######################################################################################
 #######################################################################################
@@ -500,8 +501,30 @@ SELECT * from ctsi_webcamp_adhoc.VisitRoomCore;
 #######################################################################################
 #######################################################################################
 #######################################################################################
+select distinct PI_NAME from ctsi_webcamp_adhoc.VisitRoomCore
+WHERE CRCNumber LIKE "%564%";
+
+select * from ctsi_webcamp_adhoc.VisitRoomCore
+WHERE CRCNumber LIKE "564";
+
+select count(distinct VisitID) from ctsi_webcamp_adhoc.VisitRoomCore
+WHERE CRCNumber LIKE "564";
 
 
+
+select distinct CRCNumber  from ctsi_webcamp_adhoc.VisitRoomCore
+WHERE   LIKE "%564%";
+
+
+select * from ctsi_webcamp_adhoc.VisitRoomCore where PI_NAME like "%Haller%";
+
+create table ;
+select CRCNumber,ProtocolID,VisitType,PIPersonID,count(distinct VisitID) as nVISITS 
+from ctsi_webcamp_adhoc.VisitRoomCore where PI_NAME like "%Haller%"
+ group by CRCNumber,ProtocolID,VisitType,PIPersonID;
+
+
+2304
 #######################################################################################
 #######################################################################################
 ## SANDRA SMITH REQUEST

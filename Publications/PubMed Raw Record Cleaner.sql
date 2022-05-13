@@ -51,16 +51,16 @@ select
 PMID,PMCID,Citation from 
 work.pubmed_raw
 ##where Citation like "%COVID%" or Citation Like "%Sars%"
-order by PMID;
+order by AWARD,PMID;
 
 
 DROP TABLE IF EXISTS work.PubmedULKLTL;
 create table work.PubmedULKLTL as
 select
-`Grant`, PMID,PMCID,Citation from 
+AWARD, PMID,PMCID,Citation from 
 work.pubmed_raw
 ##where Citation like "%COVID%" or Citation Like "%Sars%"
-order by PMID;
+order by AWARD,PMID;
 
 ##########################################################################################################
 ##########################################################################################################
