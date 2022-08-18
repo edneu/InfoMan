@@ -1,3 +1,6 @@
+
+### MakeAllStatus VisitRoomCore
+
 #######################################################################################
 # 0 or null=not entered
 # 1=Scheduled
@@ -574,6 +577,12 @@ SET ms.Sched_nVISTS=lu.nVisits,
 where ms.Month=lu.Month
 AND VisitCat="Scheduled";
 
+
+
+
+
+
+
 UPDATE ctsi_webcamp_adhoc.MonStatusSumm ms, ctsi_webcamp_adhoc.statuslu lu
 SET ms.Cancel_nVISTS=lu.nVisits,
 	ms.Cancel_nPatients=lu.nPatients,
@@ -581,11 +590,22 @@ SET ms.Cancel_nVISTS=lu.nVisits,
 where ms.Month=lu.Month
 AND VisitCat="Cancelled";
 
-
-Select Month,  SUM(nProtocols) as nProtocols
+DROP TABLE IF EXISTS ctsi_webcamp_adhoc.monProtocols;
+create table ctsi_webcamp_adhoc.monProtocols AS
+Select Month,  SUM(nProtocols) as nProtoComp
 from ctsi_webcamp_adhoc.statuslu
 Where VisitCat="Complete"
-group by Month;
+group by Month
+order by Month;
+
+
+ALTER TABLE ctsi_webcamp_adhoc.MonStatusSumm
+ADD nProtoComp integer(5);
+
+SET SQL_SAFE_UPDATES = 0;
+UPDATE ctsi_webcamp_adhoc.MonStatusSumm ms, ctsi_webcamp_adhoc.monProtocols lu
+SET ms.nProtoComp=lu.nProtoComp
+WHERE ms.Month=lu.Month;
 
 
 select * from  ctsi_webcamp_adhoc.MonStatusSumm order by Month;
@@ -594,14 +614,16 @@ select month, sum(totamt) from ctsi_webcamp_adhoc.statuslu group by month;
 select VisitStatus, sum(totamt) from ctsi_webcamp_adhoc.statuslu group by VisitStatus;
 
 
-drop table if exists ctsi_webcamp_adhoc.Test;
-create table ctsi_webcamp_adhoc.Test AS
+
+
+drop table if exists ctsi_webcamp_adhoc.CRC_MONEY;
+create table ctsi_webcamp_adhoc.CRC_MONEY AS
 select month,
-    sum(Comp_Amount) as Completed,
-	sum(Sched_Amount) As Scheduled,
-    sum(Cancel_Amount) as Cancelled,
-    sum(Incomp_Amount) as Incomplete,
-    SUM(Comp_Amount)+SUM(Sched_Amount)+sum(Cancel_Amount)+sum(Incomp_Amount) As Total
+    sum(Comp_Amount) as AMTCompleted,
+    sum(Cancel_Amount) as AMTCancelled,
+	sum(Sched_Amount) As AMTScheduled,
+    sum(Incomp_Amount) as AMTIncomplete,
+    SUM(Comp_Amount)+SUM(Sched_Amount)+sum(Cancel_Amount)+sum(Incomp_Amount) As AMTTotal
  from ctsi_webcamp_adhoc.MonStatusSumm
 GROUP BY month
 ORDER BY month;
@@ -610,9 +632,70 @@ ORDER BY month;
 
 
 
+###################################################
+
+drop table if exists ctsi_webcamp_adhoc.CRC_GRAPH_WORK;
+create table ctsi_webcamp_adhoc.CRC_GRAPH_WORK AS
+SELECT 
+   Month,
+   Comp_nVISTS,
+   0 AS MA_COMP,
+   Sched_nVISTS,
+   Cancel_nVISTS,
+   Comp_nPatients,
+   Comp_Amount,
+   Sched_nVISTS AS  Sched_nVISTS2,
+   Sched_nPatients,
+   Sched_Amount,
+   Cancel_nPatients,
+   Cancel_Amount,
+   Incomp_nVISTS,
+   Incomp_nPatients,
+   Incomp_Amount,
+   0 AS MA_COMP2,
+   0 AS MA_COMP_AMT,
+   nProtoComp
+FROM ctsi_webcamp_adhoc.MonStatusSumm
+ORDER BY MONTH;   
 
 
 
+desc ctsi_webcamp_adhoc.CRC_GRAPH_WORK;
+
+
+
+##################################
+
+/*
+
+desc ctsi_webcamp_adhoc.MonStatusSumm;
+Month
+Completed Visits
+Moving Average Completed Visits (projection)
+Scheduled Visits
+Cancelled Visits
+Completed Visits Unduplicated Patients
+
+Completed Amount
+
+Scheduled Visits
+Scheduled  Visits Unduplicated Patients
+Scheduled Amount
+Cancelled Visits  Unduplicated Patients
+Cancelled Visits Patients
+Cancelledd Amount
+Incomp_nVISTS
+Incomp_nPatients
+Incomp_Amount
+Moving Average Completed Visits
+Moving Average Completed Visit Amount
+###
+
+
+
+
+
+*/
 /*
 Comp where VisitStatus in (2),
 Sched where VisitStatus in (1,6)
@@ -807,7 +890,7 @@ use ctsi_webcamp_adhoc;
 drop table If existS PROTOwORK;
 CREATE TABLE PROTOwORK as
 sELECT * FROM ctsi_webcamp_adhoc.VisitRoomCore
-where sfy in ('SFY 2020-2021','SFY 2021-2022')
+where sfy in ('SFY 2020-2021','SFY 2021-2022','SFY 2022-2022')
 AND VisitStatus=2;
 
 
@@ -869,6 +952,17 @@ ALTER TABLE PROTOSUMM
      ADD visits_2022_01 INT(8),
      ADD visits_2022_02 INT(8),
      ADD visits_2022_03 INT(8),
+	 
+     ADD visits_2022_04 INT(8),
+     ADD visits_2022_05 INT(8),
+     ADD visits_2022_06 INT(8),
+     ADD visits_2022_07 INT(8),
+     ADD visits_2022_08 INT(8),
+     
+     
+     
+     
+     
 
      ADD patients_2020_07 INT(8),
      ADD patients_2020_08 INT(8),
@@ -891,6 +985,12 @@ ALTER TABLE PROTOSUMM
      ADD patients_2022_01 INT(8),
      ADD patients_2022_02 INT(8),
      ADD patients_2022_03 INT(8),
+     
+     ADD patients_2022_04 INT(8),
+     ADD patients_2022_05 INT(8),
+     ADD patients_2022_06 INT(8),
+     ADD patients_2022_07 INT(8),
+     ADD patients_2022_08 INT(8),
 
      ADD amount_2020_07 Decimal(65,10),
      ADD amount_2020_08 Decimal(65,10),
@@ -913,6 +1013,7 @@ ALTER TABLE PROTOSUMM
      ADD amount_2022_01 Decimal(65,10),
      ADD amount_2022_02 Decimal(65,10),
      ADD amount_2022_03 Decimal(65,10),
+     
 
      ADD visitdur_2020_07 Decimal(65,10),
      ADD visitdur_2020_08 Decimal(65,10),

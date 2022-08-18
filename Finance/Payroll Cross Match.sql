@@ -1,21 +1,22 @@
 ## Payroll MAtch
-
+drop table work.payrollmatchaug22;
 
 DROP TABLE IF EXISTS work.pymatch ;
 Create table work.pymatch AS
-Select * from work.payrollmatchmar22;
+Select * from work.payrollmatchaug22;
+
+SET SQL_SAFE_UPDATES = 0;
+delete from work.pymatch WHERE UFID IS NULL;
 
 select distinct Source from  work.pymatch;
 
-select Source,(count(distinct UFID)) from work.pymatch group by Source;
+## select Source,(count(distinct UFID)) from work.pymatch group by Source;
 
-ALTER TABLE work.pymatch CHANGE `Line_Item_Detail` Employee_Name varchar(255);
+##  ALTER TABLE work.pymatch CHANGE `Line_Item_Detail` Employee_Name varchar(255);
 
 select * from work.pymatch ;
 
-UPDATE work.pymatch pm, work.no_ufids lu
-SET pm.UFID=lu.UFID 
-WHERE pm.Seq=lu.Seq
+
 ;
 
 
