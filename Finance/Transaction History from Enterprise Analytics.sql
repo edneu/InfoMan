@@ -4,20 +4,20 @@
 ### LOAD FROM EXCEL SPREADHEET
 ### This proceduuyre assumes that the Cumulative transaction file and Secim File are laoded (NO Appending)
 
-create table loaddata.newtranshist202205 as 
-SELECT * from loaddata.page1;
+## create table loaddata.newtranshist202205 as 
+## SELECT * from loaddata.page1;
 
-desc loaddata.newtranshist202205;
+desc loaddata.newtranshist202206;
 ##drop table loaddata.newtranshist202205 ;
 
 desc Adhoc.combined_hist_rept;
 
 select "Combined Hist" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords, sum(Posted_Amount) as Total from Adhoc.combined_hist_rept
 UNION ALL
-select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) AS nRecords, sum(Posted_Amount) as Total  from loaddata.newtranshist202205;
+select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) AS nRecords, sum(Posted_Amount) as Total  from loaddata.newtranshist202207;
 
 desc loaddata.newtranshist;
-
+desc loaddata.newtranshist202207;
 #################
 #################
 ### MANAGE DUPLICATE RECORDS BETWEEN NEW TRANSATIONS AND SECIM
@@ -26,7 +26,7 @@ desc loaddata.newtranshist;
 
 drop table if exists loaddata.newtranshist;
 Create table loaddata.newtranshist as
-SELECT * from  loaddata.newtranshist202205;
+SELECT * from  loaddata.newtranshist202207;
 
 
 ALTER TABLE loaddata.newtranshist	ADD UnDupFlag int(1),
@@ -234,7 +234,7 @@ select CTSI_Fiscal_Year,min(Journal_Date),max(Journal_Date),count(*) from Adhoc.
 ##################################################################################################################
 ##### BACKUP AND RENAME
 /*
-CREATE TABLE Adhoc.comb_hist_report202205BU AS
+CREATE TABLE Adhoc.comb_hist_report202207BU AS
 SELECT * from Adhoc.combined_hist_rept;
 
 drop table if exists Adhoc.combined_hist_rept;
