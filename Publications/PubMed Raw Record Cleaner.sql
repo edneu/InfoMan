@@ -48,16 +48,29 @@ select * from work.pubmed_raw;
 DROP TABLE IF EXISTS work.PubmedOUT;
 create table work.PubmedOUT as
 select
-PMID,PMCID,Citation from 
+AWARD,PMID,PMCID,Citation from 
 work.pubmed_raw
 ##where Citation like "%COVID%" or Citation Like "%Sars%"
 order by AWARD,PMID;
 
+Alter table work.pubmed_raw ADD Award_Desc varchar(15);
+
+UPDATE work.pubmed_raw SET Award_Desc='KL2 2009-2011' WHERE AWARD='KL2 RR029888';
+UPDATE work.pubmed_raw SET Award_Desc='KL2 2012-2015' WHERE AWARD='KL2 TR000065';
+UPDATE work.pubmed_raw SET Award_Desc='KL2 2015-2023' WHERE AWARD='KL2 TR001429';
+UPDATE work.pubmed_raw SET Award_Desc='TL1 2009-2011' WHERE AWARD='TL1 RR029889';
+UPDATE work.pubmed_raw SET Award_Desc='TL1 2012-2015' WHERE AWARD='TL1 TR000066';
+UPDATE work.pubmed_raw SET Award_Desc='TL1 2015-2023' WHERE AWARD='TL1 TR001428';
+UPDATE work.pubmed_raw SET Award_Desc='UL1 2009-2011' WHERE AWARD='UL1 RR029890';
+UPDATE work.pubmed_raw SET Award_Desc='UL1 2012-2015' WHERE AWARD='UL1 TR000064';
+UPDATE work.pubmed_raw SET Award_Desc='UL1 2015-2023' WHERE AWARD='UL1 TR001427';
+
+select AWARD,Award_Desc,count(*) from work.pubmed_raw group by  AWARD,Award_Desc;
 
 DROP TABLE IF EXISTS work.PubmedULKLTL;
 create table work.PubmedULKLTL as
 select
-AWARD, PMID,PMCID,Citation from 
+AWARD,Award_Desc ,PMID,PMCID,Citation from 
 work.pubmed_raw
 ##where Citation like "%COVID%" or Citation Like "%Sars%"
 order by AWARD,PMID;
