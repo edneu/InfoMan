@@ -79,9 +79,11 @@ DROP TABLE IF EXISTS work.TableList;
 CREATE TABLE work.TableList AS
 SELECT TABLE_SCHEMA,table_name,create_time,UPDATE_TIME, TABLE_ROWS
 FROM INFORMATION_SCHEMA.TABLES 
-WHERE table_schema  IN  ('Adhoc');
+WHERE table_schema NOT IN ('mysql','information_schema','performance_schema','phpmyadmin','sys')
+ORDER BY TABLE_SCHEMA, TABLE_ROWS DESC ;
+;
 
-
+select distinct TABLE_SCHEMA from work.TableList;
 
 
 /*
