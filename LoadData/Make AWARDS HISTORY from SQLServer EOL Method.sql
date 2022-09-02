@@ -546,4 +546,4 @@ GROUP BY YEAR(FUNDS_ACTIVATED);
 SELECT * from work.CTSI_PI_Funding;
 
 
-SELECT 
+SELECT CLK_AWD_PROJ_TYPE,count(*) as N from lookup.awards_history group by CLK_AWD_PROJ_TYPE;
