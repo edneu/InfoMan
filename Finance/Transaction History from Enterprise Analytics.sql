@@ -2,22 +2,22 @@
 ###################################################################################################
 ###################################################################################################
 ### LOAD FROM EXCEL SPREADHEET
-### This proceduuyre assumes that the Cumulative transaction file and Secim File are laoded (NO Appending)
+### This procedure assumes that the Cumulative transaction file and Secim File are laoded (NO Appending)
 
 ## create table loaddata.newtranshist202205 as 
 ## SELECT * from loaddata.page1;
 
-desc loaddata.newtranshist202206;
+desc loaddata.newtranshist202209;
 ##drop table loaddata.newtranshist202205 ;
 
 desc Adhoc.combined_hist_rept;
 
 select "Combined Hist" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords, sum(Posted_Amount) as Total from Adhoc.combined_hist_rept
 UNION ALL
-select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) AS nRecords, sum(Posted_Amount) as Total  from loaddata.newtranshist202207;
+select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) AS nRecords, sum(Posted_Amount) as Total  from loaddata.newtranshist202209;
 
 desc loaddata.newtranshist;
-desc loaddata.newtranshist202207;
+desc loaddata.newtranshist202209;
 #################
 #################
 ### MANAGE DUPLICATE RECORDS BETWEEN NEW TRANSATIONS AND SECIM
@@ -26,7 +26,7 @@ desc loaddata.newtranshist202207;
 
 drop table if exists loaddata.newtranshist;
 Create table loaddata.newtranshist as
-SELECT * from  loaddata.newtranshist202207;
+SELECT * from  loaddata.newtranshist202209;
 
 
 ALTER TABLE loaddata.newtranshist	ADD UnDupFlag int(1),
@@ -112,10 +112,18 @@ UPDATE loaddata.newtranshist SET Grant_Year='Year 5-R' WHERE Journal_Date BETWEE
 
 
 ### VERIFY FY assignemnts
-select Journal_Date,count(*) from loaddata.newtranshist  group by Journal_Date;
-select Grant_Year,count(*) from loaddata.newtranshist  group by Grant_Year;
-select CTSI_Fiscal_Year,count(*) from loaddata.newtranshist  group by CTSI_Fiscal_Year;
-SELECT CTSI_Fiscal_Year,Grant_Year,TransMonth,count(*) as nRecs from loaddata.newtranshist  group by CTSI_Fiscal_Year,Grant_Year,TransMonth;
+
+select 	CTSI_Fiscal_Year,
+		Min(TransMonth) as MinTransmonth,
+        min(Journal_Date) as MinJournal_Date,
+        Max(TransMonth) as MaxTransmonth, 
+        max(Journal_Date) as MaxJournal_Date,
+        Count(*) as nRecs,
+		SUM(Posted_Amount) as TotalAmt
+from loaddata.newtranshist
+GROUP BY CTSI_Fiscal_Year
+ORDER BY CTSI_Fiscal_Year;
+        
 
 SELECT TransMonth,count(*) as nRecs from loaddata.newtranshist group by TransMonth;
 
@@ -180,7 +188,7 @@ desc loaddata.newtranshist ;
 drop table if exists Adhoc.combined_hist_rept_NEW;
 create table Adhoc.combined_hist_rept_NEW AS
 SELECT 
-	combined_hist_report_id,
+	newtranshist_id as combined_hist_report_id,
 	Transaction_Detail,
 	TransMonth,
     DeptID,
@@ -234,7 +242,7 @@ select CTSI_Fiscal_Year,min(Journal_Date),max(Journal_Date),count(*) from Adhoc.
 ##################################################################################################################
 ##### BACKUP AND RENAME
 /*
-CREATE TABLE Adhoc.comb_hist_report202207BU AS
+CREATE TABLE Adhoc.comb_hist_report202209BU AS
 SELECT * from Adhoc.combined_hist_rept;
 
 drop table if exists Adhoc.combined_hist_rept;
