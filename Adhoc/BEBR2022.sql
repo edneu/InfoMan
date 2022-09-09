@@ -129,7 +129,7 @@ AND Department IS NULL;
 
 
 UPDATE lookup.roster
-SET Department="EG-BIOMEDICAL ENGINEERING"
+SET Department="EG-BIO
 WHERE Display_College like "Engineering"
 AND Department IS NULL;
 
