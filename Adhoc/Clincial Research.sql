@@ -39,62 +39,6 @@ UPDATE lookup.awards_history SET ClinRrch=1
 where REPORTING_SPONSOR_NAME = 'PATIENT-CENTERED OUTCOMES RES INST' ;
  ;
 
-################################################################################################
-###Test Scenarios
-
-### ALL UF Awards Awards History
-
-SELECT 	Year(FUNDS_ACTIVATED) as Year,
-		sum(SPONSOR_AUTHORIZED_AMOUNT) as TotalAmt
-from lookup.awards_history
-WHERE Year(FUNDS_ACTIVATED) IN (2016,2017,2018,2019,2020,2021,2022)
-GROUP BY Year(FUNDS_ACTIVATED)
-ORDER BY Year(FUNDS_ACTIVATED) ;
-
-
-## ALL NIH (Prime Sponsor)
-SELECT 	Year(FUNDS_ACTIVATED) as Year,
-		sum(SPONSOR_AUTHORIZED_AMOUNT) as TotalAmt
-from lookup.awards_history
-WHERE Year(FUNDS_ACTIVATED) IN (2016,2017,2018,2019,2020,2021,2022)
-AND CLK_AWD_PRIME_SPONSOR_NAME LIKE 'NATL INST OF HLTH%'
-GROUP BY Year(FUNDS_ACTIVATED)
-ORDER BY Year(FUNDS_ACTIVATED) ;
-
-
-### Reporting Sponsor is NIH
-SELECT 	Year(FUNDS_ACTIVATED) as Year,
-		sum(SPONSOR_AUTHORIZED_AMOUNT) as TotalAmt
-from lookup.awards_history
-WHERE Year(FUNDS_ACTIVATED) IN (2016,2017,2018,2019,2020,2021,2022)
-AND REPORTING_SPONSOR_NAME LIKE 'NATL INST OF HLTH%'
-GROUP BY Year(FUNDS_ACTIVATED)
-ORDER BY Year(FUNDS_ACTIVATED) ;
-
-
-### Reporting Sponsor is NIH & ProjType =Clinical Trials, Human Research)
-SELECT 	Year(FUNDS_ACTIVATED) as Year,
-		sum(SPONSOR_AUTHORIZED_AMOUNT) as TotalAmt
-from lookup.awards_history
-WHERE Year(FUNDS_ACTIVATED) IN (2016,2017,2018,2019,2020,2021,2022)
-AND REPORTING_SPONSOR_NAME LIKE 'NATL INST OF HLTH%'
-AND CLK_AWD_PROJ_TYPE IN
-	('Clinical Trial',
-     'Clinical Trial Operating',
-     'Human Sub/Clinical Resear')
-GROUP BY Year(FUNDS_ACTIVATED)
-ORDER BY Year(FUNDS_ACTIVATED) ;
-
-
-### Reporting Sponsor is NIH & Human Subjects
-SELECT 	Year(FUNDS_ACTIVATED) as Year,
-		sum(SPONSOR_AUTHORIZED_AMOUNT) as TotalAmt
-from lookup.awards_history
-WHERE Year(FUNDS_ACTIVATED) IN (2016,2017,2018,2019,2020,2021,2022)
-AND REPORTING_SPONSOR_NAME LIKE 'NATL INST OF HLTH%'
-AND CLK_AWD_HUMAN_SUBJ="YES"
-GROUP BY Year(FUNDS_ACTIVATED)
-ORDER BY Year(FUNDS_ACTIVATED) ;
 
 ####################################################################
 ####################################################################
@@ -103,6 +47,10 @@ ORDER BY Year(FUNDS_ACTIVATED) ;
 SET SQL_SAFE_UPDATES = 0;
 
 UPDATE lookup.awards_history SET ClinRrch=0;
+
+
+
+
 
 UPDATE lookup.awards_history SET ClinRrch=1
 WHERE (REPORTING_SPONSOR_NAME LIKE 'NATL INST OF HLTH%' OR CLK_AWD_PRIME_SPONSOR_NAME LIKE 'NATL INST OF HLTH%' )
@@ -120,6 +68,8 @@ WHERE CLK_AWD_PROJ_TYPE IN
 	('Clinical Trial',
      'Clinical Trial Operating',
      'Human Sub/Clinical Resear');
+
+
 
 SELECT 	Year(FUNDS_ACTIVATED) as Year,
 		sum(SPONSOR_AUTHORIZED_AMOUNT) as TotalAmt

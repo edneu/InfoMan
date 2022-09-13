@@ -47,5 +47,32 @@ select * from finance.hscwork where RFA_COMPONENT in ('I.InstCareerDevCore','J.N
 
 select * from finance.hscwork where PROGRAM in ('KLFunding','TLFunding');
 
+drop table if exists finance.temp;
+ create table finance.temp as 
+select SEQ,PROGRAM,RFA_COMPONENT, Expense_Type, Employee_Name, UFID, Email, Home_Dept_ID, Line_Item_Detail, CTSI_Role, Total, RecType, ReportCollege
+from finance.hscwork 
+where RFA_COMPONENT in ('I.InstCareerDevCore','J.NRSATL') OR 
+PROGRAM in ('KLFunding','TLFunding')
+ORDER BY PROGRAM,SEQ;
+
+Expense_Type	Employee_Name	UFID	Email Home_Dept_ID  Line_Item_Detail CTSI_Role Total	RecType	ReportCollege
+
+select * from lookup.depts
+WHERE Deptid IN 
+(
+'60100000',
+'29050900',
+'60320000',
+'16600100',
+'36020000',
+'29110000',
+'31020000',
+'33160000');
+
+);
+select * from lookup.ufids WHERE UF_UFID="26292017";
+
+
+select * from finance.reptcolllu;
 
 

@@ -23,7 +23,7 @@ WHERE PersonKey2 IS NULL;
 
 
 SET SQL_SAFE_UPDATES = 0;
-
+create table work.rosterAGG AS
 SELECT Year,
        PersonKey2,
        max(UFID) AS UFID,
@@ -129,7 +129,7 @@ AND Department IS NULL;
 
 
 UPDATE lookup.roster
-SET Department="EG-BIO
+SET Department="EG-BIOMEDICAL ENGINEERING"
 WHERE Display_College like "Engineering"
 AND Department IS NULL;
 
