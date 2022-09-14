@@ -252,3 +252,18 @@ desc finance.hscwork;
 SELECT program,`RFA_Function/Module`,RFA_COMPONENT,Primary_CTSI_Funding_Bucket,ASSIST_Primary_Category,CTSI_Role 
 from finance.hscwork 
 group by  program,`RFA_Function/Module`,RFA_COMPONENT,Primary_CTSI_Funding_Bucket,ASSIST_Primary_Category,CTSI_Role ;
+
+
+
+
+###########################################################################
+### RECORDS SUBSTUTION
+
+UPDATE finance.hscwork SET RecType="OMIT - Voucher Assist Record"
+WHERE program="VouchersFunding";
+
+UPDATE finance.hscwork SET RecType="OMIT - TL1 Assist Record"
+WHERE program="TLFunding";
+
+UPDATE finance.hscwork SET RecType="OMIT - KL2 Assist Record"
+WHERE program="KLFunding";
