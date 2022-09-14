@@ -255,6 +255,18 @@ group by  program,`RFA_Function/Module`,RFA_COMPONENT,Primary_CTSI_Funding_Bucke
 
 
 
+##########################
+## PILOT WORK
+
+drop table if exists work.pilotstemp ;
+create table work.pilotstemp as 
+SELECT * from finance.hscwork 
+WHERE  	(Primary_CTSI_Funding_Bucket IN ('ExistingPilotsClinFunding','Existing Pilots (clin)')) OR
+		(CTSI_Role IN ('Existing Pilots'));
+
+
+
+
 
 ###########################################################################
 ### RECORDS SUBSTUTION
