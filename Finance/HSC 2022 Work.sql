@@ -373,12 +373,20 @@ ALTER TABLE tablename MODIFY columnname INTEGER;
 
 ##  Substitute Records finance.hsc_sub_2022;
 
+###hsc_sub_2022 did not include FSU
+###hsc_sub_2022a includes FSU
+
 DROP TABLE IF EXISTS finance.hsc2022;
 Create table finance.hsc2022 as
 SELECT * FROM finance.hscwork
 UNION ALL
-SELECT * FROM finance.hsc_sub_2022;
+SELECT * FROM finance.hsc_sub_2022a;
 
+
+SELECT SUM(Total) from 
+
+
+drop table finance.hsc_sub_2022a;
 
 select * from finance.hsc2022;
 
@@ -388,9 +396,18 @@ select * from finance.hsc2022;
 Select RecType, Sum(Total) as Total from finance.hsc2022
 GROUP BY RecType;
 
+Select Sum(Total) as Total from finance.hsc2022
+WHERE RecType NOT LIKE "OMIT%";
+
+
 
 select * from finance.hsc2022
-WHERE ReportCollege is Null;
+WHERE ReportCollege is Null
+AND RecType NOT LIKE "OMIT%";
+
+### FIX FORMAT ERRORS
+
+SET SQL_SAFE_UPDATES = 0;
 
 UPDATE finance.hsc2022 
 SET ReportCollege='Medicine - Jacksonville'
@@ -399,12 +416,11 @@ WHERE ReportCollege IN ('Medicine - Jacksonville','Medicine Jacksonville');
 UPDATE finance.hsc2022 
 SET ReportCollege='Public Health & Health Professions'
 WHERE ReportCollege IN ('Public Health and Health Professions','Public Health & Health Professions');
-
-
+/*
 UPDATE finance.hsc2022 
 SET ReportCollege='FSU'
 WHERE SEQ IN (120,568);
-
+*/
 UPDATE finance.hsc2022 
 SET ReportCollege='Health and Human Performance'
 WHERE SEQ IN (713);
