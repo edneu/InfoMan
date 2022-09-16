@@ -264,18 +264,162 @@ SELECT * from finance.hscwork
 WHERE  	(Primary_CTSI_Funding_Bucket IN ('ExistingPilotsClinFunding','Existing Pilots (clin)')) OR
 		(CTSI_Role IN ('Existing Pilots'));
 
+###########################
+## KL WORK
 
+drop table if exists work.kltemp ;
+create table work.kltemp as
+SELECT * from finance.hscwork
+WHERE program="KLFunding";
 
+select * from lookup.ufids 
+where UF_UFID IN
+('13018342'
 
-
+); 
 ###########################################################################
-### RECORDS SUBSTUTION
+### RECORDS SUBSTUTIO
 
-UPDATE finance.hscwork SET RecType="OMIT - Voucher Assist Record"
+SET SQL_SAFE_UPDATES = 0;
+
+
+UPDATE finance.hscwork SET RecType="OMIT Voucher"
 WHERE program="VouchersFunding";
 
-UPDATE finance.hscwork SET RecType="OMIT - TL1 Assist Record"
+UPDATE finance.hscwork SET RecType="OMIT TL1 "
 WHERE program="TLFunding";
 
-UPDATE finance.hscwork SET RecType="OMIT - KL2 Assist Record"
+UPDATE finance.hscwork SET RecType="OMIT Kl2"
 WHERE program="KLFunding";
+
+
+UPDATE finance.hscwork SET RecType="OMIT Pilot"
+WHERE  	(Primary_CTSI_Funding_Bucket IN ('ExistingPilotsClinFunding','Existing Pilots (clin)')) OR
+		(CTSI_Role IN ('Existing Pilots'));
+        
+
+Select RecType, Sum(Total) as Total from finance.hscwork
+GROUP BY RecType;
+
+############################
+## VERIFY COLLEGES / DEPARTMENTS
+drop table if exists work.hscassign;
+create table work.hscassign AS
+SELECT Home_Dept_ID,ReportCollege, count(*) as N
+from finance.hscwork
+WHERE RecType='Assist Budget'
+GROUP BY Home_Dept_ID,ReportCollege;
+
+drop table if exists work.verifydept;
+create table work.verifydept AS
+SELECT DISTINCT Home_Dept_ID
+from finance.hscwork
+WHERE RecType='Assist Budget';
+
+ALter Table work.verifydept 
+ADD DeptIDLU varchar(12),
+ADD Department varchar(45),
+ADD CollegeCode varchar(45),
+ADD College varchar(45),
+ADD ReportCollege varchar(45);
+
+
+UPDATE work.verifydept vd, lookup.dept_coll lu
+SET vd.DeptIDLU=lu.DepartmentID,
+	vd.Department=lu.Department,
+    vd.CollegeCode=lu.CollegeCode,
+    vd.College=lu.College
+WHERE vd.Home_Dept_ID=lu.DepartmentID;
+
+
+UPDATE work.verifydept vd, work.hscassign lu
+SET vd.ReportCollege=lu.ReportCollege
+WHERE vd.Home_Dept_ID=lu.Home_Dept_ID;
+
+
+
+select * from work.verifydept;
+
+UPDATE  finance.hscwork hw, work.verifydept lu
+SET hw.ReportCollege=lu.ReportCollege
+WHERE hw.Program_Dept_ID=lu.Home_Dept_ID
+And hw.Home_Dept_ID=0
+AND hw.RecType='Assist Budget';
+
+SELECT * from finance.hscwork 
+ where ReportCollege is Null
+ AND RecType='Assist Budget';
+ 
+ 
+#######################################
+UPDATE finance.hscwork SET ReportCollege='Type One Centers' WHERE UFID='69773173';
+UPDATE finance.hscwork SET ReportCollege='Medicine' WHERE UFID='81088237';
+UPDATE finance.hscwork SET ReportCollege='Pharmacy' WHERE UFID='92216954';
+UPDATE finance.hscwork SET ReportCollege='Medicine' WHERE Program_Dept_ID LIKE '2968%' AND ReportCollege is Null;
+
+
+######################################################################
+######################################################################
+######################################################################
+## APPEND SUBSTITUTE RECORDS
+
+## Determine Primary Key (SEQ) Origin
+Select max(seq)+1 from finance.hscwork;
+
+ALTER TABLE finance.hscwork MODIFY Home_Dept_ID varchar(12);
+ALTER TABLE finance.hscwork MODIFY RecType varchar(45);
+
+ALTER TABLE tablename MODIFY columnname INTEGER;
+
+##  Substitute Records finance.hsc_sub_2022;
+
+DROP TABLE IF EXISTS finance.hsc2022;
+Create table finance.hsc2022 as
+SELECT * FROM finance.hscwork
+UNION ALL
+SELECT * FROM finance.hsc_sub_2022;
+
+
+select * from finance.hsc2022;
+
+
+##############################
+### Verify and Reconcile
+Select RecType, Sum(Total) as Total from finance.hsc2022
+GROUP BY RecType;
+
+
+select * from finance.hsc2022
+WHERE ReportCollege is Null;
+
+UPDATE finance.hsc2022 
+SET ReportCollege='Medicine - Jacksonville'
+WHERE ReportCollege IN ('Medicine - Jacksonville','Medicine Jacksonville');
+
+UPDATE finance.hsc2022 
+SET ReportCollege='Public Health & Health Professions'
+WHERE ReportCollege IN ('Public Health and Health Professions','Public Health & Health Professions');
+
+
+UPDATE finance.hsc2022 
+SET ReportCollege='FSU'
+WHERE SEQ IN (120,568);
+
+UPDATE finance.hsc2022 
+SET ReportCollege='Health and Human Performance'
+WHERE SEQ IN (713);
+
+
+
+
+## TABLE
+SELECT ReportCollege, Sum(Total) as Total
+from finance.hsc2022
+WHERE RecType NOT LIKE "OMIT%"
+GROUP BY ReportCollege
+ORDER BY Total DESC;
+
+SELECT *
+from finance.hsc2022
+WHERE RecType NOT LIKE "OMIT%"
+AND ReportCollege LIKE "TYPE ONE%";

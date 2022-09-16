@@ -85,6 +85,24 @@ GROUP BY Year(FUNDS_ACTIVATED)
 ORDER BY Year(FUNDS_ACTIVATED) ;
 
 
+##########################
+## NIH EXCLUDED ANALYSIS
+
+SELECT CLK_AWD_PROJ_TYPE,count(*) as n,sum(SPONSOR_AUTHORIZED_AMOUNT) as AMT FROM lookup.awards_history
+WHERE (REPORTING_SPONSOR_NAME LIKE 'NATL INST OF HLTH%' OR CLK_AWD_PRIME_SPONSOR_NAME LIKE 'NATL INST OF HLTH%' )
+AND ClinRrch=0
+GROUP BY CLK_AWD_PROJ_TYPE;
+
+SELECT * from lookup.awards_history
+WHERE (REPORTING_SPONSOR_NAME LIKE 'NATL INST OF HLTH%' OR CLK_AWD_PRIME_SPONSOR_NAME LIKE 'NATL INST OF HLTH%' )
+AND ClinRrch=0
+AND CLK_AWD_PROJ_TYPE IN 
+('Continuation',
+'Decrease',
+'Extension',
+'New',
+'Renewal',
+'Supplemental');
 ####################################################################
 ####################################################################
 ####################################################################
