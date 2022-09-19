@@ -416,11 +416,7 @@ WHERE ReportCollege IN ('Medicine - Jacksonville','Medicine Jacksonville');
 UPDATE finance.hsc2022 
 SET ReportCollege='Public Health & Health Professions'
 WHERE ReportCollege IN ('Public Health and Health Professions','Public Health & Health Professions');
-/*
-UPDATE finance.hsc2022 
-SET ReportCollege='FSU'
-WHERE SEQ IN (120,568);
-*/
+
 UPDATE finance.hsc2022 
 SET ReportCollege='Health and Human Performance'
 WHERE SEQ IN (713);
