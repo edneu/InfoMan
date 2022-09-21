@@ -250,7 +250,10 @@ select "AuthAmt" as Measure, min(SPONSOR_AUTHORIZED_AMOUNT) as Minimum, max(SPON
 
 ALTER TABLE loaddata.awards_history
 	ADD AcademicUnit varchar(45),
-	ADD MONTH VARCHAR(8);
+	ADD MONTH VARCHAR(8),
+    ADD ctsi_SFY Varchar(25),
+    ADD ctsi_CY varchar(12),
+    ADD ctsi_FFY varchar(25) ;
 
 SET SQL_SAFE_UPDATES = 0;
 
@@ -263,12 +266,21 @@ UPDATE loaddata.awards_history ah, lookup.academic_units lu
 UPDATE loaddata.awards_history ah, lookup.academic_units lu
        SET ah.AcademicUnit=lu.AcademicUnit
        WHERE ah.CLK_AWD_PROJ_COLLEGE=lu.College
-       AND ah.AcademicUnit IS NULL  ;       
+       AND ah.AcademicUnit IS NULL  ;     
        
   
 
 UPDATE loaddata.awards_history  
 SET MONTH=concat(YEAR(FUNDS_ACTIVATED),"-",LPAD(MONTH(FUNDS_ACTIVATED),2,"0")) ;
+
+SET SQL_SAFE_UPDATES = 0;
+UPDATE  loaddata.awards_history ah, lookup.fiscal_years lu     
+       SET 	ah.ctsi_SFY=lu.SFY,
+			ah.ctsi_CY=lu.CY,
+			ah.ctsi_FFY=lu.FFY
+       WHERE ah.Month=lu.Month;
+       
+
 
 ##select distinct CLK_AWD_PI_COLLEGE from loaddata.awards_history where AcademicUnit IS NULL;
 ##select AcademicUnit,count(*) from loaddata.awards_history group by AcademicUnit;
