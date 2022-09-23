@@ -270,8 +270,10 @@ UPDATE loaddata.awards_history ah, lookup.academic_units lu
        
   
 
-UPDATE loaddata.awards_history  
+ 
 SET MONTH=concat(YEAR(FUNDS_ACTIVATED),"-",LPAD(MONTH(FUNDS_ACTIVATED),2,"0")) ;
+
+CREATE INDEX AwdMon ON loaddata.awards_history (MONTH);
 
 SET SQL_SAFE_UPDATES = 0;
 UPDATE  loaddata.awards_history ah, lookup.fiscal_years lu     
