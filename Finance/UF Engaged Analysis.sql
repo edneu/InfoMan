@@ -77,3 +77,26 @@ ORDER BY  Supervisor_Name        ;
 
 
 Select * from  work.UF_ENG  where Supervisor_Name  like "Neu%";
+
+############### RECONCILE LISTS 
+DROP TABLE if EXISTS work.ufe_reconcile;
+CREATE TABLE work.ufe_reconcile as
+SELECT  Supervisor_UFID AS UF_ENGAGED_MGR_UFID,
+		Supervisor_Name AS UF_ENGAGED_MGR_NAME
+FROM work.UF_ENG 
+GROUP BY Supervisor_UFID,
+		 Supervisor_Name  
+ORDER BY  Supervisor_Name    ;       
+
+ALTER TABLE  work.ufe_reconcile
+	ADD EmpList_UFID varchar(12),
+	ADD EmpList_Name varchar(45);
+
+SET SQL_SAFE_UPDATES = 0;
+UPDATE work.ufe_reconcile ur, work.UF_ENG_ACTV lu
+SET ur.EmpList_UFID=lu.ID,
+	ur.EmpList_Name=lu.NAME
+WHERE ur.UF_ENGAGED_MGR_UFID=lu.ID;    
+
+
+  
