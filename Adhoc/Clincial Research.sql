@@ -402,6 +402,35 @@ GROUP BY CLK_AWD_PROJ_TYPE;
 
 
 
+##########################################################
+##########################################################
+###IDC BY SPONSOR AND IDC BY PROJECT
+
+Select * from lookup.awards_history;
+
+#### IDC BY AWARD
+
+DROP TABLE IF EXISTS Adhoc.idc_proj;
+Create table Adhoc.idc_proj AS
+SELECT 	CLK_AWD_ID,
+		CLK_AWD_PI,
+        CLK_PI_UFID,
+        CLK_AWD_FULL_TITLE,
+        REPORTING_SPONSOR_NAME,
+        REPORTING_SPONSOR_AWD_ID,
+		sum(DIRECT_AMOUNT) as DirectAmt,
+        sum(INDIRECT_AMOUNT) IndirectAmt,
+		sum(SPONSOR_AUTHORIZED_AMOUNT) as TotalAmt
+from lookup.awards_history
+WHERE ClinRrch=1
+AND REPORTING_SPONSOR_NAME LIKE 'NATL INST OF HLTH%'
+GROUP BY CLK_AWD_ID,
+		CLK_AWD_PI,
+        CLK_PI_UFID,
+        CLK_AWD_FULL_TITLE,
+        REPORTING_SPONSOR_NAME,
+        REPORTING_SPONSOR_AWD_ID
+;
 
 
 
