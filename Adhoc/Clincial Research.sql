@@ -404,7 +404,7 @@ GROUP BY CLK_AWD_PROJ_TYPE;
 
 ##########################################################
 ##########################################################
-###IDC BY SPONSOR AND IDC BY PROJECT
+###IDC BY SPONSOR
 
 Select * from lookup.awards_history;
 
@@ -423,7 +423,6 @@ SELECT 	CLK_AWD_ID,
 		sum(SPONSOR_AUTHORIZED_AMOUNT) as TotalAmt
 from lookup.awards_history
 WHERE ClinRrch=1
-AND REPORTING_SPONSOR_NAME LIKE 'NATL INST OF HLTH%'
 GROUP BY CLK_AWD_ID,
 		CLK_AWD_PI,
         CLK_PI_UFID,
@@ -431,17 +430,189 @@ GROUP BY CLK_AWD_ID,
         REPORTING_SPONSOR_NAME,
         REPORTING_SPONSOR_AWD_ID
 ;
+####CREATE REPORTING SPONSOR NAME
+Alter table lookup.awards_history ADD FMT_SPONSOR_NAME varchar(45);
+SET SQL_SAFE_UPDATES = 0;
+UPDATE lookup.awards_history SET FMT_SPONSOR_NAME=REPORTING_SPONSOR_NAME;
+UPDATE lookup.awards_history SET FMT_SPONSOR_NAME='NATL INST OF HLTH' WHERE REPORTING_SPONSOR_NAME LIKE 'NATL INST OF HLTH%';
+
+DROP TABLE IF EXISTS Adhoc.idc_Sponsor;
+Create table Adhoc.idc_Sponsor AS
+SELECT 	REPORTING_SPONSOR_CAT,
+        FMT_SPONSOR_NAME,
+        ctsi_SFY,
+       	sum(DIRECT_AMOUNT) as DirectAmt,
+        sum(INDIRECT_AMOUNT) IndirectAmt,
+		sum(SPONSOR_AUTHORIZED_AMOUNT) as TotalAmt
+from lookup.awards_history
+WHERE ClinRrch=1
+AND ctsi_SFY IN 
+		(	'SFY 2018-2019',
+			'SFY 2019-2020',
+			'SFY 2020-2021',
+			'SFY 2021-2022',
+			'SFY 2022-2023')
+GROUP BY REPORTING_SPONSOR_CAT,
+        FMT_SPONSOR_NAME,
+        ctsi_SFY;
+      
+
+DROP TABLE IF EXISTS Adhoc.idc_Sponsor_Summ;
+CREATE TABLE Adhoc.idc_Sponsor_Summ AS
+SELECT REPORTING_SPONSOR_CAT,
+        FMT_SPONSOR_NAME
+FROM Adhoc.idc_Sponsor
+GROUP BY 	REPORTING_SPONSOR_CAT,
+			FMT_SPONSOR_NAME ;       
+            
+ALTER TABLE Adhoc.idc_Sponsor_Summ
+ADD SFY_18_19 decimal(65,10),
+ADD SFY_19_20 decimal(65,10),
+ADD SFY_20_21 decimal(65,10),
+ADD SFY_21_22 decimal(65,10),
+ADD SFY_22_23 decimal(65,10);     
+
+UPDATE Adhoc.idc_Sponsor_Summ ss, Adhoc.idc_Sponsor lu SET ss.SFY_18_19=lu.IndirectAmt WHERE ss.FMT_SPONSOR_NAME=lu.FMT_SPONSOR_NAME AND lu.ctsi_SFY='SFY 2018-2019';    
+UPDATE Adhoc.idc_Sponsor_Summ ss, Adhoc.idc_Sponsor lu SET ss.SFY_19_20=lu.IndirectAmt WHERE ss.FMT_SPONSOR_NAME=lu.FMT_SPONSOR_NAME AND lu.ctsi_SFY='SFY 2019-2020'; 
+UPDATE Adhoc.idc_Sponsor_Summ ss, Adhoc.idc_Sponsor lu SET ss.SFY_20_21=lu.IndirectAmt WHERE ss.FMT_SPONSOR_NAME=lu.FMT_SPONSOR_NAME AND lu.ctsi_SFY='SFY 2020-2021'; 
+UPDATE Adhoc.idc_Sponsor_Summ ss, Adhoc.idc_Sponsor lu SET ss.SFY_21_22=lu.IndirectAmt WHERE ss.FMT_SPONSOR_NAME=lu.FMT_SPONSOR_NAME AND lu.ctsi_SFY='SFY 2021-2022'; 
+UPDATE Adhoc.idc_Sponsor_Summ ss, Adhoc.idc_Sponsor lu SET ss.SFY_22_23=lu.IndirectAmt WHERE ss.FMT_SPONSOR_NAME=lu.FMT_SPONSOR_NAME AND lu.ctsi_SFY='SFY 2022-2023';
+
+
+select * from Adhoc.idc_Sponsor_Summ where REPORTING_SPONSOR_CAT like "FED%";
+##########################################################
+##########################################################
+###IDC BY PI
 
 
 
+DROP TABLE IF EXISTS Adhoc.idc_PI;
+Create table Adhoc.idc_PI AS
+SELECT 	CLK_PI_UFID AS PI_UFID,
+        ctsi_SFY,
+       	max(CLK_AWD_PI) AS PI,
+        sum(DIRECT_AMOUNT) as DirectAmt,
+        sum(INDIRECT_AMOUNT) IndirectAmt,
+		sum(SPONSOR_AUTHORIZED_AMOUNT) as TotalAmt
+from lookup.awards_history
+WHERE ClinRrch=1
+AND ctsi_SFY IN 
+		(	'SFY 2018-2019',
+			'SFY 2019-2020',
+			'SFY 2020-2021',
+			'SFY 2021-2022',
+			'SFY 2022-2023')
+GROUP BY CLK_PI_UFID,
+         ctsi_SFY;
+      
+
+DROP TABLE IF EXISTS Adhoc.idc_PI_Summ;
+CREATE TABLE Adhoc.idc_PI_Summ AS
+SELECT PI,
+       PI_UFID
+FROM Adhoc.idc_PI
+GROUP BY 	PI,
+			PI_UFID ;       
+            
+ALTER TABLE Adhoc.idc_PI_Summ
+ADD SFY_18_19 decimal(65,10),
+ADD SFY_19_20 decimal(65,10),
+ADD SFY_20_21 decimal(65,10),
+ADD SFY_21_22 decimal(65,10),
+ADD SFY_22_23 decimal(65,10);     
+
+UPDATE Adhoc.idc_PI_Summ ss, Adhoc.idc_PI lu SET ss.SFY_18_19=lu.IndirectAmt WHERE ss.PI_UFID=lu.PI_UFID AND lu.ctsi_SFY='SFY 2018-2019';    
+UPDATE Adhoc.idc_PI_Summ ss, Adhoc.idc_PI lu SET ss.SFY_19_20=lu.IndirectAmt WHERE ss.PI_UFID=lu.PI_UFID AND lu.ctsi_SFY='SFY 2019-2020'; 
+UPDATE Adhoc.idc_PI_Summ ss, Adhoc.idc_PI lu SET ss.SFY_20_21=lu.IndirectAmt WHERE ss.PI_UFID=lu.PI_UFID AND lu.ctsi_SFY='SFY 2020-2021'; 
+UPDATE Adhoc.idc_PI_Summ ss, Adhoc.idc_PI lu SET ss.SFY_21_22=lu.IndirectAmt WHERE ss.PI_UFID=lu.PI_UFID AND lu.ctsi_SFY='SFY 2021-2022'; 
+UPDATE Adhoc.idc_PI_Summ ss, Adhoc.idc_PI lu SET ss.SFY_22_23=lu.IndirectAmt WHERE ss.PI_UFID=lu.PI_UFID AND lu.ctsi_SFY='SFY 2022-2023';
+
+
+select * from Adhoc.idc_PI_Summ ;
+
+SELECT SUM(SFY_18_19),
+SUM(SFY_19_20),
+SUM(SFY_20_21),
+SUM(SFY_21_22),
+SUM(SFY_22_23)
+from Adhoc.idc_PI_Summ;
+############################################################################
+## INDIRECT BY AWARD
 
 
 
+DROP TABLE IF EXISTS Adhoc.idc_AWD;
+Create table Adhoc.idc_AWD AS
+SELECT 	CLK_AWD_ID,
+        ctsi_SFY,
+        max(CLK_PI_UFID) AS PI_UFID,
+        max(FMT_SPONSOR_NAME) AS Sponsor,
+        max(CLK_AWD_FULL_TITLE) AS FullTitle,
+       	max(CLK_AWD_PI) AS PI,
+        sum(DIRECT_AMOUNT) as DirectAmt,
+        sum(INDIRECT_AMOUNT) IndirectAmt,
+		sum(SPONSOR_AUTHORIZED_AMOUNT) as TotalAmt
+from lookup.awards_history
+WHERE ClinRrch=1
+AND ctsi_SFY IN 
+		(	'SFY 2018-2019',
+			'SFY 2019-2020',
+			'SFY 2020-2021',
+			'SFY 2021-2022',
+			'SFY 2022-2023')
+GROUP BY CLK_AWD_ID,
+        ctsi_SFY;
 
 
+##### select sum(IndirectAmt) from Adhoc.idc_AWD;      OK
+
+DROP TABLE IF EXISTS Adhoc.idc_AWD_Summ;
+CREATE TABLE Adhoc.idc_AWD_Summ AS
+SELECT CLK_AWD_ID,
+	   max(Sponsor) as Sponsor,
+       max(PI) AS PI,
+       max(PI_UFID) as PI_UFID,
+       max(FullTitle) as FullTitle
+       FROM Adhoc.idc_AWD
+GROUP BY CLK_AWD_ID;
+	       
+            
+ALTER TABLE Adhoc.idc_AWD_Summ
+ADD SFY_18_19 decimal(65,10),
+ADD SFY_19_20 decimal(65,10),
+ADD SFY_20_21 decimal(65,10),
+ADD SFY_21_22 decimal(65,10),
+ADD SFY_22_23 decimal(65,10);     
+
+UPDATE Adhoc.idc_AWD_Summ ss, Adhoc.idc_AWD lu SET ss.SFY_18_19=lu.IndirectAmt WHERE ss.CLK_AWD_ID=lu.CLK_AWD_ID AND lu.ctsi_SFY='SFY 2018-2019';    
+UPDATE Adhoc.idc_AWD_Summ ss, Adhoc.idc_AWD lu SET ss.SFY_19_20=lu.IndirectAmt WHERE ss.CLK_AWD_ID=lu.CLK_AWD_ID AND lu.ctsi_SFY='SFY 2019-2020'; 
+UPDATE Adhoc.idc_AWD_Summ ss, Adhoc.idc_AWD lu SET ss.SFY_20_21=lu.IndirectAmt WHERE ss.CLK_AWD_ID=lu.CLK_AWD_ID AND lu.ctsi_SFY='SFY 2020-2021'; 
+UPDATE Adhoc.idc_AWD_Summ ss, Adhoc.idc_AWD lu SET ss.SFY_21_22=lu.IndirectAmt WHERE ss.CLK_AWD_ID=lu.CLK_AWD_ID AND lu.ctsi_SFY='SFY 2021-2022'; 
+UPDATE Adhoc.idc_AWD_Summ ss, Adhoc.idc_AWD lu SET ss.SFY_22_23=lu.IndirectAmt WHERE ss.CLK_AWD_ID=lu.CLK_AWD_ID AND lu.ctsi_SFY='SFY 2022-2023';
 
 
+select * from Adhoc.idc_AWD_Summ ;
 
+SELECT SUM(SFY_18_19),
+SUM(SFY_19_20),
+SUM(SFY_20_21),
+SUM(SFY_21_22),
+SUM(SFY_22_23)
+from Adhoc.idc_AWD_Summ;
+
+
+## Raw Total for Reconcile
+SELECT ctsi_SFY,Sum(INDIRECT_AMOUNT) as IndirectAmt
+FROM lookup.awards_history
+WHERE ClinRrch=1
+AND ctsi_SFY IN 
+		(	'SFY 2018-2019',
+			'SFY 2019-2020',
+			'SFY 2020-2021',
+			'SFY 2021-2022',
+			'SFY 2022-2023')
+GROUP BY ctsi_SFY
+ORDER BY ctsi_SFY;            
 
 
 ############################################################################
