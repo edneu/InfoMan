@@ -215,4 +215,4 @@ WHERE Name like 'caputo%a%';
 'Wilson,Jessica');
 
 
- 
+ SELECT * from lookup.ufids where UF_UFID ="30015156";
