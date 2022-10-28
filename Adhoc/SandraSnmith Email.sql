@@ -1,6 +1,6 @@
 
 
-drop table if exists work.ss_rqst;
+drop table if exists work.ss_rqst1;
 create table work.ss_rqst1 as
 SELECT Employee_ID,
 Department_Code,
@@ -21,10 +21,10 @@ Add FirstName varchar(50)
 
 SET SQL_SAFE_UPDATES = 0;
 
-
+/*
 CREATE INDEX ufid ON lookup.ufids (UF_UFID);
 CREATE INDEX ufid_ss1 ON work.ss_rqst1 (Employee_ID);
-
+*/
 
 
 UPDATE work.ss_rqst1 ss, lookup.ufids lu
@@ -43,8 +43,7 @@ UPDATE work.ss_rqst1 ss, lookup.email lu
 SET ss.Email=lu.UF_EMAIL
 WHERE ss.Employee_ID=lu.UF_UFID;
 
-CREATE INDEX ufid ON lookup.ufids (UF_UFID);
-CREATE INDEX ufid_ss1 ON work.ss_rqst1 (Employee_ID);
+
 
 UPDATE work.ss_rqst1 ss, lookup.dept_coll_supp lu
 SET ss.College=lu.College
@@ -54,3 +53,16 @@ WHERE ss.Department_Code=lu.DeptID;
 
 SELECT Department_Code, Department from work.ss_rqst1 where College is Null group by Department_Code, Department;
 
+drop table if exists work.temp;
+create table work.temp as
+select Employee_ID as UFID,
+Email,
+Department_Code,
+Department,
+Job_Code,
+Employee_ID
+from work.ss_rqst1
+WHERE Employee_ID in (select Distinct UFID from work.staffufid);
+
+
+Empl Dept Code	Empl Dept Descr	Employee ID	Employee Name	EmplRec#	Salary Admin Plan	Empl Job Title
