@@ -66,3 +66,32 @@ WHERE Employee_ID in (select Distinct UFID from work.staffufid);
 
 
 Empl Dept Code	Empl Dept Descr	Employee ID	Employee Name	EmplRec#	Salary Admin Plan	Empl Job Title
+
+Drop table if Exists work.crcood;
+create table work.crcood as
+Select 	Employee_ID,
+		Name,
+        Department_Code,
+        Department,
+        Job_Code
+		from loaddata.activeemp20221031
+WHERE Job_Code LIKE "CL%RES%COO%";
+
+Alter table work.crcood ADD email varchar(75);
+
+SET SQL_SAFE_UPDATES = 0;
+UPDATE work.crcood cr, lookup.email lu
+SET cr.email=lu.UF_EMAIL
+WHERE cr.Employee_ID=lu.UF_UFID;
+
+UPDATE work.crcood cr, lookup.ufids lu
+SET cr.email=lu.UF_EMAIL
+WHERE cr.Employee_ID=lu.UF_UFID
+AND cr.EMAIL is NULL;
+
+UPDATE work.crcood 
+SET email='dana.brooks@ufl.edu'
+WHERE email is null 
+and Employee_ID='50173785';
+
+Select * from work.crcood where email is null;
