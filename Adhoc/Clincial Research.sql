@@ -57,7 +57,12 @@ ORDER BY ctsi_FFY;
 ####################################################################
 ####################################################################
 ####################################################################
-
+drop table if Exists work.temp;
+create table  work.temp as
+Select CLK_AWD_ID, min(Year(FUNDS_ACTIVATED))as InitYear
+from lookup.awards_history
+WHere  ClinRrch=1
+GROUP BY CLK_AWD_ID;
 
 
 
