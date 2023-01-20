@@ -4,8 +4,7 @@
 ### LOAD FROM EXCEL SPREADHEET
 ### This procedure assumes that the Cumulative transaction file and Secim File are laoded (NO Appending)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
+
 ##create table loaddata.newtranshist202210 as 
 ##SELECT * from loaddata.page1;
 
@@ -13,27 +12,20 @@ desc loaddata.newtranshist202301;
 
 =======
 =======
->>>>>>> cad467303799498b673c34cf445271b19beb8ee9
+
 create table loaddata.newtranshist202211 as 
 SELECT * from loaddata.page1;
 
 desc loaddata.newtranshist202211;
-##drop table loaddata.newtranshist202205 ;
->>>>>>> cad467303799498b673c34cf445271b19beb8ee9
+#
 
 desc Adhoc.combined_hist_rept;
 
 select "Combined Hist" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords, sum(Posted_Amount) as Total from Adhoc.combined_hist_rept
 UNION ALL
-<<<<<<< HEAD
-<<<<<<< HEAD
+
 select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) AS nRecords, sum(Posted_Amount) as Total  from loaddata.newtranshist202301;
-=======
-select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) AS nRecords, sum(Posted_Amount) as Total  from loaddata.newtranshist202211;
->>>>>>> cad467303799498b673c34cf445271b19beb8ee9
-=======
-select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) AS nRecords, sum(Posted_Amount) as Total  from loaddata.newtranshist202211;
->>>>>>> cad467303799498b673c34cf445271b19beb8ee9
+
 
 desc loaddata.newtranshist;
 
@@ -42,15 +34,10 @@ desc loaddata.newtranshist;
 #################
 
 drop table if exists loaddata.newtranshist;
-Create table loaddata.newtranshist as
-<<<<<<< HEAD
-<<<<<<< HEAD
+
 SELECT * from  loaddata.newtranshist202301;
 
-=======
-=======
->>>>>>> cad467303799498b673c34cf445271b19beb8ee9
-SELECT * from  loaddata.newtranshist202211;
+=
 /*
 ALTER TABLE loaddata.newtranshist	ADD UnDupFlag int(1),
 									ADD	DupKEY varchar(4000);
@@ -204,15 +191,7 @@ desc loaddata.newtranshist ;
 drop table if exists Adhoc.combined_hist_rept_NEW;
 create table Adhoc.combined_hist_rept_NEW AS
 SELECT 
-<<<<<<< HEAD
-<<<<<<< HEAD
 	newtranshist_id as combined_hist_report_id,
-=======
-	newtranshist_id AS combined_hist_report_id,
->>>>>>> cad467303799498b673c34cf445271b19beb8ee9
-=======
-	newtranshist_id AS combined_hist_report_id,
->>>>>>> cad467303799498b673c34cf445271b19beb8ee9
 	Transaction_Detail,
 	TransMonth,
     DeptID,
@@ -266,18 +245,10 @@ select CTSI_Fiscal_Year,min(Journal_Date),max(Journal_Date),count(*) from Adhoc.
 ##################################################################################################################
 ##### BACKUP AND RENAME
 /*
-<<<<<<< HEAD
-<<<<<<< HEAD
+
 CREATE TABLE Adhoc.comb_hist_report202212BU AS
-=======
-CREATE TABLE Adhoc.comb_hist_report202211BU AS
->>>>>>> cad467303799498b673c34cf445271b19beb8ee9
-=======
-CREATE TABLE Adhoc.comb_hist_report202211BU AS
->>>>>>> cad467303799498b673c34cf445271b19beb8ee9
 SELECT * from Adhoc.combined_hist_rept;
 
-drop table if exists Adhoc.combined_hist_rept;
 
 
 
