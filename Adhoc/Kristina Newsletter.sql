@@ -71,5 +71,5 @@ SET nl.DeptID=lu.UF_DEPT,
 WHERE nl.UFID=lu.UF_UFID
 AND nl.DeptID is Null;
 
-
+select * from work.newsletter;
 

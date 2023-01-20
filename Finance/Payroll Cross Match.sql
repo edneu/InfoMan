@@ -3,16 +3,13 @@ drop table work.payrollmatchaug26;
 
 DROP TABLE IF EXISTS work.pymatch ;
 Create table work.pymatch AS
-Select * from work.payrollmatchaug26;
+Select * from work.payrollmatchsept20;
 
 SET SQL_SAFE_UPDATES = 0;
 delete from work.pymatch WHERE UFID IS NULL;
 
+## Verify Source coding
 select distinct Source from  work.pymatch;
-
-## select Source,(count(distinct UFID)) from work.pymatch group by Source;
-
-##  ALTER TABLE work.pymatch CHANGE `Line_Item_Detail` Employee_Name varchar(255);
 
 select * from work.pymatch ;
 
@@ -215,4 +212,4 @@ WHERE Name like 'caputo%a%';
 'Wilson,Jessica');
 
 
- SELECT * from lookup.ufids where UF_UFID ="30015156";
+ 
