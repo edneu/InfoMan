@@ -2,34 +2,30 @@
 ###################################################################################################
 ###################################################################################################
 ### LOAD FROM EXCEL SPREADHEET
-### This proceduuyre assumes that the Cumulative transaction file and Secim File are laoded (NO Appending)
+### This procedure assumes that the Cumulative transaction file and Secim File are laoded (NO Appending)
 
-create table loaddata.newtranshist202210 as 
-SELECT * from loaddata.page1;
+##create table loaddata.newtranshist202210 as 
+##SELECT * from loaddata.page1;
 
-desc loaddata.newtranshist202210;
-##drop table loaddata.newtranshist202205 ;
+desc loaddata.newtranshist202301;
+
 
 desc Adhoc.combined_hist_rept;
 
 select "Combined Hist" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) nRecords, sum(Posted_Amount) as Total from Adhoc.combined_hist_rept
 UNION ALL
-select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) AS nRecords, sum(Posted_Amount) as Total  from loaddata.newtranshist202210;
+select "New Transaction File" as tablename, min(Journal_date) as FromDate, Max(Journal_date) ToDate,count(*) AS nRecords, sum(Posted_Amount) as Total  from loaddata.newtranshist202301;
 
 desc loaddata.newtranshist;
 
 #################
 #################
-### MANAGE DUPLICATE RECORDS BETWEEN NEW TRANSATIONS AND SECIM
-
-
+#################
 
 drop table if exists loaddata.newtranshist;
 Create table loaddata.newtranshist as
-SELECT * from  loaddata.newtranshist202210;
+SELECT * from  loaddata.newtranshist202301;
 
-ALTER TABLE loaddata.newtranshist	ADD UnDupFlag int(1),
-									ADD	DupKEY varchar(4000);
 
 select * from loaddata.newtranshist;
 
@@ -139,7 +135,7 @@ SET SQL_SAFE_UPDATES = 0;
 UPDATE loaddata.newtranshist SET Alt_Dept_ID=NULL;
 
 CREATE INDEX flex1 ON loaddata.newtranshist (Flex_Code);
-CREATE INDEX flex2 ON Adhoc.flex_codes (DeptFlex);
+##CREATE INDEX flex2 ON Adhoc.flex_codes (DeptFlex);
 
 ### Assign from Flex Code Table
 UPDATE loaddata.newtranshist hr, Adhoc.flex_codes lu
@@ -179,7 +175,7 @@ desc loaddata.newtranshist ;
 drop table if exists Adhoc.combined_hist_rept_NEW;
 create table Adhoc.combined_hist_rept_NEW AS
 SELECT 
-	combined_hist_report_id,
+	newtranshist_id as combined_hist_report_id,
 	Transaction_Detail,
 	TransMonth,
     DeptID,
@@ -233,7 +229,7 @@ select CTSI_Fiscal_Year,min(Journal_Date),max(Journal_Date),count(*) from Adhoc.
 ##################################################################################################################
 ##### BACKUP AND RENAME
 /*
-CREATE TABLE Adhoc.comb_hist_report202210BU AS
+CREATE TABLE Adhoc.comb_hist_report202212BU AS
 SELECT * from Adhoc.combined_hist_rept;
 
 drop table if exists Adhoc.combined_hist_rept;
