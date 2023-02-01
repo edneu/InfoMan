@@ -141,49 +141,84 @@ Group by Year,FacType  ;
 
 
 
-
-################
+#######################################################
+#######################################################
+#######################################################
+#######################################################
+### SUMMARY TABLE
 ###SERVICE USERS BY TYPE YEAR
 
-SELECT 	Year,
-		Faculty,
+## FACULTY Adjsut for incomplete 2022 roster
+SELECT 	Faculty,
         Count(Distinct Person_key)
 from lookup.roster
 WHERE Affiliation="UF"
   AND Faculty="Faculty"
-  AND Year>=2012
-Group by Year,Faculty ; 
+  AND Year IN (2021,2022)
+Group by Faculty ; 
 
+## NON FACULTY  ## Adjsut for incomplete 2022 roster
+SELECT Count(Distinct Person_key)
+from lookup.roster
+WHERE Affiliation="UF"
+AND Faculty='Non-Faculty'
+  AND Year IN (2021,2022)
+; 
 
-
-
-
-SELECT 	Year,
-		FacType,
+## TRAINEE  ## Adjsut for incomplete 2022 roster
+SELECT 	FacType,
         Count(Distinct Person_key)
 from lookup.roster
 WHERE Affiliation="UF"
   AND FacType='Trainee'
-  AND Year>=2012
-Group by Year,FacType ;  
+    AND Year IN (2021,2022)
+Group by FacType ;  
 
-SELECT 	Year,
-		FacType,
-        Count(Distinct Person_key)
+## Other Research Personnel  ## Adjsut for incomplete 2022 roster
+SELECT Count(Distinct Person_key)
 from lookup.roster
 WHERE Affiliation="UF"
-AND FacType='Non-Faculty'
-  AND Year>=2012
-Group by Year,FacType ; 
+  AND FacType<>'Trainee' 
+  AND Faculty='Non-Faculty'
+   AND Year IN (2021,2022)
+;
 
-
-SELECT 	Year,
-        Count(Distinct Person_key)
+## Total Service Users  ## Adjsut for incomplete 2022 roster
+SELECT 	Count(Distinct Person_key)
 from lookup.roster
-#WHERE Affiliation="UF"
-WHERE Year>=2012
-Group by Year; 
+WHERE Affiliation="UF"
+   AND Year IN (2021,2022)
+;
 
+## Total Assistant Professors  ## Adjsut for incomplete 2022 roster
+SELECT 	Count(Distinct Person_key)
+from lookup.roster
+WHERE Affiliation="UF"
+AND FacType="Assistant Professor"
+   AND Year IN (2021,2022)
+;
+
+
+##### Awards 2021
+Select Year(FUNDS_ACTIVATED) as Year,
+	  	COUNT(DISTINCT CLK_AWD_ID) as nAWD, 
+	   Sum(SPONSOR_AUTHORIZED_AMOUNT) as TotAmt
+From lookup.awards_history
+WHERE Year(FUNDS_ACTIVATED)=2021
+AND Roster2021=1;     
+
+##### Awards 2022
+Select Year(FUNDS_ACTIVATED) as Year,
+	  	COUNT(DISTINCT CLK_AWD_ID) as nAWD, 
+	   Sum(SPONSOR_AUTHORIZED_AMOUNT) as TotAmt
+From lookup.awards_history
+WHERE Year(FUNDS_ACTIVATED)=2022
+AND Roster2022=1;       
+########################################################################
+########################################################################
+########################################################################
+########################################################################
+########################################################################
 
 ########################
 ### SERIVCE USE

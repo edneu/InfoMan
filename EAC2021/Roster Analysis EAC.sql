@@ -323,8 +323,26 @@ select year,count(distinct Person_key) as Undup from lookup.roster  group by Yea
 select year,count(distinct Person_key) as Undup from lookup.roster 
 WHERE FacType="Assistant Professor"  group by Year;
 
+##  Associate Professors
+ 
+select year,count(distinct Person_key) as Undup from lookup.roster 
+WHERE FacType="Associate Professor"  group by Year;
+
+##  Professors
+
+select year,count(distinct Person_key) as Undup from lookup.roster 
+WHERE FacType="Professor"  group by Year;
 
 
+###  Adjust for 2002 incomplete roster 
+select FacType,count(distinct Person_key) as Undup from lookup.roster 
+WHERE FacType="Professor" and Year in (2021,2022);
+
+select FacType,count(distinct Person_key) as Undup from lookup.roster 
+WHERE FacType="Associate Professor" and Year in (2021,2022);
+
+select FacType,count(distinct Person_key) as Undup from lookup.roster 
+WHERE FacType="Assistant Professor" and Year in (2021,2022);
 ########### UNDUP ALL YEARS
 
 ## FACULTY

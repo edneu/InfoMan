@@ -73,6 +73,15 @@ UPDATE lookup.roster SET Rept_Program='Learning Health System' WHERE STD_PROGRAM
 UPDATE lookup.roster SET Rept_Program='Network Science' WHERE STD_PROGRAM='Network Science Program';
 UPDATE lookup.roster SET Rept_Program='Research Administration' WHERE STD_PROGRAM='Office of Clinical Research';
 UPDATE lookup.roster SET Rept_Program='UF Health Jacksonville' WHERE STD_PROGRAM='UF Health Jacksonville';
+UPDATE lookup.roster SET Rept_Program='Cellular Reprogramming' WHERE STD_PROGRAM='Cellular Reprograming';
+UPDATE lookup.roster SET Rept_Program='COVID-19 SRC' WHERE STD_PROGRAM='COVID-19 SRCWG';
+UPDATE lookup.roster SET Rept_Program='Integrated Data Repository' WHERE STD_PROGRAM='Intergrated Data Repository';
+UPDATE lookup.roster SET Rept_Program='Communications'  WHERE STD_PROGRAM='COMR';
+
+
+
+
+
 
 
 Select Rept_Program,count(*) from lookup.roster group by Rept_Program;
@@ -137,7 +146,12 @@ Update lookup.roster SET Display_College='PHHP-COM Intergrated Programs' WHERE D
 Update lookup.roster SET Display_College='Florida State University' WHERE Affiliation in ("FSU");
 Update lookup.roster SET Display_College='Medicine - Jacksonville' WHERE Department='JX-COMMUNITY MEDICINE-JAX';
 
-###################################################################################################################################################################
+#########################################################################################
+#########################################################################################
+#########################################################################################
+#########################################################################################
+#########################################################################################
+######################################################################################### 
 ##Grouped YEar
 select distinct ctsi_year from lookup.roster;
 
@@ -161,8 +175,12 @@ Select 	ctsi_year,
 From lookup.roster         
 Where FacType IN ('Associate Professor','Professor','Assistant Professor')
 
-
- 
+#########################################################################################
+#########################################################################################
+#########################################################################################
+#########################################################################################
+#########################################################################################
+######################################################################################### 
 
 
 

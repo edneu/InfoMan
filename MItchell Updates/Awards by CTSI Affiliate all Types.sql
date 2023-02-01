@@ -1,5 +1,9 @@
-
-
+########################################################################################
+########################################################################################
+########################################################################################
+########################################################################################
+########################################################################################
+## SPONSOR CATEGORY SUMMARY
 SELECT DISTINCT REPORTING_SPONSOR_CAT FROM lookup.awards_history;
 SELECT DISTINCT REPORTING_SPONSOR_NAME FROM lookup.awards_history;
 
@@ -90,7 +94,7 @@ GROUP BY YEAR(FUNDS_ACTIVATED), SponCat
 UNION ALL
 SELECT YEAR(FUNDS_ACTIVATED) AS YEAR, SponCat, SUM(DIRECT_AMOUNT) as Direct, SUM(INDIRECT_AMOUNT) as Indirect, SUM(SPONSOR_AUTHORIZED_AMOUNT) as TotAward
 from lookup.awards_history 
-WHERE YEAR(FUNDS_ACTIVATED)=2022 and Roster2022=1  ## Adjust for incomplete roster data
+WHERE YEAR(FUNDS_ACTIVATED)=2022 and Roster2022=1  
 GROUP BY YEAR(FUNDS_ACTIVATED), SponCat;
 ;
 
@@ -121,4 +125,9 @@ UPDATE work.YearSponCatSumm cs, work.YearSponCat lu SET cs.OthGovNP=lu.TotAward 
 
 SELECT * from work.YearSponCatSumm;
 
+########################################################################################
+########################################################################################
+########################################################################################
+########################################################################################
+########################################################################################
 

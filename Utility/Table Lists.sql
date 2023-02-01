@@ -9,11 +9,11 @@ ORDER BY SizeMB DESC;
 
 
 ### Table Sizes in Specific Schema
-SELECT table_name AS 'Table',
+SELECT table_schema,table_name AS 'Table',
 ROUND(((data_length + index_length) / 1024 / 1024), 2) AS 'Size (MB)',
 UPDATE_TIME
 FROM information_schema.TABLES
-WHERE table_schema NOT IN "Adhoc"
+WHERE table_schema NOT IN ("lookup", "space")
 ORDER BY (data_length + index_length) DESC;
 
 
