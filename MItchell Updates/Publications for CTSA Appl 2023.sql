@@ -132,3 +132,110 @@ select 	year(CM_Pub_Date) as PubdateYear,
    group by year(CM_Pub_Date);
 
 
+
+##Select Unique list of Publishers and Journals
+select 	CM_Publisher AS Publisher,
+		CM_Journal as Journal,
+        count(*) as nRECs
+   from biblio.ulpubs 
+   group by CM_Publisher, CM_Journal;
+## n=388
+
+## Use iCITE Journal
+select 	IC_Journal as Journal,
+        count(*) as nRECs
+   from biblio.ulpubs 
+   group by IC_Journal;
+## 385
+
+## Check Match CM_Journal, iCITE Journal
+select 	IC_Journal,
+		CM_Journal,
+        count(*) as nRECs
+   from biblio.ulpubs 
+   group by IC_Journal,
+			CM_Journal;
+        
+#387            
+### CHECK THE NON MATCH
+select 	IC_Journal,
+		CM_Journal,
+        count(*) as nRECs
+   from biblio.ulpubs 
+   WHERE IC_Journal <> 	CM_Journal
+   group by IC_Journal,
+			CM_Journal;
+## Looks like the CM_Journal is more complete
+################
+################
+####  DROP TABLE IF EXISTS biblio.impact1;
+#### Test Matching with Impact File
+################
+ALTER TABLE biblio.ulpubs
+ADD impactID int(5),
+ADD im_journal varchar(255),
+ADD im_jcr_abbr varchar(25);
+
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE biblio.ulpubs 
+SET impactID=NULL,
+	im_journal=NULL,
+	im_jcr_abbr=NULL;
+    
+UPDATE biblio.ulpubs pb, biblio.impact1 im
+SET pb.impactID =im.impact1_id,
+	pb.im_journal=im.Journal_name,
+	pb.im_jcr_abbr=JCR_Abbreviation
+WHERE pb.CM_Journal=im.Journal_name
+AND pb.impactID IS NULL;
+
+UPDATE biblio.ulpubs pb, biblio.impact1 im
+SET pb.impactID =im.impact1_id,
+	pb.im_journal=im.Journal_name,
+	pb.im_jcr_abbr=JCR_Abbreviation
+WHERE pb.CM_Journal=im.JCR_Abbreviation
+AND pb.impactID IS NULL;
+
+UPDATE biblio.ulpubs pb, biblio.impact1 im
+SET pb.impactID =im.impact1_id,
+	pb.im_journal=im.Journal_name,
+	pb.im_jcr_abbr=JCR_Abbreviation
+WHERE pb.IC_Journal=im.Journal_name
+AND pb.impactID IS NULL;
+
+UPDATE biblio.ulpubs pb, biblio.impact1 im
+SET pb.impactID =im.impact1_id,
+	pb.im_journal=im.Journal_name,
+	pb.im_jcr_abbr=JCR_Abbreviation
+WHERE pb.IC_Journal=im.JCR_Abbreviation
+AND pb.impactID IS NULL;
+
+Select * from biblio.ulpubs ORDER BY impactid DESC;
+
+
+drop table if exists  biblio.curate_im;
+create table biblio.curate_im AS
+Select IC_Journal,
+	   CM_Journal,
+       impactID,
+       im_journal,
+       im_jcr_abbr,
+       COunt(*) as nPubs
+from biblio.ulpubs
+WHERE impactID IS NOT NULL
+GROUP BY IC_Journal,
+	   CM_Journal,
+       impactID,
+       im_journal,
+       im_jcr_abbr
+       ORDER BY CM_Journal;
+
+
+;
+
+
+
+
+
+            
