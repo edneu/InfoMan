@@ -218,4 +218,16 @@ SELECT * from work.ProgUsersOut ORDER BY Undup DESC, Year ;
 
 
 
+SELECT 	Category,
+		Count(*) as nAwards,
+		Sum(Award_Amt) as Amount
+from pilots.PILOTS_MASTER 
+WHERE Awarded="Awarded"
+Group BY category;
 
+SELECT 	Award_Year,
+		Count(*) as nAwards,
+		Sum(Award_Amt) as Amount
+from pilots.PILOTS_MASTER 
+WHERE Awarded="Awarded"
+Group BY Award_Year;

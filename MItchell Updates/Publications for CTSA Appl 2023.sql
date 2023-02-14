@@ -174,44 +174,75 @@ select 	IC_Journal,
 ALTER TABLE biblio.ulpubs
 ADD impactID int(5),
 ADD im_journal varchar(255),
-ADD im_jcr_abbr varchar(25);
+ADD im_jcr_abbr varchar(25),
+ADD im_2021_JIF decimal(65,30),
+ADD im_JIF_Quartile varchar(5);
+
+
+ALTER TABLE biblio.impact1
+ADD MatchFlag int(1);
 
 SET SQL_SAFE_UPDATES = 0;
 
 UPDATE biblio.ulpubs 
 SET impactID=NULL,
 	im_journal=NULL,
-	im_jcr_abbr=NULL;
+	im_jcr_abbr=NULL,
+    im_2021_JIF=NULL,
+    im_JIF_Quartile=Null;
+    
+UPDATE biblio.impact1 
+SET MatchFlag=0;    
     
 UPDATE biblio.ulpubs pb, biblio.impact1 im
 SET pb.impactID =im.impact1_id,
 	pb.im_journal=im.Journal_name,
-	pb.im_jcr_abbr=JCR_Abbreviation
+	pb.im_jcr_abbr=JCR_Abbreviation,
+    pb.im_2021_JIF=im.`2021_JIF`,
+    pb.im_JIF_Quartile=im.JIF_Quartile,
+    im.MatchFlag=1
 WHERE pb.CM_Journal=im.Journal_name
 AND pb.impactID IS NULL;
 
 UPDATE biblio.ulpubs pb, biblio.impact1 im
 SET pb.impactID =im.impact1_id,
 	pb.im_journal=im.Journal_name,
-	pb.im_jcr_abbr=JCR_Abbreviation
+	pb.im_jcr_abbr=JCR_Abbreviation,
+    pb.im_2021_JIF=im.`2021_JIF`,
+    pb.im_JIF_Quartile=im.JIF_Quartile,
+    im.MatchFlag=1
 WHERE pb.CM_Journal=im.JCR_Abbreviation
 AND pb.impactID IS NULL;
 
 UPDATE biblio.ulpubs pb, biblio.impact1 im
 SET pb.impactID =im.impact1_id,
 	pb.im_journal=im.Journal_name,
-	pb.im_jcr_abbr=JCR_Abbreviation
+	pb.im_jcr_abbr=JCR_Abbreviation,
+    pb.im_2021_JIF=im.`2021_JIF`,
+    pb.im_JIF_Quartile=im.JIF_Quartile,
+    im.MatchFlag=1
 WHERE pb.IC_Journal=im.Journal_name
 AND pb.impactID IS NULL;
 
 UPDATE biblio.ulpubs pb, biblio.impact1 im
 SET pb.impactID =im.impact1_id,
 	pb.im_journal=im.Journal_name,
-	pb.im_jcr_abbr=JCR_Abbreviation
+	pb.im_jcr_abbr=JCR_Abbreviation,
+    pb.im_2021_JIF=im.`2021_JIF`,
+    pb.im_JIF_Quartile=im.JIF_Quartile,
+    im.MatchFlag=1
 WHERE pb.IC_Journal=im.JCR_Abbreviation
 AND pb.impactID IS NULL;
 
 Select * from biblio.ulpubs ORDER BY impactid DESC;
+
+SET SQL_SAFE_UPDATES = 0;
+UPDATE biblio.ulpubs
+SET CM_Journal = TRIM(CM_Journal) ,
+	CM_Publisher = TRIM(CM_Publisher),
+    IC_Journal = TRIM(IC_Journal);
+
+
 
 
 drop table if exists  biblio.curate_im;
@@ -234,8 +265,56 @@ GROUP BY IC_Journal,
 
 ;
 
+DROP TABLE IF EXISTS biblio.ImpactCurate;
+Create table biblio.ImpactCurate as 
+select 	CM_Journal, 
+		CM_Publisher,
+        IC_Journal,
+        count(*) as nPubs,
+		max(im_2021_JIF) as JIF_2021,
+		max(im_JIF_Quartile) as JIF_Quartile
+FROM biblio.ulpubs
+GROUP BY CM_Journal,CM_Publisher,IC_Journal
+ORDER BY JIF_2021 DESC ;
 
 
+################# SJR H Factor Table
 
-
+Drop table if exists  biblio.sjr_impact;
+select * from biblio.sjr_impact;
             
+            
+ALTER TABLE biblio.ulpubs
+ADD sjr_iSSN varchar(45),
+ADD sjr_Hindex int(5),
+ADD sjr_Quartile varchar(5);
+
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE biblio.ulpubs
+SET sjr_ISSN=NULL,
+	sjr_Hindex=NULL,
+	sjr_Quartile=Null;
+    
+    
+UPDATE biblio.ulpubs pb, biblio.sjr_impact lu
+SET pb.sjr_ISSN=lu.Issn,
+	pb.sjr_Hindex=lu.H_index,
+    pb.sjr_Quartile=lu.SJR_Best_Quartile
+WHERE pb.IC_Journal=lu.Title
+AND pb.sjr_Hindex is null;    
+    
+UPDATE biblio.ulpubs pb, biblio.sjr_impact lu
+SET pb.sjr_ISSN=lu.Issn,
+	pb.sjr_Hindex=lu.H_index,
+    pb.sjr_Quartile=lu.SJR_Best_Quartile
+WHERE pb.CM_Journal=lu.Title
+AND pb.sjr_Hindex is null;        
+
+      select distinct(CM_Journal) from biblio.ulpubs where sjr_Hindex is null;    
+      
+      
+      select * from biblio.sjr_impact where Title like "%LUNG%";
+      
+      'Lung'
+      'Lung'

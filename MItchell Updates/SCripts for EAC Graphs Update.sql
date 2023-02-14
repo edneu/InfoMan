@@ -15,6 +15,20 @@ WHERE Year>=2012
 AND UserClass IN ('UF Faculty','UF Research Professtionals','UF Grad Student / Trainee')
 group by Rept_Program,UserClass;
 
+
+#############  2019-2022
+DROP TABLE IF EXISTS  work.userprogram;
+CREATE TABLE work.userprogram as
+SELECT Rept_Program,UserClass, count(distinct Person_Key) As nUndup
+from lookup.roster
+WHERE Year>=2019
+AND UserClass IN ('UF Faculty','UF Research Professtionals','UF Grad Student / Trainee')
+group by Rept_Program,UserClass;
+
+
+
+
+
 select max(length(UserClass)) from work.userprogram;
 
 
@@ -27,7 +41,7 @@ DROP TABLE IF EXISTS work.ProgUsersUndup;
 Create TABLE work.ProgUsersUndup AS
 SELECT Rept_Program, Count(Distinct Person_key) as nUndup
 from lookup.roster
-WHERE Year>=2012
+WHERE Year>=2019
 AND UserClass IN ('UF Faculty','UF Research Professtionals','UF Grad Student / Trainee')
 group by Rept_Program;
 
