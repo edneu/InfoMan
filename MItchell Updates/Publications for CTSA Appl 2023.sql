@@ -311,10 +311,39 @@ SET pb.sjr_ISSN=lu.Issn,
 WHERE pb.CM_Journal=lu.Title
 AND pb.sjr_Hindex is null;        
 
-      select distinct(CM_Journal) from biblio.ulpubs where sjr_Hindex is null;    
+ ## Load CUrated Data
+ UPDATE biblio.ulpubs pb, biblio.sjr_curate lu
+SET pb.sjr_ISSN=lu.Issn,
+	pb.sjr_Hindex=lu.H_index,
+    pb.sjr_Quartile=lu.SJR_Best_Quartile
+WHERE pb.CM_Journal=lu.CM_Journal
+AND pb.sjr_Hindex is null;        
+ 
+## drop table if exists biblio.sjr_curate;
+ 
+
+ 
+ ## CREATE CURATION LIST
+ select distinct(CM_Journal) from biblio.ulpubs where sjr_Hindex is null;    
+ 
+ 
+      DROP TABLE IF EXISTS biblio.curate_sjr_list;
+      Create table biblio.curate_sjr_list as
       
       
-      select * from biblio.sjr_impact where Title like "%LUNG%";
-      
-      'Lung'
-      'Lung'
+      select 	Title,
+				Issn,
+				H_index,
+				SJR_Best_Quartile
+            from biblio.sjr_impact
+      WHERE 
+     Title LIKE ('%translation%pro%') 
+     ORDER BY Title;
+
+
+    select * from biblio.sjr_curate;
+    
+    select "Have H-Index" as Measure, count(*) as nPubs from biblio.ulpubs where sjr_Hindex is not NULL
+   UNION ALL
+       select "No H-Index" as Measure, count(*) as nPubs from biblio.ulpubs where sjr_Hindex is NULL;
+ 
