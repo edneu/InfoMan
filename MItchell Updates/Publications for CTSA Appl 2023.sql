@@ -343,7 +343,22 @@ AND pb.sjr_Hindex is null;
 
     select * from biblio.sjr_curate;
     
+    
     select "Have H-Index" as Measure, count(*) as nPubs from biblio.ulpubs where sjr_Hindex is not NULL
    UNION ALL
-       select "No H-Index" as Measure, count(*) as nPubs from biblio.ulpubs where sjr_Hindex is NULL;
+       select "No H-Index" as Measure, count(*) as nPubs from biblio.ulpubs where sjr_Hindex is NULL
+   UNION ALL    
+		select "Compliant" as Measure, count(*) as nPubs from biblio.ulpubs WHERE PM_PMCID <>""
+   UNION ALL    
+		select "Total" as Measure, count(*) as nPubs from biblio.ulpubs
+   UNION ALL     
+      select "Compliant Have H-Index" as Measure, count(*) as nPubs from biblio.ulpubs where sjr_Hindex is not NULL AND PM_PMCID <>""
+   UNION ALL
+       select "Compliant No H-Index" as Measure, count(*) as nPubs from biblio.ulpubs where sjr_Hindex is NULL and PM_PMCID <>""
+  UNION ALL     
+      select "Compliant Have RCR" as Measure, count(*) as nPubs from biblio.ulpubs where IC_RCR is not NULL AND PM_PMCID <>""
+ ;       
+Select min(Year(CM_Pub_Date)), max(Year(CM_Pub_Date)) from biblio.ulpubs;        
  
+ 
+ select distinct IC_RCR from biblio.ulpubs;
