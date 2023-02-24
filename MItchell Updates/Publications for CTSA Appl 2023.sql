@@ -387,7 +387,24 @@ FROM biblio.ulpubs ul LEFT JOIN biblio.jcr_impact_lookup lu
 ON ul.fmt_ISSN1=lu.ISSN OR ul.fmt_ISSN1=lu.ISSN
 AND ul.fmt_ISSN1 IS NOT NULL;
 
+#################################################################################################
+###
+/*
+LOOK HERE
+Add these to ul.work
+			Full_Journal_Title,
+			JCR_Abbreviated_Title,
+			Journal_Impact_Factor;
+            WOS_Impact_Status
+				- Has Impact Factor
+                - WOS Record No Impact Facotr
+                - No Wos Record
+Updates as below  JOin selcted etc.
 
+            
+
+
+*/
 drop table if exists biblio.temp;        
 create table biblio.temp as
 SELECT 	ul.PM_PMID,
@@ -430,21 +447,27 @@ Select 	CM_Journal,
         fmt_ISSN2,
         Full_Journal_Title,
         JCR_Abbreviated_Title,
-        Journal_Impact_Factor
+        Journal_Impact_Factor,
+        COUNT(DISTINCT PM_PMID) AS nPubs
 from biblio.temp
 WHERE Journal_Impact_Factor IS NULL
-AND Full_Journal_Title IS NULL;
+AND Full_Journal_Title IS NULL
+GROUP BY 	CM_Journal,
+			IC_Journal,
+			ISSN, 
+			`ISSN-2`,
+			fmt_ISSN1,
+			fmt_ISSN2,
+			Full_Journal_Title,
+			JCR_Abbreviated_Title,
+			Journal_Impact_Factor;
 2059-8661
 107
 90  - 529 matches
 75
 
-select distinct Journal_Impact_Factor from biblio.temp;
-
-
-select count(distinct PM_PMID), count(*) from biblio.ulpubs;
-
-select count(*) from biblio.ulpubs;
+SELECT * FROM biblio.jcr_impact_lookup
+WHERE Full_Journal_Title LIKE "Journal of Clinical and Translational Science";
 
 
 
