@@ -322,43 +322,147 @@ AND pb.sjr_Hindex is null;
 ## drop table if exists biblio.sjr_curate;
  
 
- 
- ## CREATE CURATION LIST
- select distinct(CM_Journal) from biblio.ulpubs where sjr_Hindex is null;    
- 
- 
-      DROP TABLE IF EXISTS biblio.curate_sjr_list;
-      Create table biblio.curate_sjr_list as
-      
-      
-      select 	Title,
-				Issn,
-				H_index,
-				SJR_Best_Quartile
-            from biblio.sjr_impact
-      WHERE 
-     Title LIKE ('%translation%pro%') 
-     ORDER BY Title;
+#################################################################
+#################################################################
+### FORMAT FOR Merge with Impact Factor table from Cancer Center 
+### Clarivate JCR
 
 
-    select * from biblio.sjr_curate;
-    
-    
-    select "Have H-Index" as Measure, count(*) as nPubs from biblio.ulpubs where sjr_Hindex is not NULL
-   UNION ALL
-       select "No H-Index" as Measure, count(*) as nPubs from biblio.ulpubs where sjr_Hindex is NULL
-   UNION ALL    
-		select "Compliant" as Measure, count(*) as nPubs from biblio.ulpubs WHERE PM_PMCID <>""
-   UNION ALL    
-		select "Total" as Measure, count(*) as nPubs from biblio.ulpubs
-   UNION ALL     
-      select "Compliant Have H-Index" as Measure, count(*) as nPubs from biblio.ulpubs where sjr_Hindex is not NULL AND PM_PMCID <>""
-   UNION ALL
-       select "Compliant No H-Index" as Measure, count(*) as nPubs from biblio.ulpubs where sjr_Hindex is NULL and PM_PMCID <>""
-  UNION ALL     
-      select "Compliant Have RCR" as Measure, count(*) as nPubs from biblio.ulpubs where IC_RCR is not NULL AND PM_PMCID <>""
- ;       
-Select min(Year(CM_Pub_Date)), max(Year(CM_Pub_Date)) from biblio.ulpubs;        
- 
- 
- select distinct IC_RCR from biblio.ulpubs;
+Alter Table biblio.ulpubs 
+	ADD fmt_ISSN1 varchar(12),
+	ADD fmt_ISSN2 varchar(12);
+
+SET SQL_SAFE_UPDATES = 0;
+UPDATE biblio.ulpubs
+	SET fmt_ISSN1=NULL,
+		fmt_ISSN2=NULL;
+
+UPDATE biblio.ulpubs
+	SET Fmt_ISSN1=CONCAT(SUBSTR(sjr_iSSN,1,4),"-",SUBSTR(sjr_iSSN,5,4)),
+        Fmt_ISSN2=CONCAT(SUBSTR(sjr_iSSN,11,4),"-",SUBSTR(sjr_iSSN,15,4));
+        
+ UPDATE biblio.ulpubs
+	SET Fmt_ISSN2=Null
+ WHERE Fmt_ISSN2="-";       
+
+SELECT sjr_iSSN,Fmt_ISSN1,Fmt_ISSN2 from biblio.ulpubs;
+
+##UNDUP IMPACT Factors TABLE
+DROP TABLE IF EXISTS biblio.jcr_impact_lookup;
+create table biblio.jcr_impact_lookup as
+SELECT 	Full_Journal_Title,
+		JCR_Abbreviated_Title,
+        ISSN,
+        `ISSN-2`,
+        Total_Cites,
+        Journal_Impact_Factor,
+        Impact_Factor_without_Journal_Self_Cites,
+        Five_Year_Impact_Factor,
+        Eigenfactor_Score,
+        count(*) as nRecs
+from biblio.jcr_impact_factor
+GROUP BY Full_Journal_Title,
+		JCR_Abbreviated_Title,
+        ISSN,
+        `ISSN-2`,
+        Total_Cites,
+        Journal_Impact_Factor,
+        Impact_Factor_without_Journal_Self_Cites,
+        Five_Year_Impact_Factor,
+        Eigenfactor_Score;
+
+drop table if exists biblio.temp;        
+create table biblio.temp as
+SELECT 	ul.PM_PMID,
+		ul.CM_Journal,
+		ul.IC_Journal,
+        ul.fmt_ISSN1,
+        ul.fmt_ISSN2,
+        lu.ISSN,
+        lu.`ISSN-2`,
+        lu.Full_Journal_Title,
+        lu.JCR_Abbreviated_Title,
+        lu.Journal_Impact_Factor
+FROM biblio.ulpubs ul LEFT JOIN biblio.jcr_impact_lookup lu
+ON ul.fmt_ISSN1=lu.ISSN OR ul.fmt_ISSN1=lu.ISSN
+AND ul.fmt_ISSN1 IS NOT NULL;
+
+
+drop table if exists biblio.temp;        
+create table biblio.temp as
+SELECT 	ul.PM_PMID,
+		ul.CM_Journal,
+		ul.IC_Journal,
+        ul.fmt_ISSN1,
+        ul.fmt_ISSN2,
+        lu.ISSN,
+        lu.`ISSN-2`,
+        lu.Full_Journal_Title,
+        lu.JCR_Abbreviated_Title,
+        lu.Journal_Impact_Factor
+FROM biblio.ulpubs ul LEFT JOIN biblio.jcr_impact_lookup lu
+ON (ul.fmt_ISSN1=lu.ISSN OR ul.fmt_ISSN1=lu.`ISSN-2` OR ul.fmt_ISSN2=lu.ISSN OR ul.fmt_ISSN2=lu.`ISSN-2`)
+AND ul.fmt_ISSN1 IS NOT NULL;
+
+UPDATE biblio.temp ul, biblio.jcr_impact_lookup lu
+SET ul.Full_Journal_Title=lu.Full_Journal_Title,
+	ul.JCR_Abbreviated_Title=lu.JCR_Abbreviated_Title,
+    ul.Journal_Impact_Factor=lu.Journal_Impact_Factor
+WHERE (ul.CM_Journal=lu.Full_Journal_Title OR ul.CM_Journal=lu.JCR_Abbreviated_Title)
+AND ul.Journal_Impact_Factor IS NULL;    
+
+UPDATE biblio.temp ul, biblio.jcr_impact_lookup lu
+SET ul.Full_Journal_Title=lu.Full_Journal_Title,
+	ul.JCR_Abbreviated_Title=lu.JCR_Abbreviated_Title,
+    ul.Journal_Impact_Factor=lu.Journal_Impact_Factor
+WHERE (ul.IC_Journal=lu.Full_Journal_Title OR ul.IC_Journal=lu.JCR_Abbreviated_Title)
+AND ul.Journal_Impact_Factor IS NULL;   
+
+desc biblio.temp;
+
+drop table if exists biblio.temp2;        
+create table biblio.temp2 as
+Select 	CM_Journal,
+		IC_Journal,
+        ISSN, 
+        `ISSN-2`,
+        fmt_ISSN1,
+        fmt_ISSN2,
+        Full_Journal_Title,
+        JCR_Abbreviated_Title,
+        Journal_Impact_Factor
+from biblio.temp
+WHERE Journal_Impact_Factor IS NULL
+AND Full_Journal_Title IS NULL;
+2059-8661
+107
+90  - 529 matches
+75
+
+select distinct Journal_Impact_Factor from biblio.temp;
+
+
+select count(distinct PM_PMID), count(*) from biblio.ulpubs;
+
+select count(*) from biblio.ulpubs;
+
+
+
+
+Select 	sjr_iSSN, 
+		CONCAT(SUBSTR(sjr_iSSN,1,4),"-",SUBSTR(sjr_iSSN,5,4)) as Fmt_ISSN1,
+        CONCAT(SUBSTR(sjr_iSSN,11,4),"-",SUBSTR(sjr_iSSN,15,4)) as Fmt_ISSN2
+from biblio.ulpubs;
+
+
+Select distinct length(sjr_iSSN)
+from biblio.ulpubs;
+
+0007-9235	1542-4863
+0140-6736	1474-547X
+0028-4793	1533-4406
+
+select ISSN,`ISSN-2` from biblio.jcr_impact_factor;
+
+
+
