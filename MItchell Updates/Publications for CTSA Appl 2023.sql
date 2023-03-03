@@ -355,8 +355,41 @@ selecT jcr_Status, COUNT(*) AS nPUBS, count(distinct CM_Journal) as nJournals
 FROM biblio.ulpubs
 group by jcr_Status; 
 
+select 	COUNT(PM_PMID) AS nPUBS,
+		count(distinct CM_Journal) as nJournals
+from biblio.ulpubs as nJournals
+WHERE jcr_Status="Has WOS JIF"
+AND jcr_Journal_Impact_Factor>=1;
+
+selecT jcr_Status, COUNT(*) AS nPUBS, count(distinct CM_Journal) as nJournals
+FROM biblio.ulpubs
+group by jcr_Status; 
+
+## Scratch
+select 	COUNT(PM_PMID) AS nPUBS,
+		count(distinct CM_Journal) as nJournals
+from biblio.ulpubs
+WHERE IC_RCR iS NOT NULL
+AND IC_NIH_Percentile>=80;
+
+Select 	Year(CM_Pub_Date) as PubYear,
+		Avg(`IC_Mol/Cell`) ,
+        Avg(IC_Animal),
+        Avg(IC_Human)
+from biblio.ulpubs
+GROUP BY  Year(CM_Pub_Date);   
+
+## Create no Impact Summary
+Select jcr_Status,CM_Journal,count(distinct PM_PMID) as nPubs
+from biblio.ulpubs
+WHERE jcr_Status  <> 'Has WOS JIF'
+GROUP BY jcr_Status,CM_Journal;
+
+GROUP BY  jcr_Status,CM_Journal;  
 
 ######OUTPUT TABLE
+DROP TABLE IF EXISTS biblio.UL_Impact;
+CREATE TABLE biblio.UL_Impact as
 SELECT 	PM_PMID,
 		PM_PMCID,
         PM_Citation,
@@ -372,11 +405,12 @@ SELECT 	PM_PMID,
         jcr_Status
 from biblio.ulpubs;        
         
+        
+ ######
 
 
-FROM biblio.ulpubs
 
-###create table biblio.ul_pubs_bu as select * from biblio.ulpubs;
+
 
 
 ##############################################################################################################################

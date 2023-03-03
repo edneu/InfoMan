@@ -2,9 +2,49 @@
 
 
 ## CREATE WORK TABLE
+DROP TABLE IF EXISTS clinical.ct_worktemp;
+CREATE TABLE clinical.ct_worktemp AS
+SELECT * from clinical.ctgov20230222; 
+
+## UNDUPLICATE WORKING FILE  
+## DUE TO FSU SUPPLEMENT
+
 DROP TABLE IF EXISTS clinical.ct_work;
 CREATE TABLE clinical.ct_work AS
-SELECT * from clinical.ctgov20230222; 
+SELECT         max(Rank) AS Rank,
+               NCT_Number,
+               max(Title) AS Title,
+               max(Acronym) AS Acronym,
+               max(Status) AS Status,
+               max(Study_Results) AS Study_Results,
+               max(Conditions) AS Conditions,
+               max(Interventions) AS Interventions,
+               max(Outcome_Measures) AS Outcome_Measures,
+               max(`Sponsor/Collaborators`) AS `Sponsor/Collaborators`,
+               max(Gender) AS Gender,
+               max(Age) AS Age,
+               max(Phases) AS Phases,
+               max(Enrollment) AS Enrollment,
+               max(Funded_Bys) AS Funded_Bys,
+               max(Study_Type) AS Study_Type,
+               max(Study_Designs) AS Study_Designs,
+               max(Other_IDs) AS Other_IDs,
+               max(Start_Date) AS Start_Date,
+               max(Primary_Completion_Date) AS Primary_Completion_Date,
+               max(Completion_Date) AS Completion_Date,
+               max(First_Posted) AS First_Posted,
+               max(Results_First_Posted) AS Results_First_Posted,
+               max(Last_Update_Posted) AS Last_Update_Posted,
+               max(Locations) AS Locations,
+               max(Study_Documents) AS Study_Documents,
+               max(URL) AS URL
+from clinical.ct_worktemp
+GROUP BY NCT_Number;               
+
+
+
+
+
 
 ALTER TABLE clinical.ct_work
 	ADD keep_date int(1),
@@ -43,6 +83,11 @@ WHERE  Locations LIKE ('%UNIVERSITY OF FLORIDA%')
    OR  Locations LIKE ('%UF HEALTH%'); 
 
 ## FSU
+## HANDLE FSU RECORDS WITH MISSIN LOCATIONS (Supplemental Terra Bradley
+UPDATE clinical.ct_work
+SET FSU=1
+WHERE NCT_Number IN('NCT05459636','NCT05431855');
+
 UPDATE 	clinical.ct_work
 		SET FSU=1
 WHERE  Locations LIKE ('%FLORIDA STATE UNIVERSITY%');     
@@ -73,6 +118,7 @@ Update clinical.ct_work SET Lead_Institution='Cornell University' WHERE NCT_Numb
 Update clinical.ct_work SET Lead_Institution='University of California San Francisco' WHERE NCT_Number='NCT05574335';
 Update clinical.ct_work SET Lead_Institution='University of California, San Diego' WHERE NCT_Number='NCT05453578';
 Update clinical.ct_work SET Lead_Institution='University of California San Francisco' WHERE NCT_Number='NCT05201469';
+Update clinical.ct_work SET Lead_Institution='Florida State University' WHERE NCT_Number IN('NCT05459636','NCT05431855');
 ##################################################################################################################################
 ##################################################################################################################################
 ##################################################################################################################################
@@ -93,10 +139,6 @@ SET ct.Lead_ERACommons=lu.ERACommons,
     ct.Lead_EIN=lu.EIN
 WHERE ct.Lead_Institution=TRIM(lu.Institution);    
 
-
-
-
-
 select * from clinical.ct_work;
 
 
@@ -107,9 +149,21 @@ AND (UF=1 OR FSU=1);
 
 #################################################################
 ## Format Output  Table
+## TOP %
+select 	Outcome_Measures,
+		length(Outcome_Measures) as LenOut,
+        (LENGTH(Outcome_Measures)-LENGTH( REPLACE (Outcome_Measures, "|", "") ) ) as nPipe,
+        SUBSTRING_INDEX(Outcome_Measures, "|", 6) AS TopN,
+        LENGTH (SUBSTRING_INDEX(Outcome_Measures, "|", 6) ) as LenTopN
+from clinical.ct_work
+WHERE keep_date=1
+AND (UF=1 OR FSU=1);
 
 
-select  NCT_Number,
+DROP TABLE IF EXISTS clinical.UF_FSU_TRIALS;
+CREATE TABLE clinical.UF_FSU_TRIALS AS
+Select  NCT_Number,
+		Title,
 		Interventions,
         Phases,
         nSites,
@@ -119,7 +173,7 @@ select  NCT_Number,
         Funded_Bys,  ## REVISE Contract, Grant, Institutional
         Duration_months,
         Enrollment,
-        Outcome_Measures
+        SUBSTRING_INDEX(Outcome_Measures, "|", 6) AS Outcomes
 from clinical.ct_work
 WHERE keep_date=1
 AND (UF=1 OR FSU=1);
@@ -200,3 +254,10 @@ WHERE  Lead_Institution IN
 #################################################################
 #################################################################
 
+## SCRATCH FIND FSU STUDIES
+SELECT count(*) FROM clinical.ct_work;
+WHERE 
+
+
+NCT05459636
+NCT05431855
