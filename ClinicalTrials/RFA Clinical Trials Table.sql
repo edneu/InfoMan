@@ -173,11 +173,19 @@ Select  NCT_Number,
         Funded_Bys,  ## REVISE Contract, Grant, Institutional
         Duration_months,
         Enrollment,
-        SUBSTRING_INDEX(Outcome_Measures, "|", 6) AS Outcomes
+        SUBSTRING_INDEX(Outcome_Measures, "|", 6) AS Outcomes,
+        URL
 from clinical.ct_work
 WHERE keep_date=1
 AND (UF=1 OR FSU=1);
 ########################################################################################
+select URL from clinical.ct_work
+WHERE NCT_NUMBER="NCT05643573";
+
+SELECT REPORTING_SPONSOR_NAME,CLK_AWD_ID,CLK_AWD_FULL_TITLE ,REPORTING_SPONSOR_NAME,ALLOCATION_ID,MOD_PAY_ID from lookup.awards_history
+WHERE CLK_AWD_FULL_TITLE LIKE '%Baby%'
+AND REPORTING_SPONSOR_NAME LIKE '%' ;
+
 /*
 xCT ID1
 xStudy Title
@@ -254,10 +262,10 @@ WHERE  Lead_Institution IN
 #################################################################
 #################################################################
 
-## SCRATCH FIND FSU STUDIES
-SELECT count(*) FROM clinical.ct_work;
-WHERE 
+## SCRATCH FIND UFIRST AND IRB Records
+SELECT distinct  NCT_Number
+FROM clinical.UF_FSU_TRIALS;
 
+select 
+from lookup.
 
-NCT05459636
-NCT05431855

@@ -1,6 +1,8 @@
 
 ## FROM ANGELA
-select * from finance.contribidc;
+DROP TABLE IF EXISTS finance.contribidcRAW;
+create table finance.contribidcRAW as 
+select * from finance.contribidc2023;
 
 
 ##############################################################
@@ -10,18 +12,21 @@ DROP TABLE IF EXISTS finance.rosterfacIDC1;
 CREATE TABLE finance.rosterfacIDC1 AS
 Select UFID 
 from lookup.roster
-where Year in ('2019','2020')
+where Year in ('2021','2022')
 AND Faculty="Faculty"
 AND UFID not in ('','0')
 GROUP BY UFID
 UNION ALL 
 SELECT DISTINCT UFID
-FROM finance.contribidc ;
+FROM finance.contribidcRAW 
+WHERE UFID <> '0000000';
+
 
 
 DROP TABLE IF EXISTS finance.rosterfacIDC;
 CREATE TABLE finance.rosterfacIDC AS
-Select DISTINCT UFID from finance.rosterfacIDC1; 
+Select DISTINCT UFID from finance.rosterfacIDC1
+WHERE UFID <>'0000000'; 
 
 
 
@@ -35,7 +40,7 @@ SELECT 	CLK_AWD_PROJ_ID as ProjectID,
 		SUM(INDIRECT_AMOUNT) As Indirect,
 		SUM(SPONSOR_AUTHORIZED_AMOUNT) As Total
 FROM lookup.awards_history
-WHERE FUNDS_ACTIVATED BETWEEN str_to_date('07,31,2019','%m,%d,%Y') AND str_to_date('06,30,2020','%m,%d,%Y')
+WHERE FUNDS_ACTIVATED BETWEEN str_to_date('07,01,2022','%m,%d,%Y') AND str_to_date('06,30,2023','%m,%d,%Y')
 AND CLK_PI_UFID in (SELECT DISTINCT UFID FROM finance.rosterfacIDC)
 GROUP BY CLK_AWD_PROJ_ID;
 
@@ -54,13 +59,12 @@ GROUP BY PI_UFID;
 ##   IDC Recevied (from Angela's Table)
 ##################################################################
 
-DROP TABLE IF EXISTS finance.ContribIDC;
-CREATE TABLE finance.ContribIDC AS
-
+DROP TABLE IF EXISTS finance.ContribIDClu;
+CREATE TABLE finance.ContribIDClu AS
 SELECT UFID,
        COUNT(ProjectID) AS IDCContrib_nProj,
        SUM(ContribIDC) AS IDCContrib_Amount
-from finance.contribidc
+from finance.contribidcRAW
 GROUP BY UFID;
 
 
@@ -69,7 +73,8 @@ GROUP BY UFID;
 
 DROP TABLE IF EXISTS finance.IDC_SUMMARY;
 Create table finance.IDC_SUMMARY AS
-SELECT * from finance.rosterfacIDC;
+SELECT * from finance.rosterfacIDC
+WHERE UFID <>'0000000';
 
 
 
@@ -114,7 +119,7 @@ SET 	ids.PI_LastName=lu.UF_LAST_NM,
         ids.PI_DeptNAme=lu.UF_DEPT_NM
 WHERE ids.UFID=lu.UF_UFID;   
 
- 
+ /*
 UPDATE finance.IDC_SUMMARY ids, lookup.Employees lu
 SET 	ids.PI_DeptID=lu.Department_Code,
         ids.PI_DeptNAme=lu.Department,
@@ -123,7 +128,7 @@ WHERE ids.UFID=lu.Employee_ID;
 
 
  
-UPDATE finance.IDC_SUMMARY ids, lookup.email_master lu
+UPDATE finance.IDC_SUMMARY ids, lookup.email lu
 SET 	ids.PI_Email=UF_EMAIL
 WHERE ids.UFID=lu.UF_UFID
 AND UF_PRIMARY_FLG="Y"; 
@@ -134,7 +139,7 @@ SET 	ids.PI_DeptID=lu.Department_Code,
         ids.PI_DeptNAme=lu.Department,
         ids.PI_Title=lu.Job_Code
 WHERE ids.UFID=lu.Employee_ID;  
-
+*/
 
 
 ### ADD AWARD SUMMARY
@@ -146,7 +151,7 @@ SET 	ids.NumProjects=lu.NumProjects,
 WHERE ids.UFID=lu.PI_UFID;  
     
 ##  ADD CONTRIBUTION SUMMARY
-UPDATE finance.IDC_SUMMARY ids, finance.ContribIDC lu
+UPDATE finance.IDC_SUMMARY ids, finance.ContribIDClu lu
 SET 	ids.IDCContrib_nProj=lu.IDCContrib_nProj,
 		ids.IDCContrib_Amount=lu.IDCContrib_Amount
 WHERE ids.UFID=lu.UFID;   
@@ -156,6 +161,7 @@ DELETE FROM finance.IDC_SUMMARY
 WHERE NumProjects =0 
    AND IDCContrib_nProj=0 ;
    
+Select * from finance.IDC_SUMMARY;   
 ########################################################################################
 ########################################################################################
 ###################                   EOF               ################################
