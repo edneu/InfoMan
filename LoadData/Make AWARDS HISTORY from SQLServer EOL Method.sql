@@ -98,7 +98,7 @@ SET GLOBAL local_infile = 1;
 
 
 ## load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory20230131.dat" 
-load data local infile "C:\\Users\\edneu\\Desktop\\AwardsHistory20230131.dat"
+load data local infile "C:\\Users\\edneu\\Desktop\\AwardHistory 20230404.dat"
 into table loaddata.awards_history 
 fields terminated by '|'
 lines terminated by '\r'
@@ -369,9 +369,8 @@ UPDATE loaddata.awards_history ah SET Roster2019=1 Where Year(FUNDS_ACTIVATED)=2
 UPDATE loaddata.awards_history ah SET Roster2020=1 Where Year(FUNDS_ACTIVATED)=2020 AND ah.CLK_AWD_PROJ_MGR_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2020 and UFID<>0 AND UFID IS NOT NULL);
 UPDATE loaddata.awards_history ah SET Roster2021=1 Where Year(FUNDS_ACTIVATED)=2021 AND ah.CLK_AWD_PROJ_MGR_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2021 and UFID<>0 AND UFID IS NOT NULL);
 UPDATE loaddata.awards_history ah SET Roster2022=1 Where Year(FUNDS_ACTIVATED)=2022 AND ah.CLK_AWD_PROJ_MGR_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2022 and UFID<>0 AND UFID IS NOT NULL);
-## ADJUST FOR RAOSTER INCOMPLETE
-UPDATE loaddata.awards_history ah SET Roster2022=1 Where Year(FUNDS_ACTIVATED)=2022 AND ah.CLK_AWD_PROJ_MGR_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2021 and UFID<>0 AND UFID IS NOT NULL);  ## ADJUST FOR ROSTER INCOMPLETE
-## ADJUST FOR ROSTER INCOMPLETE
+
+
 ###
 /*
 UPDATE loaddata.awards_history SET Roster2022=1 WHERE (CLK_AWD_PI="06031259" OR CLK_AWD_PROJ_MGR_UFID="06031259") AND Year(FUNDS_ACTIVATED)=2022;  NO CHANGES
@@ -388,7 +387,7 @@ select distinct AcademicUnit from loaddata.awards_history;
 
 SET sql_mode = '';
 SET SQL_SAFE_UPDATES = 0;
-create table loaddata.backupAwardsHistory2023131 AS SELECT * from lookup.awards_history;
+create table loaddata.backupAwardsHistory20230404 AS SELECT * from lookup.awards_history;
 
 
 Select "Old File" AS Measure, Count(*) AS Reccount from lookup.awards_history

@@ -96,32 +96,36 @@ AND VisitID='65322';
 SELECT Service, UnitOfService, count(*) as nOccurance
 FROM ctsi_webcamp_adhoc.VisitRoomCore
 GROUP BY Service, UnitOfService;
+############################################################################
+############################################################################
+DROP TABLE IF EXISTS ctsi_webcamp_adhoc.vrc1349;
+Create table ctsi_webcamp_adhoc.vrc1349 as
+Select * from ctsi_webcamp_adhoc.VisitRoomCore
+WHERE CRCNumber='1349'
+AND VisitID='65322';
+
+DROP TABLE IF EXISTS ctsi_webcamp_adhoc.vrc1349;
+Create table ctsi_webcamp_adhoc.vrc1349 as
+Select  Service,  ## LABTEST
+        ProvPersonName,
+        CoreSvcID,
+        CoreSvcStart,
+        CoreSvcEnd,
+        SvcUnitCost,
+        CoreSvcQuant,
+        CoreSvcLenDurMin,
+        CoreSvcLenDurMin/60 AS CoreSvcLenDurHRS,
+        UnitOfService,
+        BillingUnitSrvc,
+        Amount
+ from ctsi_webcamp_adhoc.VisitRoomCore
+WHERE CRCNumber='1349'
+AND VisitID='65322'
+ORDER BY SERVICE;
+
+select * from ctsi_webcamp_pr.coreservice
+WHERE UNIQUEFIELD IN (344856, 344856);
 
 
 
-AND ParticipantID=1467706;
 
-SELECT DISTINCT UnitOfService from ctsi_webcamp_adhoc.VisitRoomCore; 
-
-
-SELECT * from ctsi_webcamp_pr.coreservice
-WHERE UNIQUEFIELD IN 
-(344847);
-
-SELECT * from ctsi_webcamp_pr.labtest
-WHERE UNIQUEFIELD IN 
-(225);
-
-REQUESTEDQUANTITYLABEL
-
-
-(344856);
-
-344854,
-344853,
-344852,
-344849,
-344912,
-344851,
-344848,
-344847);

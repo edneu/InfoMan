@@ -4,9 +4,73 @@ DROP TABLE IF EXISTS finance.contribidcRAW;
 create table finance.contribidcRAW as 
 select * from finance.contribidc2023;
 
+#################################################################
+## Vouchers
+DROP TABLE if Exists finance.voucherIDC;
+create table finance.voucherIDC as 
+SELECT * from finance.vocher2223;
+
+################################################################
+## CRC PIs
+Select * from finance.crcidc;
+
+Alter table finance.crcidc ADD UFID varchar(12);
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE finance.crcidc ci, lookup.email lu
+SET ci.UFID=lu.UF_UFID
+WHERE ci.EMAIL=lu.UF_EMAIL;
+
+UPDATE finance.crcidc ci, lookup.roster lu
+SET ci.UFID=lu.UFID
+WHERE ci.EMAIL=lu.EMAIL
+AND ci.UFID IS NULL;
+
+UPDATE finance.crcidc ci, lookup.ufids lu
+SET ci.UFID=lu.UF_UFID
+WHERE ci.EMAIL=lu.UF_EMAIL
+AND ci.UFID IS NULL;
+
+UPDATE finance.crcidc ci, lookup.employee_by_term lu
+SET ci.UFID=lu.UFID
+WHERE concat(ci.Lastname,",",ci.Firstname)=lu.Name
+AND ci.UFID IS NULL;
+
+
+UPDATE finance.crcidc ci, lookup.ufids lu
+SET ci.UFID=lu.UF_UFID
+WHERE CONCAT(substr(EMAIL,1,LOCATE("@",EMAIL)),"UFL.EDU")=lu.UF_EMAIL
+AND ci.UFID IS NULL;
+
+UPDATE finance.crcidc ci, lookup.email lu
+SET ci.UFID=lu.UF_UFID
+WHERE CONCAT(substr(EMAIL,1,LOCATE("@",EMAIL)),"UFL.EDU")=lu.UF_EMAIL
+AND ci.UFID IS NULL;
+
+Update finance.crcidc SET UFID='07218980' WHERE PIPersonID=1294;
+Update finance.crcidc SET UFID='35110437' WHERE PIPersonID=1302;
+Update finance.crcidc SET UFID='16012600' WHERE PIPersonID=150;
+Update finance.crcidc SET UFID='57131029' WHERE PIPersonID=1753;
+Update finance.crcidc SET UFID='46481410' WHERE PIPersonID=1877;
+Update finance.crcidc SET UFID='47782600' WHERE PIPersonID=2304;
+Update finance.crcidc SET UFID='16365942' WHERE PIPersonID=3091;
+
+DELETE from finance.crcidc WHERE UFID IS NULL;
 
 ##############################################################
-## AWARDS FOR ROSTER FACULTY
+##  Pilots
+##############################################################
+DROP TABLE IF EXISTS finance.PilotsIDC;
+CREATE TABLE finance.PilotsIDC AS
+Select DISTINCT UFID 
+from pilots.PILOTS_MASTER
+WHERE Award_Year in (2021,2022)
+AND Awarded='Awarded';
+
+
+
+##############################################################
+##  ROSTER FACULTY
 ##############################################################
 DROP TABLE IF EXISTS finance.rosterfacIDC1;
 CREATE TABLE finance.rosterfacIDC1 AS
@@ -15,19 +79,100 @@ from lookup.roster
 where Year in ('2021','2022')
 AND Faculty="Faculty"
 AND UFID not in ('','0')
-GROUP BY UFID
+AND UFID IS NOT NULL
+GROUP BY UFID;
+#######################################################################
+#######################################################################
+#######################################################################
+#######################################################################
+#######################################################################
+#######################################################################
+###  CREATE MASTER UFID TABLE
+
+DROP TABLE if exists finance.idc_ufid_dup;
+Create table finance.idc_ufid_dup as
+Select distinct UFID from finance.contribidcRAW
 UNION ALL 
-SELECT DISTINCT UFID
-FROM finance.contribidcRAW 
-WHERE UFID <> '0000000';
+Select distinct UFID from finance.voucherIDC
+UNION ALL 
+Select distinct UFID from finance.rosterfacIDC1
+UNION ALL 
+select distinct UFID from finance.PilotsIDC
+UNION ALL 
+select distinct UFID from finance.crcidc;
+
+DROP TABLE if exists finance.idc_master;
+Create table finance.idc_master as
+SELECT DISTINCT UFID from finance.idc_ufid_dup;
+
+DELETE FROM finance.idc_master WHERE UFID LIKE '000000%';
+
+ALTER TABLE finance.idc_master
+ADD FirstName varchar(45),
+ADD LastName varchar(45),
+ADD FullName varchar(125),
+ADD email varchar(65),
+ADD Voucher int(1),
+ADD Pilot int(1),
+ADD Roster int(1),
+ADD CRC int(1),
+ADD LastYearIDC int(1),
+ADD LastYearIDC_nProj int(5),
+ADD LastYearIDCAmt decimal(65,10),
+ADD nAwards int(5),
+ADD TotalAmt decimal(65,10),
+ADD DirectAmt decimal(65,10),
+ADD IndirectAmt decimal(65,10);
 
 
+SET SQL_SAFE_UPDATES = 0;
 
-DROP TABLE IF EXISTS finance.rosterfacIDC;
-CREATE TABLE finance.rosterfacIDC AS
-Select DISTINCT UFID from finance.rosterfacIDC1
-WHERE UFID <>'0000000'; 
+## SET Particpation Flags
+UPDATE finance.idc_master
+	SET Voucher=0,
+		Pilot=0,
+        Roster=0,
+        CRC=0,
+        LastYearIDC=0;
 
+UPDATE finance.idc_master SET Voucher=1 WHERE UFID IN (SELECT DISTINCT UFID FROM finance.voucherIDC);
+UPDATE finance.idc_master SET Pilot=1 WHERE UFID IN (SELECT DISTINCT UFID FROM finance.PilotsIDC); 
+UPDATE finance.idc_master SET Roster=1 WHERE UFID IN (SELECT DISTINCT UFID FROM finance.rosterfacIDC1); 
+UPDATE finance.idc_master SET LastYearIDC=1 WHERE UFID IN (SELECT DISTINCT UFID FROM finance.contribidcRAW); 
+UPDATE finance.idc_master SET CRC=1 WHERE UFID IN (SELECT DISTINCT UFID FROM finance.crcidc); 
+
+
+UPDATE finance.idc_master ms, lookup.ufids lu 
+Set ms.FirstName=lu.UF_FIRST_NM,
+    ms.LastName=lu.UF_LAST_NM,
+    ms.FullName=lu.UF_DISPLAY_NM,
+    ms.email=lu.UF_EMAIL
+WHERE ms.UFID=lu.UF_UFID; 
+
+### AGGREGATE LAST YEARS CONTRIBUTIONS
+DROP TABLE IF EXISTS finance.LastYearIDC_AGG;
+Create table finance.LastYearIDC_AGG AS
+select UFID,
+       Count(distinct ProjectID) as LastYearIDC_nProj,
+       SUM(ContribIDC) as LastYearIDCAmt
+ from finance.contribidcRAW
+GROUP BY UFID;
+
+UPDATE finance.idc_master ms, finance.LastYearIDC_AGG lu 
+Set ms.LastYearIDC_nProj=lu.LastYearIDC_nProj,
+	ms.LastYearIDCAmt=lu.LastYearIDCAmt
+WHERE ms.UFID=lu.UFID; 
+
+
+####################################################
+#################################################
+  
+DELETE from finance.idc_master Where email is null;
+DELETE from finance.idc_master Where UFID is null;
+###########################################################
+##  Get Awards History File for Possible IDC
+
+	
 
 
 
@@ -41,12 +186,12 @@ SELECT 	CLK_AWD_PROJ_ID as ProjectID,
 		SUM(SPONSOR_AUTHORIZED_AMOUNT) As Total
 FROM lookup.awards_history
 WHERE FUNDS_ACTIVATED BETWEEN str_to_date('07,01,2022','%m,%d,%Y') AND str_to_date('06,30,2023','%m,%d,%Y')
-AND CLK_PI_UFID in (SELECT DISTINCT UFID FROM finance.rosterfacIDC)
+AND CLK_PI_UFID in (SELECT DISTINCT UFID FROM finance.idc_master)
 GROUP BY CLK_AWD_PROJ_ID;
 
 
-DROP TABLE IF EXISTS finance.RosterFacAwdSumm;
-CREATE TABLE finance.RosterFacAwdSumm AS
+DROP TABLE IF EXISTS finance.FacAwdSumm;
+CREATE TABLE finance.FacAwdSumm AS
 SELECT 	PI_UFID,
 		SUM(NumProjects) AS NumProjects,
         Sum(Direct) AS TotalDirect,
@@ -56,112 +201,28 @@ FROM finance.RosterFacAwd1
 GROUP BY PI_UFID;         
 
 ##################################################################
-##   IDC Recevied (from Angela's Table)
 ##################################################################
+## UPDATE MASTER WITH Awards
 
-DROP TABLE IF EXISTS finance.ContribIDClu;
-CREATE TABLE finance.ContribIDClu AS
-SELECT UFID,
-       COUNT(ProjectID) AS IDCContrib_nProj,
-       SUM(ContribIDC) AS IDCContrib_Amount
-from finance.contribidcRAW
-GROUP BY UFID;
-
+UPDATE finance.idc_master ms, finance.FacAwdSumm lu
+SET ms.nAwards=lu.NumProjects,
+	ms.TotalAmt=lu.TotalAwardRec,
+	ms.DirectAmt=lu.TotalDirect,
+    ms.IndirectAmt=lu.TotalIndirect
+WHERE ms.UFID=lu.PI_UFID;    
 
 ##################################################################
 ##### COMPLETE SUMMARY TABLE
 
-DROP TABLE IF EXISTS finance.IDC_SUMMARY;
-Create table finance.IDC_SUMMARY AS
-SELECT * from finance.rosterfacIDC
-WHERE UFID <>'0000000';
+select * from finance.idc_master;
 
 
 
 
 
-ALTER TABLE finance.IDC_SUMMARY
-	ADD PI_LastName varchar(45),
-	ADD PI_FirstName varchar(45),
-    ADD PI_Email varchar(45),
-    ADD PI_DeptID varchar(12),
-    ADD PI_DeptName varchar(60),
-    ADD PI_Title varchar(45),
-    ADD NumProjects int(5),
-	ADD TotalDirect decimal(65,10),
-	ADD TotalIndirect decimal(65,10),
-	ADD TotalAwardRec decimal(65,10),
-	ADD IDCContrib_nProj int(5),
-	ADD IDCContrib_Amount decimal(65,10);
-    
-    
- 
-SET SQL_SAFE_UPDATES = 0;
 
-####INITALIZE NUMERICS
-UPDATE finance.IDC_SUMMARY
-SET NumProjects=0,
-	TotalDirect=0,
-	TotalIndirect=0,
-	TotalAwardRec=0,
-	IDCContrib_nProj=0,
-	IDCContrib_Amount=0;
     
 
-
-
-
-UPDATE finance.IDC_SUMMARY ids, lookup.ufids lu
-SET 	ids.PI_LastName=lu.UF_LAST_NM,
-		ids.PI_FirstName=lu.UF_FIRST_NM,
-        ids.PI_Email=lu.UF_EMAIL,
-        ids.PI_DeptID=lu.UF_DEPT,
-        ids.PI_DeptNAme=lu.UF_DEPT_NM
-WHERE ids.UFID=lu.UF_UFID;   
-
- /*
-UPDATE finance.IDC_SUMMARY ids, lookup.Employees lu
-SET 	ids.PI_DeptID=lu.Department_Code,
-        ids.PI_DeptNAme=lu.Department,
-        ids.PI_Title=lu.Job_Code
-WHERE ids.UFID=lu.Employee_ID;  
-
-
- 
-UPDATE finance.IDC_SUMMARY ids, lookup.email lu
-SET 	ids.PI_Email=UF_EMAIL
-WHERE ids.UFID=lu.UF_UFID
-AND UF_PRIMARY_FLG="Y"; 
-
-
-UPDATE finance.IDC_SUMMARY ids, lookup.Employees lu
-SET 	ids.PI_DeptID=lu.Department_Code,
-        ids.PI_DeptNAme=lu.Department,
-        ids.PI_Title=lu.Job_Code
-WHERE ids.UFID=lu.Employee_ID;  
-*/
-
-
-### ADD AWARD SUMMARY
-UPDATE finance.IDC_SUMMARY ids, finance.RosterFacAwdSumm lu
-SET 	ids.NumProjects=lu.NumProjects,
-		ids.TotalDirect=lu.TotalDirect,
-        ids.TotalIndirect=lu.TotalIndirect,
-        ids.TotalAwardRec=lu.TotalAwardRec
-WHERE ids.UFID=lu.PI_UFID;  
-    
-##  ADD CONTRIBUTION SUMMARY
-UPDATE finance.IDC_SUMMARY ids, finance.ContribIDClu lu
-SET 	ids.IDCContrib_nProj=lu.IDCContrib_nProj,
-		ids.IDCContrib_Amount=lu.IDCContrib_Amount
-WHERE ids.UFID=lu.UFID;   
-
-
-DELETE FROM finance.IDC_SUMMARY
-WHERE NumProjects =0 
-   AND IDCContrib_nProj=0 ;
-   
-Select * from finance.IDC_SUMMARY;   
 ########################################################################################
 ########################################################################################
 ###################                   EOF               ################################
