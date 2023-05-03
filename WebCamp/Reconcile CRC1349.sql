@@ -29,7 +29,7 @@ SELECT UNIQUEFIELD as ProtocolID FROM ctsi_webcamp_pr.protocol WHERE Protocol=13
 ### 775 is protocol key for CRC# 1349
 
 
-### Core Service Records for this protocl since 7/1/2022
+### Core Service Records for this protocol since 7/1/2022
 drop table if exists ctsi_webcamp_adhoc.coreservice1349;
 create table ctsi_webcamp_adhoc.coreservice1349 as
 SELECT * from ctsi_webcamp_pr.coreservice
