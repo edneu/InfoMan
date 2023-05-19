@@ -178,8 +178,9 @@ DELETE from finance.idc_master Where UFID is null;
 
 DROP TABLE IF EXISTS finance.RosterFacAwd1;
 CREATE TABLE finance.RosterFacAwd1 AS
-SELECT 	CLK_AWD_PROJ_ID as ProjectID,
-		MAX(1) as NumProjects,
+SELECT 	CLK_AWD_ID as AwardID,
+		CLK_AWD_PROJ_ID as ProjectID,
+        MAX(1) as NumProjects,
 		MAX(CLK_PI_UFID) AS PI_UFID,
 		SUM(DIRECT_AMOUNT) AS Direct,
 		SUM(INDIRECT_AMOUNT) As Indirect,
@@ -187,7 +188,61 @@ SELECT 	CLK_AWD_PROJ_ID as ProjectID,
 FROM lookup.awards_history
 WHERE FUNDS_ACTIVATED BETWEEN str_to_date('07,01,2022','%m,%d,%Y') AND str_to_date('06,30,2023','%m,%d,%Y')
 AND CLK_PI_UFID in (SELECT DISTINCT UFID FROM finance.idc_master)
-GROUP BY CLK_AWD_PROJ_ID;
+GROUP BY CLK_AWD_ID,CLK_AWD_PROJ_ID;
+
+## ADD PUAC
+#########################################################
+DROP TABLE IF EXISTS finance.RosterFacAwdID;
+CREATE TABLE finance.RosterFacAwdID AS
+SELECT DISTINCT AwardID from  finance.RosterFacAwd1;
+
+select * from finance.puac_lookup;
+
+Select CLK_PI_UFID,max(CLK_AWD_PI), max(CLK_AWD_PUAC) from finance.puac_lookup
+WHERE CLK_PI_UFID IN (SELECT DISTINCT PI_UFID from finance.RosterFacAwd1)
+GROUP BY CLK_PI_UFID;
+
+Select CLK_PI_UFID,CLK_AWD_PI, CLK_AWD_PUAC from finance.puac_lookup
+WHERE CLK_PI_UFID IN (SELECT DISTINCT PI_UFID from finance.RosterFacAwd1)
+GROUP BY CLK_PI_UFID,CLK_AWD_PI, CLK_AWD_PUAC;
+
+Select count(distinct CLK_PI_UFID), COunt(distinct CLK_AWD_PUAC) from finance.puac_lookup
+WHERE CLK_PI_UFID IN (SELECT DISTINCT PI_UFID from finance.RosterFacAwd1);
+
+drop table finance.puac;
+select * from finance.puac;
+
+Alter table finance.puac ADD email varchar(60);
+
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE finance.puac pu, lookup.email lu 
+SET pu.email=lu.UF_EMAIL
+WHERE pu.PUAC_UFID=lu.UF_UFID;
+
+UPDATE finance.puac pu, lookup.ufids lu 
+SET pu.email=lu.UF_EMAIL
+WHERE pu.PUAC_UFID=lu.UF_UFID
+AND pu.email IS NULL;
+
+delete from finance.puac where email is Null;
+
+ALter table finance.puac ADD Active int(1);
+UPDATE finance.puac set Active=0;
+
+UPDATE finance.puac pu, loaddata.`Active 20230519` lu 
+SET Active=1
+WHERE pu.PUAC_UFID=lu.Employee_ID;
+
+DELETE FROM finance.puac where Active=0;
+
+drop table if exists finance.pi_puac;
+Create table finance.pi_puac as
+Select CLK_AGR_PI_UFID as PI_UFID,
+       CLK_AGR_PI as PI,
+        GROUP_CONCAT(DISTINCT email  SEPARATOR '; ') AS PUAC_Email
+FROM finance.puac        
+GROUP BY CLK_AGR_PI,  CLK_AGR_PI_UFID;      
 
 
 DROP TABLE IF EXISTS finance.FacAwdSumm;
@@ -199,6 +254,13 @@ SELECT 	PI_UFID,
 		SUM(Total) AS TotalAwardRec
 FROM finance.RosterFacAwd1
 GROUP BY PI_UFID;         
+
+#####################################
+DROP TABLE IF EXISTS finance.puac_email;
+CREATE TABLE finance.puac_email as
+select Distinct PUAC_UFID from finance.puac_ufid;
+
+ALter table finance.puac_email ADD email;
 
 ##################################################################
 ##################################################################
