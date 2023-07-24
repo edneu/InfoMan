@@ -52,3 +52,36 @@ AND VisitStart>=str_to_date('01,01,2020','%m,%d,%Y')
 AND VisitStatus=2
 AND CoreSvcStatus=2
 ORDER BY CRCNumber, PatientName, VisitStart;
+
+
+
+Select  CRCNumber,
+		VisitID,
+        VisitStatus,
+		Month,
+		VisitStart,
+        VisitEnd,
+        ParticipantID,
+        PatientName,
+		Service,  ## LABTEST
+        CoreSvcID,
+        CoreSvcStatus,
+        CoreSvcStart,
+        CoreSvcEnd,
+        SvcUnitCost,
+        CoreSvcQuant,
+        CoreSvcLenDurMin,
+        CoreSvcLenDurMin/60 AS CoreSvcLenDurHRS,
+        ProtoSpecRate,
+        UnitOfService,
+        BillingUnitSrvc,
+        Amount
+ from ctsi_webcamp_adhoc.VisitRoomCore
+WHERE CRCNumber IN ('1785','1007')
+AND VisitStart>=str_to_date('10,18,2022','%m,%d,%Y')
+AND VisitStatus=2
+AND CoreSvcStatus=2
+ORDER BY CRCNumber, PatientName, VisitStart;
+
+
+

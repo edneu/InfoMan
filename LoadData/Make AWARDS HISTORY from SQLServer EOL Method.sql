@@ -90,15 +90,16 @@ CREATE TABLE loaddata.awards_history
 `CLK_MOD_SPON_AWD_ID` varchar(25) null,
 `CLK_AWD_PURPOSE_NAME` varchar(255) null,
 `CLK_AWD_PURPOSE_GROUP` varchar(255)  null,
-`ORGNL_FUNDS_ACTIVATED` Datetime null
+`ORGNL_FUNDS_ACTIVATED` Datetime null,
+`EOLmark` varchar(1)
 
 );
 
 SET GLOBAL local_infile = 1;
 
 
-## load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory20230131.dat" 
-load data local infile "C:\\Users\\edneu\\Desktop\\AwardHistory 20230404.dat"
+## load data local infile "P:\\My Documents\\My Documents\\LoadData\\AwardsHistory202307-5.dat" 
+load data local infile "C:\\Users\\edneu\\Desktop\\AwardHistory 20230705.dat"
 into table loaddata.awards_history 
 fields terminated by '|'
 lines terminated by '\r'
@@ -187,12 +188,13 @@ CLK_MOD_SPON_AWD_ID,
 ## Following Added December 12 2017
 CLK_AWD_PURPOSE_NAME,
 CLK_AWD_PURPOSE_GROUP,
-ORGNL_FUNDS_ACTIVATED
+ORGNL_FUNDS_ACTIVATED,
+EOLMARK
 );
 
-
+select * from loaddata.awards_history;
 ###Select distinct EXCEPTION,count(*)  FROM loaddata.awards_history group by Exception;
-
+ALTER TABLE loaddata.awards_history DROP EOLmark;
 SET SQL_SAFE_UPDATES = 0;
 
 
@@ -308,7 +310,8 @@ ADD Roster2018 integer(1),
 ADD Roster2019 integer(1),
 ADD Roster2020 integer(1),
 ADD Roster2021 integer(1),
-ADD Roster2022 integer(1);
+ADD Roster2022 integer(1),
+ADD Roster2023 integer(1);
 
 
 SET SQL_SAFE_UPDATES = 0;
@@ -328,7 +331,8 @@ SET Roster2008=0,
 	Roster2019=0,
     Roster2020=0,
     Roster2021=0,
-    Roster2022=0;
+    Roster2022=0,
+    Roster2023=0;
 
 #########
 
@@ -353,6 +357,7 @@ UPDATE loaddata.awards_history ah SET Roster2019=1 Where Year(FUNDS_ACTIVATED)=2
 UPDATE loaddata.awards_history ah SET Roster2020=1 Where Year(FUNDS_ACTIVATED)=2020 AND ah.CLK_PI_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2020 and UFID<>0 AND UFID IS NOT NULL);
 UPDATE loaddata.awards_history ah SET Roster2021=1 Where Year(FUNDS_ACTIVATED)=2021 AND ah.CLK_PI_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2021 and UFID<>0 AND UFID IS NOT NULL);
 UPDATE loaddata.awards_history ah SET Roster2022=1 Where Year(FUNDS_ACTIVATED)=2022 AND ah.CLK_PI_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2022 and UFID<>0 AND UFID IS NOT NULL);
+UPDATE loaddata.awards_history ah SET Roster2023=1 Where Year(FUNDS_ACTIVATED)=2023 AND ah.CLK_PI_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2023 and UFID<>0 AND UFID IS NOT NULL);
 
 UPDATE loaddata.awards_history ah SET Roster2008=1 Where Year(FUNDS_ACTIVATED)=2008 AND ah.CLK_AWD_PROJ_MGR_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2009 and UFID<>0 AND UFID IS NOT NULL);  ## USE 2009 roster for 2008 (AT)
 UPDATE loaddata.awards_history ah SET Roster2009=1 Where Year(FUNDS_ACTIVATED)=2009 AND ah.CLK_AWD_PROJ_MGR_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2009 and UFID<>0 AND UFID IS NOT NULL);
@@ -369,7 +374,7 @@ UPDATE loaddata.awards_history ah SET Roster2019=1 Where Year(FUNDS_ACTIVATED)=2
 UPDATE loaddata.awards_history ah SET Roster2020=1 Where Year(FUNDS_ACTIVATED)=2020 AND ah.CLK_AWD_PROJ_MGR_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2020 and UFID<>0 AND UFID IS NOT NULL);
 UPDATE loaddata.awards_history ah SET Roster2021=1 Where Year(FUNDS_ACTIVATED)=2021 AND ah.CLK_AWD_PROJ_MGR_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2021 and UFID<>0 AND UFID IS NOT NULL);
 UPDATE loaddata.awards_history ah SET Roster2022=1 Where Year(FUNDS_ACTIVATED)=2022 AND ah.CLK_AWD_PROJ_MGR_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2022 and UFID<>0 AND UFID IS NOT NULL);
-
+UPDATE loaddata.awards_history ah SET Roster2023=1 Where Year(FUNDS_ACTIVATED)=2023 AND ah.CLK_AWD_PROJ_MGR_UFID IN (SELECT DISTINCT UFID from lookup.roster Where Year=2023 and UFID<>0 AND UFID IS NOT NULL);
 
 ###
 /*
@@ -387,7 +392,7 @@ select distinct AcademicUnit from loaddata.awards_history;
 
 SET sql_mode = '';
 SET SQL_SAFE_UPDATES = 0;
-create table loaddata.backupAwardsHistory20230404 AS SELECT * from lookup.awards_history;
+create table loaddata.backupAwardsHistory20230705 AS SELECT * from lookup.awards_history;
 
 
 Select "Old File" AS Measure, Count(*) AS Reccount from lookup.awards_history
@@ -417,6 +422,9 @@ WHERE EXCEPTION IN (
 '2020',
 '2021',
 '2022',
+'2023',
+'Deep Learning based Cross-device and Cross-process Side Channel Analysis in Advanced Technology Nodes (#RV3)',
+'Opioid Prescribing Practices and Health Outcomes among Patients with Alzheimer\Zs Disease and Related Dementia',
 'EXCLUDE-BYPASS',
 'EXCLUDE-CARRYOVER',
 'EXCLUDE-CORE',

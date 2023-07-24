@@ -9,12 +9,13 @@ group by Display_College;
 
 SelecT  ctsi_year,year,count(*) from lookup.roster  group by ctsi_year,year;
 
-UPDATE lookup.roster SET ctsi_year='2018-2021' WHERE ctsi_year='2018-2020';
 
-UPDATE lookup.roster SET ctsi_year='2018-2021' WHERE year in (2018,2019,2020,2021,2022);
 
 
 ####Undup Fac BY ype and Grouped Year
+
+UPDATE lookup.roster SET ctsi_year='2018-2022' WHERE year in (2018,2019,2020,2021,2022);
+
 drop table if exists work.grYearFac;
 create table work.grYearFac AS
 Select 	ctsi_year,
@@ -49,6 +50,13 @@ UPDATE results.GrYearFacOut yf, work.grYearFac lu
 	SET yf.Profess=lu.Undup
 	WHERE yf.ctsi_year=lu.ctsi_year
 	AND lu.FacType='Professor';    
+    
+Select 	ctsi_year,
+		count(distinct Person_key) as Undup
+From lookup.roster         
+Where FacType IN ('Associate Professor','Professor','Assistant Professor')
+GROUP BY ctsi_year;
+		
     
 Select * from results.GrYearFacOut;    
 ####################################################################################
@@ -107,6 +115,21 @@ SELECT count(distinct Person_key) as Undup
 FROM lookup.roster 
 Where Faculty="Faculty";
 
+SELECT Year,count(distinct Person_key) as Undup
+FROM lookup.roster 
+Where Faculty="Faculty"
+GROUP BY YEAR;
+
+SELECT count(distinct Person_key) as Undup
+FROM lookup.roster 
+Where Faculty="Faculty"
+;
+
+SELECT FacType,count(distinct Person_key) as Undup
+FROM lookup.roster 
+Where Faculty="Faculty"
+GROUP BY FacType;
+;
 
 
 

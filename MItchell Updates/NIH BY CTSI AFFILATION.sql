@@ -35,7 +35,7 @@ UPDATE work.nih SET CTSIAffil=1 WHERE Year(nih.FUNDS_ACTIVATED)=2019 and Roster2
 UPDATE work.nih SET CTSIAffil=1 WHERE Year(nih.FUNDS_ACTIVATED)=2020 and Roster2020=1;  
 UPDATE work.nih SET CTSIAffil=1 WHERE Year(nih.FUNDS_ACTIVATED)=2021 and Roster2021=1;  
 UPDATE work.nih SET CTSIAffil=1 WHERE Year(nih.FUNDS_ACTIVATED)=2022 and Roster2022=1;  
-##DATE work.nih SET CTSIAffil=1 WHERE Year(nih.FUNDS_ACTIVATED)=2023 and Roster2023=1;  
+UPDATE work.nih SET CTSIAffil=1 WHERE Year(nih.FUNDS_ACTIVATED)=2023 and Roster2023=1;  
 
 DROP TABLE IF EXISTS work.nih_affil_lu;
 Create table work.nih_affil_lu as

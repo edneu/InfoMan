@@ -234,6 +234,8 @@ UPDATE finance.puac pu, loaddata.`Active 20230519` lu
 SET Active=1
 WHERE pu.PUAC_UFID=lu.Employee_ID;
 
+DELETE  from finance.puac WHERE CLK_AGR_PUAC_DEPT_ID LIKE "11%";
+
 DELETE FROM finance.puac where Active=0;
 
 drop table if exists finance.pi_puac;
@@ -243,6 +245,11 @@ Select CLK_AGR_PI_UFID as PI_UFID,
         GROUP_CONCAT(DISTINCT email  SEPARATOR '; ') AS PUAC_Email
 FROM finance.puac        
 GROUP BY CLK_AGR_PI,  CLK_AGR_PI_UFID;      
+
+
+		
+
+
 
 
 DROP TABLE IF EXISTS finance.FacAwdSumm;
@@ -260,7 +267,6 @@ DROP TABLE IF EXISTS finance.puac_email;
 CREATE TABLE finance.puac_email as
 select Distinct PUAC_UFID from finance.puac_ufid;
 
-ALter table finance.puac_email ADD email;
 
 ##################################################################
 ##################################################################
@@ -279,6 +285,26 @@ WHERE ms.UFID=lu.PI_UFID;
 select * from finance.idc_master;
 
 
+select * from finance.puac;
+select * from finance.idc_master;
+
+
+drop table if exists finance.idc_mass_mail;
+Create table finance.idc_mass_mail as
+SELECT "PI" as PersonType, 
+		FullName as Name,
+		email as EMAIL
+from finance.idc_master
+WHERE IndirectAmt>0
+GROUP BY "PI",FullName,email
+UNION ALL
+SELECT "PUAC" as PersonType, 
+		CLK_AGR_PUAC as Name,
+		email as EMAIL
+from finance.puac
+WHERE CLK_AGR_PUAC_DEPT_ID NOT LIKE "11%"
+AND PUAC_UFID NOT IN (SELECT DISTINCT UFID from finance.idc_master WHERE IndirectAmt>0)
+GROUP BY "PUAC",CLK_AGR_PUAC,email;
 
 
 

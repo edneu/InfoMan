@@ -263,9 +263,50 @@ WHERE  Lead_Institution IN
 #################################################################
 
 ## SCRATCH FIND UFIRST AND IRB Records
-SELECT distinct  NCT_Number
-FROM clinical.UF_FSU_TRIALS;
 
-select 
-from lookup.
+
+select * from work.ct_nct_lu;
+A
+
+ALTER TABLE work.ct_nct_lu
+ADD Committee varchar(12),
+ADD ID varchar(12);
+
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE work.ct_nct_lu ct, work.nct_4_irb irb 
+SET ct.Committee=irb.Committee,
+	ct.ID=irb.ID
+where ct.NCT_=irb.NCT;   
+ 
+UPDATE work.ct_nct_lu ct, work.nct_4_irb irb 
+SET ct.Committee=irb.Committee,
+	ct.ID=irb.ID
+where ct.NCT_NUM    =    irb.NCT_NUM
+AND ct.Committee is not Null;   
+
+
+SELECT cast(NCT_NUM AS UNSIGNED) as temp  from work.ct_nct_lu;
+
+select * from work.nct_4_irb;
+
+ALTER TABLE work.nct_4_irb ADD NCT_NUM int(11);
+
+UPDATE work.nct_4_irb
+SET NCT_NUM=CAST(NCT as UNSIGNED)
+WHERE SUBSTR(trim(NCT),1,1)<>"N";
+
+drop table work.nct_4_irb;
+
+
+SELECT
+Name,
+Start_Date
+FROM brian.termed23
+WHERE  Name LIKE '%estel%'
+        OR  Name Like '%giaquinta%'
+        OR  Name Like '%johnson%'
+        OR  Name Like  '%labarage%'
+        OR Name Like '%beltz%'
+        OR Name Like '%church%';
 

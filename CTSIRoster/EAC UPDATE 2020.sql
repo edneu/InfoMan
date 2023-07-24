@@ -157,7 +157,7 @@ WHERE Affiliation="UF"
   AND Year IN (2021,2022)
 Group by Faculty ; 
 
-## NON FACULTY  ## Adjsut for incomplete 2022 roster
+## NON FACULTY  ## Adjust for incomplete 2022 roster
 SELECT Count(Distinct Person_key)
 from lookup.roster
 WHERE Affiliation="UF"
@@ -165,7 +165,7 @@ AND Faculty='Non-Faculty'
   AND Year IN (2021,2022)
 ; 
 
-## TRAINEE  ## Adjsut for incomplete 2022 roster
+## TRAINEE  ## Adjust for incomplete 2022 roster
 SELECT 	FacType,
         Count(Distinct Person_key)
 from lookup.roster
@@ -174,7 +174,7 @@ WHERE Affiliation="UF"
     AND Year IN (2021,2022)
 Group by FacType ;  
 
-## Other Research Personnel  ## Adjsut for incomplete 2022 roster
+## Other Research Personnel  ## Adjust for incomplete 2022 roster
 SELECT Count(Distinct Person_key)
 from lookup.roster
 WHERE Affiliation="UF"
@@ -231,7 +231,7 @@ UPDATE lookup.roster SET ReportRole="UF Graduate Students / Trainees" WHERE FacT
 UPDATE lookup.roster SET ReportRole="UF Faculty" WHERE Faculty="Faculty" and Affiliation="UF";
 UPDATE lookup.roster SET ReportRole="Other Users" WHERE Faculty='Non-Faculty' AND FacType<>'Trainee';
 
-
+desc lookup.roster;
 
 SELECT STD_PROGRAM, Rept_Program2 from lookup.roster 
 WHERE Rept_Program2 IN (NULL,'')
