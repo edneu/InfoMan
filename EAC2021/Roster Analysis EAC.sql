@@ -6,10 +6,30 @@ FROM lookup.roster
 WHERE Display_College not In ('Non-Academic','Non-UF')
 group by Display_College;
 
+## 2015-2017
+Select Display_College ,count(distinct Person_Key) as Undup
+FROM lookup.roster 
+WHERE Display_College not In ('Non-Academic','Non-UF')
+AND Year in (2015,2016,2017)
+group by Display_College
+ORDER BY Undup DESC;
+
+
+## 2018-2023
+Select Display_College ,count(distinct Person_Key) as Undup
+FROM lookup.roster 
+WHERE Display_College not In ('Non-Academic','Non-UF')
+AND Year in (2018,2019,2020,2021,2022)
+group by Display_College
+ORDER BY Undup DESC;
+
+
+
+
 
 SelecT  ctsi_year,year,count(*) from lookup.roster  group by ctsi_year,year;
 
-
+select * from lookup.ufids Where UF_Display_nm like "Mccarty%Dou%";
 
 
 ####Undup Fac BY ype and Grouped Year

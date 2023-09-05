@@ -632,8 +632,24 @@ AND vr.ProtocolID=cr.CoreSvcProtocolID;
 DELETE FROM ctsi_webcamp_adhoc.VisitRoomCore where CoreSvcID is null;
 
 Select * from ctsi_webcamp_adhoc.VisitRoomCore;
+DESC ctsi_webcamp_adhoc.VisitRoomCore;
 
-Select * from ctsi_webcamp_adhoc.VisitRoomCore WHERE CRCNumber=1785 and VisitID=0;
+ALTER TABLE ctsi_webcamp_adhoc.VisitRoomCore
+ADD PatientDOB datetime,
+ADD AgeAtDOS decimal(65,10);
+
+UPDATE ctsi_webcamp_adhoc.VisitRoomCore vrc, ctsi_webcamp_pr.patient lu
+SET vrc.PatientDOB=lu.DOB
+WHERE vrc.PatientID=lu.UNIQUEFIELD;
+
+UPDATE ctsi_webcamp_adhoc.VisitRoomCore 
+SET AgeAtDOS=TRUNCATE(ABS(DATEDIFF(PatientDOB,VisitStart))/365.25,0);
+
+
+SELECT PatientDOB, VisitStart, AgeAtDOS from ctsi_webcamp_adhoc.VisitRoomCore;
+
+select PatientDOB,count(*) from ctsi_webcamp_adhoc.VisitRoomCore group by PatientDOB;
+
 #######################################################################################
 #######################################################################################
 #######################################################################################

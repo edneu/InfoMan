@@ -19,7 +19,7 @@ FROM ctsi_webcamp_adhoc.CoreRoot
 WHERE CoreSvcMonth="2022-12"
 ##AND VisitStatus=2
 AND CoreSvcStatus=2
-AND DONOTBILL=0
+AND OMIT=0
 GROUP BY "VisitRoomCore",Service;
 
 select * from ctsi_webcamp_adhoc.rec1 where Service Like "%Budgeted%";
@@ -67,6 +67,8 @@ Drop Table if Exists ctsi_webcamp_adhoc.AARecOut;
 Create table ctsi_webcamp_adhoc.AARecOut as
 Select  Service, InvoiceAmt,OnInvoice, VRCAmt, OnVRC, AMT_DIFF, PCT_DIFF from ctsi_webcamp_adhoc.RecDec2022;
 
+Select  Service, InvoiceAmt,OnInvoice, VRCAmt, OnVRC, ABS(AMT_DIFF) AS ABS_DIFF, PCT_DIFF from ctsi_webcamp_adhoc.RecDec2022 WHERE AMT_DIFF <>0 OR AMT_DIFF IS NULL ;
+
 ###ON Both Invoice and VRC
 Drop Table if Exists ctsi_webcamp_adhoc.AARecOut;
 Create table ctsi_webcamp_adhoc.AARecOut as
@@ -78,9 +80,20 @@ WHERE OnInvoice=1 AND OnVRC=1;
 Select * from ctsi_webcamp_adhoc.CoreRoot Where Service='CTRB: Outpatient Visit (Instance)';
 Select * from ctsi_webcamp_adhoc.CoreRoot Where Service='NUR: Specimen collection /Blood draw';
 
-Select * from ctsi_webcamp_adhoc.dec_2022_invoice Where Service='NUR: Specimen collection /Blood draw';
-Select * from  ctsi_webcamp_pr.coreservice Where LABTEST=50;
 
+Select * from ctsi_webcamp_adhoc.dec_2022_invoice Where Service='NUR: Specimen collection /Blood draw';
+Select * from  ctsi_webcamp_pr.coreservice Where LABTEST=50 AND ;
+
+Select *  from ctsi_webcamp_pr.coreservice 
+Where LABTEST=50
+and Year(STARTDATE)=2022 and Month(STARTDATE)=12
+ and Status=2;
+ 
+ Select * from ctsi_webcamp_adhoc.CoreRoot Where Service='NUR: Specimen collection /Blood draw'
+ AND CoreSvcMonth="2022-12" 
+ AND CoreSvcStatus=2;
+;
+ 
 
 Select * from ctsi_webcamp_adhoc.dec_2022_invoice Where Service='CTRB:  Outpatient visit (budgeted)';
 Select * from ctsi_webcamp_adhoc.CoreRoot Where Service='CTRB:  Outpatient visit (budgeted)';
@@ -114,3 +127,8 @@ select * from ctsi_webcamp_adhoc.CoreRoot Where Service like 'CTRB: Outpatient V
 select * from ctsi_webcamp_pr.coreservice where Labtest=200;
 ##########################################################################################################################
 ##########################################################################################################################
+
+SELECT CoreSvcSFY, SUM(Amount) as TotalAmt
+from ctsi_webcamp_adhoc.CoreRoot
+WHERE  CoreSvcStatus=2 AND OMIT=0
+GROUP BY CoreSvcSFY;

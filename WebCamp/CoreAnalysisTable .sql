@@ -59,8 +59,6 @@ Alter Table ctsi_webcamp_adhoc.CoreRoot
 SET SQL_SAFE_UPDATES = 0;
 
 ##########################
-
-
 UPDATE ctsi_webcamp_adhoc.CoreRoot
 SET CoreSvcDTStart=ADDTIME(CoreSvcStart, STR_TO_DATE(concat(trim(CoreSvcTimeIn),"m"), '%h:%i %p')) ,
     CoreSvcDTEnd=ADDTIME(CoreSvcEnd, STR_TO_DATE(concat(trim(CoreSvcTimeOut),"m"), '%h:%i %p')),
@@ -71,13 +69,7 @@ WHERE CoreSvcTimeOut IS NOT NULL
 UPDATE ctsi_webcamp_adhoc.CoreRoot
 SET CoreSvcTotTime=CoreServiceDTDur
 WHERE CoreServiceDTDur IS NOT NULL;
-
-  
-  ###select * from ctsi_webcamp_adhoc.CoreRoot;
-
 ##########################
-
-
 
 UPDATE ctsi_webcamp_adhoc.CoreRoot cr, ctsi_webcamp_pr.labtest lu
 SET cr.Service=lu.LABTEST,
@@ -85,12 +77,9 @@ SET cr.Service=lu.LABTEST,
     cr.BillingUnitSrvc=lu.QUANTITYLABEL
 where cr.LabTestID=lu.UNIQUEFIELD;
 
-
-
 UPDATE ctsi_webcamp_adhoc.CoreRoot cr, ctsi_webcamp_pr.coreservice_personprovider lu
 SET cr.ProvPersonID=PERSON
 WHERE cr.CoreSvcID=lu.CORESERVICE;
-    
 
 UPDATE ctsi_webcamp_adhoc.CoreRoot cr, ctsi_webcamp_pr.person lu
 SET cr.ProviderPersonName=CONCAT(lu.LASTNAME,", ",lu.FIRSTNAME)
@@ -100,16 +89,13 @@ UPDATE ctsi_webcamp_adhoc.CoreRoot cr, ctsi_webcamp_pr.lab lu
 SET cr.VisitFacility=lu.LAB
 WHERE cr.LabID=lu.UNIQUEFIELD;
 
-
 UPDATE ctsi_webcamp_adhoc.CoreRoot SET CoreSvcMonth=concat(Year(CoreSvcEnd),"-",lpad(month(CoreSvcEnd),2,"0"));
 UPDATE ctsi_webcamp_adhoc.CoreRoot SET CoreSvcTotTime=time_to_sec(TimeDIFF(CoreSvcEnd,CoreSvcStart))/60 WHERE CoreSvcTotTime IS NULL;
-
 
 UPDATE ctsi_webcamp_adhoc.CoreRoot cr, ctsi_webcamp_adhoc.sfy_classify lu
 SET cr.CoreSvcSFY=lu.SFY,
 	cr.CoreSvcQuarter=lu.Quarter
 WHERE cr.CoreSvcMonth=lu.Month; 
-
 
 
 UPDATE ctsi_webcamp_adhoc.CoreRoot SET BillingUnitSrvc=NULL WHERE QuantityType IN (0,NULL);
@@ -124,17 +110,16 @@ UPDATE ctsi_webcamp_adhoc.CoreRoot SET BillingUnitSrvc='Years' WHERE QuantityTyp
 UPDATE ctsi_webcamp_adhoc.CoreRoot SET BillingUnitSrvc='Dollars' WHERE QuantityType=9; 
 UPDATE ctsi_webcamp_adhoc.CoreRoot SET BillingUnitSrvc='Participants' WHERE QuantityType=10; 
 
-
 ## RIG
 UPDATE ctsi_webcamp_adhoc.CoreRoot Set BillingUnitSrvc='Instance' WHERE Service='CTRB: Outpatient Visit (Instance)';
 UPDATE ctsi_webcamp_adhoc.CoreRoot SET BillingUnitSrvc='Hours' WHERE Service='CTRB:  Outpatient visit (budgeted)';
 ##
  
-
 ##### SET OMIT FLAG
 UPDATE ctsi_webcamp_adhoc.CoreRoot SET OMIT=0;
 UPDATE ctsi_webcamp_adhoc.CoreRoot SET OMIT=1 Where DONOTBILL=1;
 UPDATE ctsi_webcamp_adhoc.CoreRoot SET OMIT=1 Where SERVICE='CTRB: Outpatient visit (actual)';
+UPDATE ctsi_webcamp_adhoc.CoreRoot SET OMIT=1 WHERE CoreSvcEnd<=str_to_date('06,30,2016','%m,%d,%Y');
 
 
 ###1392
@@ -174,15 +159,15 @@ UPDATE ctsi_webcamp_adhoc.CoreRoot SET Amount=(CoreSvcTotTime/(60*24*7*30.25*12)
 UPDATE ctsi_webcamp_adhoc.CoreRoot SET Amount=QUANTITY_OF_SERVICE*SvcUnitCost WHERE  BillingUnitSrvc='Dollars';
 UPDATE ctsi_webcamp_adhoc.CoreRoot SET Amount=QUANTITY_OF_SERVICE*SvcUnitCost WHERE  BillingUnitSrvc='Participants';
 
-## RIG
-UPDATE ctsi_webcamp_adhoc.CoreRoot Set AMOUNT=QUANTITY_OF_SERVICE*.25*SvcUnitCost WHERE Service='NUR: Specimen collection /Blood draw';
+## RIG PRICING
+UPDATE ctsi_webcamp_adhoc.CoreRoot Set AMOUNT=(CoreSvcTotTime/60)*SvcUnitCost WHERE Service='NUR: Specimen collection /Blood draw';
 ##
 
 #####################################################################################################
 ###################   END OF CORE SERVICE TABLE CREATION ############################################
 ######################################################################################################
 
-
+select * from ctsi_webcamp_adhoc.CoreRoot;
 
 #################################################################################################### 
 #################################################################################################### 
@@ -202,9 +187,9 @@ UPDATE ctsi_webcamp_adhoc.ProtoRoot pr, ctsi_webcamp_pr.person lu
 SET pr.PI_NAME=CONCAT(lu.LASTNAME,", ",lu.FIRSTNAME)
 WHERE pr.PIPersonID=lu.UNIQUEFIELD;
 
-select * from ctsi_webcamp_adhoc.ProtoRoot where PI_NAME like "%Shenk%";
+select * from ctsi_webcamp_adhoc.ProtoRoot ;
 
-select * from ctsi_webcamp_adhoc.ProtoRoot where CRCNumber like "%1392%";
+
 ####################################################################################################
 ####################################################################################################  
 #################################################################################################### 
@@ -276,7 +261,7 @@ WHERE tmpTIMEOUT IS NOT NULL
 
 
 
-select * from ctsi_webcamp_adhoc.VisitRoot where ProtocolID=812;
+select * from ctsi_webcamp_adhoc.VisitRoot ;
 ####################################################################################################
 ####################################################################################################  
 DROP TABLE IF EXISTS ctsi_webcamp_adhoc.CoreVisit;
@@ -345,23 +330,24 @@ SET 	cv.VisitType=lu.VisitType,
 WHERE cv.OPVISIT=lu.VisitID
 AND lu.VisitType="OutPatient"  ;   
 
+##SELECT * from ctsi_webcamp_adhoc.CoreVisit;
 
 
-desc ctsi_webcamp_adhoc.VisitRoot;
 
-SELECT * from ctsi_webcamp_adhoc.CoreVisit where ProtocolID=812;
 
-SELECT * from ctsi_webcamp_adhoc.CoreVisit where CoreSvcMonth="2022-12"; 
 
-Select * from ctsi_webcamp_adhoc.CoreVisit 
-WHERE CoreSvcStart is NULL
-AND CoreSvcEnd is NULL 
-AND  VisitStart is NULL
-AND  VisitEND IS NULL;
-
-select * from ctsi_webcamp_pr.opvisit where Uniquefield =25792;
-
+######################################################################################################################
+######################################################################################################################
+######################################################################################################################
 ## EOF
+
+select * from ctsi_webcamp_adhoc.CoreRoot;
+select * from ctsi_webcamp_adhoc.ProtoRoot;
+select * from ctsi_webcamp_adhoc.CoreVisit;
+select * from ctsi_webcamp_adhoc.VisitRoot;
+
+###select BillingUnitSrvc, count(*) as nRECs from ctsi_webcamp_adhoc.CoreRoot group by BillingUnitSrvc;
+
 ####################################################################################################
 ###################################################################################################
 ######################################################################################################  

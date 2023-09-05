@@ -110,7 +110,7 @@ Select * from work.biblio_impact;
 
 
 select count(distinct PMID) from work.biblio_impact; 
-Select Award,
+Select Grant,
 	   count(distinct PMID) as nPubs, 
        avg(Citations_Per_Year_Icite) AS avgCiteYr, 
        min(Citations_Per_Year_Icite) as MinCiteYr,
@@ -118,7 +118,9 @@ Select Award,
        AVG(RCR_iCITE) as AvgRCR, 
        Max(RCR_iCITE) as MaxRCR,
        AVG(NIH_Percentile_iCITE) as AvgNIHPct, 
-       Max(NIH_Percentile_iCITE) as MaxNIHPct
+       Max(NIH_Percentile_iCITE) as MaxNIHPct,
+       Sum(Total_Citations) as SumTotCite,
+       AVG(Total_Citations) as AvgTotalCIte
  from work.biblio_impact Group by Award;
+ select * from  work.biblio_impact;
        
-
