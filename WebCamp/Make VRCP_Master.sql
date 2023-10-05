@@ -19,18 +19,22 @@ SELECT
     TIMEOUT AS CoreSvcTimeOut,
     TOTAL_TIME AS CoreSvcTotTime,
     QUANTITY_OF_SERVICE,
+    QUANTITY_REQUESTED,
     PROTOCOL AS ProtocolID,
     STATUS as CoreSvcStatus,
-    ### RELATED_TO AS CoreSvcRelatedTo,
+    RELATED_TO AS CoreSvcRelatedTo,
     LABTEST AS LabTestID,
     LAB AS LabID,
+    RELATED_TO,
     OPVISIT,
     ADMISSIO,
     SBADMISSIO,
     DONOTBILL
 From ctsi_webcamp_pr.coreservice
-WHERE STARTDATE>=str_to_date('07,01,2009','%m,%d,%Y');
+WHERE STARTDATE>=str_to_date('07,01,2009','%m,%d,%Y')
+AND LABTEST IS NOT NULL;   ### SBADMISSIONS Do not Have a LABTEST
 
+####select LABTEST,OPVISIT,ADMISSIO,SBADMISSIO from ctsi_webcamp_pr.coreservice;
 /*
     STARTDATE, STR_TO_DATE(concat(trim(TIMEIN),"m"), '%h:%i %p')) AS CoreSvcStart,
     ENDDATE, STR_TO_DATE(concat(trim(TIMEOUT),"m"), '%h:%i %p')) AS CoreSvcEnd,
@@ -84,6 +88,7 @@ DROP TABLE IF EXISTS ctsi_webcamp_adhoc.Labtestcost_t1;
 Create table ctsi_webcamp_adhoc.Labtestcost_t1 AS
 SELECT Labtest,MAX(Uniquefield) as CurrUF  ## Using LIZ Wood Variable name
 FROM ctsi_webcamp_pr.labtestcost
+WHERE RATEGROUP=1
 GROUP BY Labtest;
 
 CREATE INDEX crlt ON ctsi_webcamp_adhoc.CoreRoot (LabTestID);
@@ -94,12 +99,17 @@ SET cr.SvcUnitCost=lu.DEFAULTCOST
 WHERE cr.LabTestID=lu.LABTEST
 AND lu.UNIQUEFIELD IN (SELECT DISTINCT CurrUF from ctsi_webcamp_adhoc.Labtestcost_t1);
 
+#######################################################################################################   XXXXXXXXXXXXXXXXXXX
+#######################################################################################################   XXXXXXXXXXXXXXXXXXX
 
-
+/*
 UPDATE ctsi_webcamp_adhoc.CoreRoot cr, ctsi_webcamp_pr.labtest lu
 	SET cr.QUANTITY_OF_SERVICE=lu.QUANTITYDEFAULT
 where cr.LabTestID=lu.UNIQUEFIELD
 AND cr.QUANTITY_OF_SERVICE IS NULL;
+*/
+
+
 
 
 UPDATE ctsi_webcamp_adhoc.CoreRoot cr, ctsi_webcamp_pr.coreservice_personprovider lu
@@ -115,13 +125,18 @@ SET cr.VisitFacility=lu.LAB
 WHERE cr.LabID=lu.UNIQUEFIELD;
 
 UPDATE ctsi_webcamp_adhoc.CoreRoot SET CoreSvcMonth=concat(Year(CoreSvcStart),"-",lpad(month(CoreSvcStart),2,"0"));
+#### CHECK THSI TO HANDLE BAD DATE DATA
 UPDATE ctsi_webcamp_adhoc.CoreRoot SET CoreSvcTotTime=time_to_sec(TimeDIFF(CoreSvcEnd,CoreSvcStart))/60 WHERE CoreSvcTotTime IS NULL;
+
 
 UPDATE ctsi_webcamp_adhoc.CoreRoot cr, ctsi_webcamp_adhoc.sfy_classify lu
 SET cr.CoreSvcSFY=lu.SFY,
 	cr.CoreSvcQuarter=lu.Quarter
 WHERE cr.CoreSvcMonth=lu.Month; 
 
+
+
+select * from ctsi_webcamp_adhoc.CoreRoot;
 
 #####################################################################################################
 ###################   END OF CORE SERVICE TABLE CREATION ############################################
@@ -138,7 +153,8 @@ Select UNIQUEFIELD as ProtocolID,
        TITLE as Title,
        Person AS PIPersonID,
        Protocol as CRCNumber
-FROM ctsi_webcamp_pr.protocol;    
+FROM ctsi_webcamp_pr.protocol
+;    
 
 ALTER TABLE  ctsi_webcamp_adhoc.ProtoRoot
 ADD PI_NAME varchar(100);  
@@ -322,17 +338,6 @@ UPDATE ctsi_webcamp_adhoc.CoreVisit cv,  ctsi_webcamp_pr.patient lu
 SET cv.ParticipantName=concat(trim(LASTNAME),", ",trim(FIRSTNAME)),
 	cv.ParticipantID=lu.PATIENT
 WHERE cv.PatientID=lu.UNIQUEFIELD;  
-
-
-sELECT UNIQUEFIELD, lABTEST FROM ctsi_webcamp_pr.labtest where LABTEST LIKE "%DRIVER%";
-
-sELECT * FROM ctsi_webcamp_pr.labtestCOST WHERE LABTEST IN
-(505,
-506,
-507,
-508,
-509,
-510);
 #####################################################################################################
 ################### CREATE CORE VISIT PROTOCOL TABLE 
 #####################################################################################################
@@ -404,6 +409,7 @@ SELECT       CoreSvcSFY,
              SvcUnitCost,
              Amount,
              DONOTBILL,
+             CoreSvcRelatedTo,
              OMIT,
              OPVISIT,
              ADMISSIO,
@@ -420,9 +426,42 @@ ORDER BY CoreSvcMonth, ProtocolID,  VisitID;
 
 SET SQL_SAFE_UPDATES = 0;
 
+
+##### KEY ISSUES Missing SvcUnitCost
+/*
+
+drop table if exists ctsi_webcamp_adhoc.billsum;
+create table ctsi_webcamp_adhoc.billsum as
+select LabtestID,Service, BillingUnit,BillingUnitSrvc,donotbill,ProtoSpecRate,
+count(*),
+min(QUANTITY_OF_SERVICE),
+max(QUANTITY_OF_SERVICE),
+min(BillingTimeMin),
+max(BillingTimeMin),
+min(BillingQuantity),
+max(BillingQuantity),
+min(SvcUnitCost),
+max(SvcUnitCost),
+min(ProtoSvcUnitCost),
+max(ProtoSvcUnitCost),
+min(CoreSvcMonth),
+max(CoreSvcMonth)
+from ctsi_webcamp_adhoc.VRCP_Master 
+WHERE OMIT=0
+GROUP BY LabtestID,Service, BillingUnit,BillingUnitSrvc,donotbill,ProtoSpecRate;
+
+select distinct BillingUnit from ctsi_webcamp_adhoc.VRCP_Master;
+*/
+
 ALter table ctsi_webcamp_adhoc.VRCP_Master
 ADD BillingUnit varchar(20),
+ADD BillingTimeMin float,
+ADD BillingQuantity float,
 ADD BillingAmt decimal(65,10);
+
+UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingQuantity=QUANTITY_OF_SERVICE;
+UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingTimeMin=CoreSvcTotTime WHERE CoreSvcTotTime IS NOT NULL;
+
 
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingUnit=NULL WHERE QuantityType IN (0,NULL);
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingUnit='Minutes' WHERE QuantityType=1;
@@ -437,9 +476,18 @@ UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingUnit='Dollars' WHERE QuantityTy
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingUnit='Participants' WHERE QuantityType=10; 
 
 ## RIG
-UPDATE ctsi_webcamp_adhoc.VRCP_Master Set BillingUnit='Instance' WHERE Service='CTRB: Outpatient Visit (Instance)';
+UPDATE ctsi_webcamp_adhoc.VRCP_Master Set BillingUnit='Instance' WHERE Service like "%Instance%";
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingUnit='Hours' WHERE Service='CTRB:  Outpatient visit (budgeted)';
 ####  OTHER SPECIFY  QuantityType=5
+
+SELECT * from ctsi_webcamp_adhoc.VRCP_Master WHERE Service='CTRB:  Outpatient visit (budgeted)' AND CoreSvcMonth="2022-12" 
+AND OMIT=0
+AND VisitStatus=2 
+AND CoreSvcStatus=2;
+
+
+
+
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingUnit='Each' WHERE BillingUnitSrvc='1' AND QuantityType=5;
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingUnit='Hours' WHERE BillingUnitSrvc='Total Time' AND QuantityType=5;
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingUnit='Hours' WHERE BillingUnitSrvc='Hours' AND QuantityType=5;
@@ -466,8 +514,10 @@ UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingUnit='Each' WHERE QUANTITYUNITS
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingUnit='Each' WHERE QUANTITYUNITS='tablet' AND QuantityType=5;
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingUnit='Each' WHERE QUANTITYUNITS='vial' AND QuantityType=5;
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingUnit='Each' WHERE QUANTITYUNITS='YSI' AND QuantityType=5;
+UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingUnit='Each' WHERE QUANTITYUNITS IS NULL AND QuantityType=5;  ###FOR TESTING AND VERIFY
 
 ####
+/*
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingUnit='Hours' WHERE Service='CTRB:  Outpatient visit (budgeted)';
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingUnit='' WHERE Service='CTRB: IOA';
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingUnit='Instance ' WHERE Service='CTRB: Specimen drop off only';
@@ -483,8 +533,8 @@ UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingUnit='Instance ' WHERE Service=
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingUnit='Hours' WHERE Service='NUR: Scheduled nursing services';
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingUnit='Hours' WHERE Service='NUR: Specimen collection /Blood draw';
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingUnit='Instance ' WHERE Service LIKE ('%Instance%') AND BillingUnit='Other Specify';
+*/
 
-SELECT * FROM 
 #########################################################################################
 ### USE Protocol Specific Rates if available
 UPDATE 	ctsi_webcamp_adhoc.VRCP_Master SET ProtoSpecRate=0;
@@ -494,7 +544,7 @@ SET cr.ProtoSvcUnitCost=ar.RATESPEC,
     cr.ProtoSpecRate=1
 WHERE cr. ProtocolID=ar.PROTOCOL
   AND cr.LabTestID=ar.LABTEST
-  and (cr.CoreSvcStart>=ar.STARTDATE OR ar.STARTDATE IS NULL)
+  and (cr.CoreSvcStart>=ar.STARTDATE OR ar.STARTDATE IS NULL)    #### VERIFY THIS DATE LOGIC
   and (cr.CoreSvcStart<=ar.ENDDATE OR ar.ENDDATE IS NULL);
   
 ##UPDATE ctsi_webcamp_adhoc.VRCP_Master SET SvcUnitCost=DefaultSvcUnitCost;
@@ -503,22 +553,20 @@ UPDATE ctsi_webcamp_adhoc.VRCP_Master SET SvcUnitCost=ProtoSvcUnitCost WHERE Pro
 
 #####
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=0;
-UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=CoreSvcTotTime*SvcUnitCost WHERE BillingUnit='Minutes' ;
-UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=(CoreSvcTotTime/60)*SvcUnitCost WHERE BillingUnit='Hours'; #### 2
-UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=(CoreSvcTotTime/(60*24))*SvcUnitCost WHERE BillingUnit='Days'; ##### 3
-UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=1*SvcUnitCost WHERE BillingUnit='Instance' ; ##### 4  Should units be 1 (default unit?)
-UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=QUANTITY_OF_SERVICE*SvcUnitCost WHERE BillingUnit='Each' ; ## NEW
-##UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=QUANTITY_OF_SERVICE*SvcUnitCost WHERE BillingUnit='Other Specify' ;  #### 5 IS THIS CORRECT?
+UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=BillingTimeMin*SvcUnitCost WHERE BillingUnit='Minutes' ;											##### NOT USED
+UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=(BillingQuantity*SvcUnitCost) WHERE BillingUnit='Hours'; #### 2                        ##### NEEDS TO BE VERIFIED          
+UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=(BillingQuantity*SvcUnitCost)*SvcUnitCost WHERE BillingUnit='Days'; ##### 3
+UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=BillingQuantity*SvcUnitCost WHERE BillingUnit='Instance' ; ##### 4  Should units be 1 (default unit?)
+UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=BillingQuantity*SvcUnitCost WHERE BillingUnit='Each' ; ## NEW
+##UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=QUANTITY_OF_SERVICE*SvcUnitCost WHERE BillingUnit='Other Specify' ;  #### There should be none, all reclassified?
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=(CoreSvcTotTime/(60*24*7))*SvcUnitCost WHERE BillingUnit='Weeks'; 
-UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=(CoreSvcTotTime/(60*24*7*30.25))*SvcUnitCost WHERE BillingUnit='Months'; ###### 7
-UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=(CoreSvcTotTime/(60*24*7*30.25*12))*SvcUnitCost WHERE BillingUnit='Months';
+UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=(BillingQuantity*SvcUnitCost) WHERE BillingUnit='Months'; ###### 7                                   ##### VERIFIED 
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=(CoreSvcTotTime/(60*24*7*30.25*12))*SvcUnitCost WHERE BillingUnit='Years';
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=QUANTITY_OF_SERVICE*SvcUnitCost WHERE  BillingUnit='Dollars';
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=QUANTITY_OF_SERVICE*SvcUnitCost WHERE  BillingUnit='Participants';
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=QUANTITY_OF_SERVICE*SvcUnitCost WHERE BillingUnitSrvc='Total Time';
 
-
-
+UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=(VisitLength/60)*SvcUnitCost WHERE SERVICE='CTRB:  Outpatient visit (budgeted)'; 
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=(VisitLength/60)*SvcUnitCost WHERE BillingUnit='Hours' AND CoreSvcTotTime=0 AND VisitLength>0 AND SUBSTR(SERVICE,1,4)="CTRB"; 
 
 ######################################################################################################################
@@ -528,6 +576,15 @@ UPDATE ctsi_webcamp_adhoc.VRCP_Master SET OMIT=1 Where DONOTBILL=1;
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET OMIT=1 Where SERVICE='CTRB: Outpatient visit (actual)';
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET OMIT=1 WHERE CoreSvcEnd<=str_to_date('06,30,2016','%m,%d,%Y');
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET OMIT=1 WHERE CoreSvcEnd IS NULL;
+UPDATE ctsi_webcamp_adhoc.VRCP_Master SET OMIT=1 WHERE ProtocolID IS NULL;
+######################################################################################################################
+######################################################################################################################
+######################################################################################################################
+######################################################################################################################
+######################################################################################################################
+######################################################################################################################
+######################################################################################################################
+######################################################################################################################
 ######################################################################################################################
 #### TEST
 
@@ -573,7 +630,6 @@ SELECT 		 LabTestID,
              CoreSvcTotTime,
              BillingUnitSrvc,
              DefaultSvcUnitCost,
-             
              ProtoSpecRate,
              ProtoSvcUnitCost,
              SvcUnitCost,
@@ -644,7 +700,8 @@ FROM ctsi_webcamp_adhoc.dec_2022_invoice
 UNION ALL
 SELECT "VRC" As Source, SUM(BillingAmt) AS Total
 from ctsi_webcamp_adhoc.VRCP_Master
-WHERE CoreSvcMonth="2022-12";
+WHERE CoreSvcMonth="2022-12"
+AND Omit=0 ;
 
 
 SELECT * from ctsi_webcamp_adhoc.VRCP_Master

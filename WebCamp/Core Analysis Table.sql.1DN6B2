@@ -322,17 +322,6 @@ UPDATE ctsi_webcamp_adhoc.CoreVisit cv,  ctsi_webcamp_pr.patient lu
 SET cv.ParticipantName=concat(trim(LASTNAME),", ",trim(FIRSTNAME)),
 	cv.ParticipantID=lu.PATIENT
 WHERE cv.PatientID=lu.UNIQUEFIELD;  
-
-
-sELECT UNIQUEFIELD, lABTEST FROM ctsi_webcamp_pr.labtest where LABTEST LIKE "%DRIVER%";
-
-sELECT * FROM ctsi_webcamp_pr.labtestCOST WHERE LABTEST IN
-(505,
-506,
-507,
-508,
-509,
-510);
 #####################################################################################################
 ################### CREATE CORE VISIT PROTOCOL TABLE 
 #####################################################################################################
@@ -484,7 +473,8 @@ UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingUnit='Hours' WHERE Service='NUR
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingUnit='Hours' WHERE Service='NUR: Specimen collection /Blood draw';
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingUnit='Instance ' WHERE Service LIKE ('%Instance%') AND BillingUnit='Other Specify';
 
-SELECT * FROM 
+UPDATE 
+BillingUnitSrvc
 #########################################################################################
 ### USE Protocol Specific Rates if available
 UPDATE 	ctsi_webcamp_adhoc.VRCP_Master SET ProtoSpecRate=0;
@@ -517,6 +507,7 @@ UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=QUANTITY_OF_SERVICE*SvcUnit
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=QUANTITY_OF_SERVICE*SvcUnitCost WHERE  BillingUnit='Participants';
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=QUANTITY_OF_SERVICE*SvcUnitCost WHERE BillingUnitSrvc='Total Time';
 
+BillingUnitSrvc
 
 
 UPDATE ctsi_webcamp_adhoc.VRCP_Master SET BillingAmt=(VisitLength/60)*SvcUnitCost WHERE BillingUnit='Hours' AND CoreSvcTotTime=0 AND VisitLength>0 AND SUBSTR(SERVICE,1,4)="CTRB"; 
