@@ -1,5 +1,4 @@
 ### Source : [IS_BaseData].[Base].[vwPeople]
-### USE ODBC with SPSS
 ### UFID Load and Write ODBC.sps
 
 
@@ -42,7 +41,7 @@ commit;
 
 
 
-load data local infile "P:\\My Documents\\My Documents\\Loaddata\\ufid20220429.dat" 
+load data local infile "P:\\My Documents\\My Documents\\Loaddata\\ufid20240124.dat" 
 into table loaddata.ufids 
 fields terminated by '|'
 lines terminated by '\n'

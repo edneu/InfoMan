@@ -44,6 +44,8 @@ WHERE LOCATE("PMCID:",RAW)>0;
 SET SQL_SAFE_UPDATES = 1;
 select * from work.pubmed_raw;
 
+
+
 ##### MAKE Pubmed Output file
 DROP TABLE IF EXISTS work.PubmedOUT;
 create table work.PubmedOUT as

@@ -395,11 +395,44 @@ select distinct (CLK_AWD_PRJ_END_DT) from loaddata.awards_history;
 select distinct CLK_AWD_OVERALL_END_DATE from loaddata.awards_history;
 Select EXCEPTION,count(*)  FROM loaddata.awards_history group by Exception;
 
-DELETE FROM loaddata.awards_history WHERE EXCEPTION <>'NULL';
- 
-Select "Old File" AS Measure, Count(*) AS Reccount from lookup.awards_history
-UNION ALL
-Select "New File" AS Measure, Count(*) AS Reccount from loaddata.awards_history;
+
+
+DELETE FROM loaddata.awards_history
+WHERE EXCEPTION IN (
+ ' ""Heterogeneity and Impact of Rotavirus Vaccination in Asia"""',
+ ' Master Services Agreement and Statement of Work ' ,
+ ' US Alpha-1 	Medical Advisory Board ',
+'Best Managment Practices Program and Research',
+' "Heterogeneity and Impact of Rotavirus Vaccination in Asia"',
+' Accelerate @ Sid Martin Biotech: Scientific Equipment Modernization',
+' Sid Martin Biotech: New Scientific Equipment',
+'2019',
+'2020',
+'2021',
+'2022',
+'2023',
+'Deep Learning based Cross-device and Cross-process Side Channel Analysis in Advanced Technology Nodes (#RV3)',
+'Opioid Prescribing Practices and Health Outcomes among Patients with Alzheimer\Zs Disease and Related Dementia',
+'EXCLUDE-BYPASS',
+'EXCLUDE-CARRYOVER',
+'EXCLUDE-CORE',
+'EXCLUDE-NOT AUTH',
+'EXCLUDE-REBUDGET',
+'EXCLUDE-TEMP',
+'EXCLUDE-UF',
+'EXCLUDE-UFRF');
+;
+
+
+select * from loaddata.awards_history;
+select count(*)  from loaddata.awards_history;
+
+select * from loaddata.awards_history  Where CLK_AWD_PRJ_END_DT='Research Developmental'
+OR 'CLK_AWD_ALLOC_END_DT'='Research Developmental' ;
+
+select distinct CLK_AWD_OVERALL_END_DATE from loaddata.awards_history;
+
+Select distinct EXCEPTION FROM loaddata.awards_history;
 
 
 /*
@@ -416,7 +449,7 @@ Select * from loaddata.awards_history where CLK_AWD_PRJ_END_DT IN (SELECT MAX(CL
 
 */
 
-## should be the same
+
 Select "Old File" AS Measure, Count(*) AS Reccount from lookup.awards_history
 UNION ALL
 Select "New File" AS Measure, Count(*) AS Reccount from loaddata.awards_history;

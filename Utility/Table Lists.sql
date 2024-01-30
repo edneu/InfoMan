@@ -21,20 +21,23 @@ desc information_schema.TABLES;
 
 ### FILE LIST BY SIZE
 
-DROP TABLE IF EXISTS  work.TableList;
+
+
+
+desc information_schema.TABLES;
+#######################
+select "lookup" as DB, min(FUNDS_ACTIVATED) MinDate, MAX(FUNDS_ACTIVATED) as MaxDate from lookup.awards_history
+UNION ALL
+select "loadDROP TABLE IF EXISTS  work.TableList;
 CREATE TABLE work.TableList AS
 SELECT 
 TABLE_SCHEMA AS 'Schema',
 table_name AS 'Table',
+UPDATE_TIME ,
 ROUND(((data_length + index_length) / 1024 / 1024), 2) AS 'Size (MB)'
 FROM information_schema.TABLES
 WHERE TABLE_SCHEMA NOT IN ('mysql','information_schema','sys','performance_schema')
-ORDER BY ROUND(((data_length + index_length) / 1024 / 1024), 2)  DESC;
-
-#######################
-select "lookup" as DB, min(FUNDS_ACTIVATED) MinDate, MAX(FUNDS_ACTIVATED) as MaxDate from lookup.awards_history
-UNION ALL
-select "loaddata" as DB, min(FUNDS_ACTIVATED) MinDate, MAX(FUNDS_ACTIVATED) as MaxDate from loaddata.awards_history;
+ORDER BY ROUND(((data_length + index_length) / 1024 / 1024), 2)  DESC;data" as DB, min(FUNDS_ACTIVATED) MinDate, MAX(FUNDS_ACTIVATED) as MaxDate from loaddata.awards_history;
 
 
 Select count(*) from lookup.roster;
