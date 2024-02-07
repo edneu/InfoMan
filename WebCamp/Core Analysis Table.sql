@@ -17,7 +17,7 @@ SELECT
     ENDDATE AS CoreSvcEnd,
     TIMEIN AS CoreSvcTimeIn,
     TIMEOUT AS CoreSvcTimeOut,
-    TOTAL_TIME AS CoreSvcTotTime,
+    P
     QUANTITY_OF_SERVICE,
     PROTOCOL AS ProtocolID,
     STATUS as CoreSvcStatus,
