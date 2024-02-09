@@ -17,6 +17,8 @@ ADD Citation Text,
 ADD PMID varchar(12),
 ADD PMCID varchar(12);
 
+
+
 SET SQL_SAFE_UPDATES = 0;
 
 ## REMOVE LEADING NUMBER FROM PUBMED OUTPUT
@@ -77,7 +79,7 @@ select AWARD,Award_Desc,count(*) from work.pubmed_raw group by  AWARD,Award_Desc
 DROP TABLE IF EXISTS work.PubmedULKLTL;
 create table work.PubmedULKLTL as
 select
-AWARD,Award_Desc ,PMID,PMCID,Citation from 
+AWARD,PMID,PMCID,Citation from 
 work.pubmed_raw
 ##where Citation like "%COVID%" or Citation Like "%Sars%"
 order by AWARD,PMID;
