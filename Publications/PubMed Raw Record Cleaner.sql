@@ -52,14 +52,13 @@ select * from work.pubmed_raw;
 DROP TABLE IF EXISTS work.PubmedOUT;
 create table work.PubmedOUT as
 select
-#AWARD,
+AWARD,
 PMID,
 PMCID,
 Citation from 
 work.pubmed_raw
-##where Citation like "%COVID%" or Citation Like "%Sars%"
 order by 
-#AWARD,
+AWARD,
 PMID;
 
 Alter table work.pubmed_raw ADD Award_Desc varchar(15);
