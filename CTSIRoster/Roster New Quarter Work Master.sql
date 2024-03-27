@@ -28,9 +28,9 @@ select * from brian.roster_upstairs;
 
 DROP TABLE IF EXISTS loaddata.roster;
 CREATE TABLE loaddata.roster
-SELECT roster_upstairs_id AS rosterid,
+SELECT roster_upstairs_id AS rosterid,   ## MAy nned to Edit to match input file
        Space(1) AS Roster_Key,
-       Year,
+       Year,                             ## IF year is missing in Input file Use: YYYY as Year, where YYY is current year i.e. 2024
        " " AS STD_PROGRAM,
        UFID AS UFID,
        LastName AS LastName,
