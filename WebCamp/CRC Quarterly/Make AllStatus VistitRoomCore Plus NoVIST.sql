@@ -650,6 +650,7 @@ SELECT PatientDOB, VisitStart, AgeAtDOS from ctsi_webcamp_adhoc.VisitRoomCore;
 
 select PatientDOB,count(*) from ctsi_webcamp_adhoc.VisitRoomCore group by PatientDOB;
 
+select * from ctsi_webcamp_adhoc.VisitRoomCore ;
 #######################################################################################
 #######################################################################################
 #######################################################################################
